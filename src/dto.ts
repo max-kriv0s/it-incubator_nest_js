@@ -12,3 +12,15 @@ export class Paginator {
   readonly pageSize: number;
   readonly totalCount: number;
 }
+
+export enum ResultCode {
+  Success,
+  NotFound,
+  ServerError,
+}
+
+export type ResultDto<T> = {
+  data: T | null;
+  code: ResultCode;
+  errorMessage: string;
+};

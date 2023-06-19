@@ -3,6 +3,8 @@ import { CreateBlogDto } from './dto/create-blog.dto';
 import { BlogsRepository } from './blogs.repository';
 import { BlogDocument } from './blog.schema';
 import { UpdateBlogDto } from './dto/update-blog.dto';
+import { ResultCode, ResultDto } from 'src/dto';
+import { getResultDto } from 'src/utils';
 
 @Injectable()
 export class BlogsService {
@@ -14,15 +16,17 @@ export class BlogsService {
     return createdBlog;
   }
 
-  async updateBlog(id: string, blogDto: UpdateBlogDto) {
+  async updateBlog(
+    id: string,
+    blogDto: UpdateBlogDto,
+  ): Promise<ResultDto<null>> {
     const blog = await this.blogsRepository.findBlogById(id);
-    if (!blog) {
-      throw new HttpException('blog not fount', HttpStatus.NOT_FOUND);
-    }
+    if (!blog) return getResultDto(ResultCode.NotFound, null, 'Blog not found');
 
     blog.updateBlog(blogDto);
-
     await this.blogsRepository.save(blog);
+
+    return getResultDto(ResultCode.Success);
   }
 
   async deleteBlogById(id: string) {

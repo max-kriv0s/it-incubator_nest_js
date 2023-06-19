@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   HttpCode,
+  HttpException,
   HttpStatus,
   Param,
   Post,
@@ -16,6 +17,7 @@ import { PaginatorBlogView, ViewBlogDto } from './dto/view-blog.dto';
 import { BlogsService } from './blogs.service';
 import { CreateBlogDto } from './dto/create-blog.dto';
 import { UpdateBlogDto } from './dto/update-blog.dto';
+import { calcResultDto } from 'src/utils';
 
 @Controller('blogs')
 export class BlogsController {
@@ -28,34 +30,65 @@ export class BlogsController {
   async getBlogs(
     @Query() queryParams: QueryParams,
   ): Promise<PaginatorBlogView> {
-    return await this.blogsQueryRepository.getBlogs(queryParams);
+    try {
+      return await this.blogsQueryRepository.getBlogs(queryParams);
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
   @Post()
   async createBlog(@Body() blogDto: CreateBlogDto): Promise<ViewBlogDto> {
-    const createdBlog = await this.blogsService.createBlog(blogDto);
+    try {
+      const createdBlog = await this.blogsService.createBlog(blogDto);
 
-    const blogView = await this.blogsQueryRepository.getBlogById(
-      createdBlog._id,
-    );
+      const result = await this.blogsQueryRepository.getBlogById(
+        createdBlog._id,
+      );
 
-    return blogView;
+      return calcResultDto<ViewBlogDto>(
+        result.code,
+        result.data as ViewBlogDto,
+        result.errorMessage,
+      );
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
   @Get(':id')
   async getBlogById(@Param('id') id: string): Promise<ViewBlogDto> {
-    return this.blogsQueryRepository.getBlogById(id);
+    try {
+      const result = await this.blogsQueryRepository.getBlogById(id);
+
+      return calcResultDto<ViewBlogDto>(
+        result.code,
+        result.data as ViewBlogDto,
+        result.errorMessage,
+      );
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
   @Put(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async updateBlog(@Param('id') id: string, @Body() blogDto: UpdateBlogDto) {
-    return this.blogsService.updateBlog(id, blogDto);
+    try {
+      const result = await this.blogsService.updateBlog(id, blogDto);
+      return calcResultDto(result.code, result.data, result.errorMessage);
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteBlog(@Param('id') id: string) {
-    return this.blogsService.deleteBlogById(id);
+    try {
+      return this.blogsService.deleteBlogById(id);
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 }
