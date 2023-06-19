@@ -11,8 +11,10 @@ export class BlogsQueryRepository {
   constructor(@InjectModel(Blog.name) private BlogModel: BlogModelType) {}
   async getBlogs(queryParams: QueryParams): Promise<PaginatorBlogView> {
     const searchNameTerm: string = queryParams.searchNameTerm ?? '';
-    const pageNumber: number = +queryParams.pageNumber ?? 1;
-    const pageSize: number = +queryParams.pageSize ?? 10;
+    const pageNumber: number = queryParams.pageNumber
+      ? +queryParams.pageNumber
+      : 1;
+    const pageSize: number = queryParams.pageSize ? +queryParams.pageSize : 10;
     const sortBy: string = queryParams.sortBy ?? 'createdAt';
     const sortDirection: string = queryParams.sortDirection ?? 'desc';
     const filter: any = {};

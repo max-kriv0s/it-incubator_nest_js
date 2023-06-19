@@ -22,6 +22,10 @@ export class BlogsRepository {
     return this.BlogModel.findByIdAndDelete(id);
   }
 
+  async deleteBlogs() {
+    await this.BlogModel.deleteMany({});
+  }
+
   async save(blog: BlogDocument): Promise<BlogDocument> {
     return blog.save();
   }
