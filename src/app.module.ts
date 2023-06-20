@@ -7,6 +7,8 @@ import { BlogsModule } from './blogs/blogs.module';
 import { settings } from './settings';
 import { TestingModule } from './testing/testing.module';
 import { UsersModule } from './users/users.module';
+import { CommentsModule } from './comments/comments.module';
+import { LikesModule } from './likes/likes.module';
 
 @Module({
   imports: [
@@ -17,6 +19,8 @@ import { UsersModule } from './users/users.module';
     BlogsModule,
     TestingModule,
     UsersModule,
+    CommentsModule,
+    LikesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

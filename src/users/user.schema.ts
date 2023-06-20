@@ -18,7 +18,6 @@ export class AccountData {
   @Prop({ required: true })
   createdAt: string;
 }
-// export const AccountDataSchema = SchemaFactory.createForClass(AccountData);
 
 @Schema()
 export class UserEmailConfirmation {

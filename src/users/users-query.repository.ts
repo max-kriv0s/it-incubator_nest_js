@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { QueryUserDto } from './dto/query-user.dto';
 import { PaginatorUserView, ViewUserDto } from './dto/view-user.dto';
-import { User, UserDocument, UserModelType } from './users.schema';
+import { User, UserDocument, UserModelType } from './user.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { ResultCode, ResultDto } from 'src/dto';
 import { Types } from 'mongoose';
