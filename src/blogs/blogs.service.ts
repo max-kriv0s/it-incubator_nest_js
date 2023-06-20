@@ -29,10 +29,7 @@ export class BlogsService {
     return getResultDto(ResultCode.Success);
   }
 
-  async deleteBlogById(id: string) {
-    const deletedBlog = await this.blogsRepository.deleteBlogById(id);
-    if (!deletedBlog) {
-      throw new HttpException('Blog not found', HttpStatus.NOT_FOUND);
-    }
+  async deleteBlogById(id: string): Promise<BlogDocument | null> {
+    return this.blogsRepository.deleteBlogById(id);
   }
 }

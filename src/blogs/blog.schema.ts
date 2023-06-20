@@ -35,8 +35,8 @@ export class Blog {
       createdAt: new Date().toISOString(),
     };
 
-    const createdBlog = new BlogModel(data);
-    return createdBlog;
+    const newBlog = new BlogModel(data);
+    return newBlog;
   }
 
   updateBlog(blogDto: UpdateBlogDto) {

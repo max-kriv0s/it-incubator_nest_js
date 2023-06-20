@@ -31,7 +31,7 @@ export class BlogsController {
     @Query() queryParams: QueryParams,
   ): Promise<PaginatorBlogView> {
     try {
-      return await this.blogsQueryRepository.getBlogs(queryParams);
+      return this.blogsQueryRepository.getBlogs(queryParams);
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -86,7 +86,12 @@ export class BlogsController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteBlog(@Param('id') id: string) {
     try {
-      return this.blogsService.deleteBlogById(id);
+      const deletedBlog = this.blogsService.deleteBlogById(id);
+      if (!deletedBlog) {
+        throw new HttpException('Blog not found', HttpStatus.NOT_FOUND);
+      }
+
+      return;
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
