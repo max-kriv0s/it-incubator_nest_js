@@ -11,7 +11,7 @@ import {
   Put,
   Query,
 } from '@nestjs/common';
-import { BlogsQueryRepository } from './blogs.query.repository';
+import { BlogsQueryRepository } from './blogs-query.repository';
 import { QueryParams } from 'src/dto';
 import { PaginatorBlogView, ViewBlogDto } from './dto/view-blog.dto';
 import { BlogsService } from './blogs.service';

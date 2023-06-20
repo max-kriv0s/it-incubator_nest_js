@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { BlogsController } from './blogs.controller';
-import { BlogsQueryRepository } from './blogs.query.repository';
+import { BlogsQueryRepository } from './blogs-query.repository';
 import { BlogsService } from './blogs.service';
 import { BlogsRepository } from './blogs.repository';
 import { Blog, BlogSchema } from './blog.schema';

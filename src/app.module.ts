@@ -9,6 +9,7 @@ import { TestingModule } from './testing/testing.module';
 import { UsersModule } from './users/users.module';
 import { CommentsModule } from './comments/comments.module';
 import { LikesModule } from './likes/likes.module';
+import { PostsModule } from './posts/posts.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { LikesModule } from './likes/likes.module';
     UsersModule,
     CommentsModule,
     LikesModule,
+    PostsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
