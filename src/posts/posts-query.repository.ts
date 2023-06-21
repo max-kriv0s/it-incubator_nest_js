@@ -6,10 +6,14 @@ import { QueryParams, ResultCode, ResultDto } from 'src/dto';
 import { PaginatorPostView, ViewPostDto } from './dto/view-post.dto';
 import { getResultDto, validID } from 'src/utils';
 import { LikeStatus } from 'src/likes/dto/like-status';
+import { Blog, BlogModelType } from 'src/blogs/blog.schema';
 
 @Injectable()
 export class PostsQueryRepository {
-  constructor(@InjectModel(Post.name) private PostModel: PostModelType) {}
+  constructor(
+    @InjectModel(Post.name) private PostModel: PostModelType,
+    @InjectModel(Blog.name) private BlogModel: BlogModelType,
+  ) {}
 
   async getPosts(
     queryParams: QueryParams,
@@ -23,6 +27,42 @@ export class PostsQueryRepository {
     const totalCount: number = await this.PostModel.countDocuments({});
     const skip = (pageNumber - 1) * pageSize;
     const posts: PostDocument[] = await this.PostModel.find({}, null, {
+      sort: { [sortBy]: sortDirection === 'asc' ? 1 : -1 },
+      skip: skip,
+      limit: pageSize,
+    }).exec();
+
+    return {
+      pagesCount: Math.ceil(totalCount / pageSize),
+      page: pageNumber,
+      pageSize: pageSize,
+      totalCount: totalCount,
+      items: await Promise.all(
+        posts.map((post) => this.postDBToPostView(post, userId)),
+      ),
+    };
+  }
+
+  async findPostsByBlogId(
+    blogId: string,
+    queryParams: QueryParams,
+    userId?: string,
+  ): Promise<PaginatorPostView | null> {
+    const pageNumber: number = +queryParams.pageNumber || 1;
+    const pageSize: number = +queryParams.pageSize || 10;
+    const sortBy: string = queryParams.sortBy || 'createdAt';
+    const sortDirection = queryParams.sortDirection || 'desc';
+
+    if (!validID(blogId)) return null;
+
+    const blog = await this.BlogModel.findById(blogId);
+    if (!blog) return null;
+
+    const filter = { blogId: blog._id };
+    const totalCount: number = await this.PostModel.countDocuments(filter);
+
+    const skip = (pageNumber - 1) * pageSize;
+    const posts: PostDocument[] = await this.PostModel.find(filter, null, {
       sort: { [sortBy]: sortDirection === 'asc' ? 1 : -1 },
       skip: skip,
       limit: pageSize,

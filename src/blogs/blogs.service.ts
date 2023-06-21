@@ -5,10 +5,16 @@ import { BlogDocument } from './blog.schema';
 import { UpdateBlogDto } from './dto/update-blog.dto';
 import { ResultCode, ResultDto } from 'src/dto';
 import { getResultDto } from 'src/utils';
+import { CreateBlogPostDto } from './dto/create-blog-post.dto';
+import { PostDocument } from 'src/posts/post.schema';
+import { PostsRepository } from 'src/posts/posts.repository';
 
 @Injectable()
 export class BlogsService {
-  constructor(private readonly blogsRepository: BlogsRepository) {}
+  constructor(
+    private readonly blogsRepository: BlogsRepository,
+    private readonly postsRepository: PostsRepository,
+  ) {}
 
   async createBlog(blogDto: CreateBlogDto): Promise<BlogDocument> {
     const newBlog = await this.blogsRepository.createBlog(blogDto);
@@ -31,5 +37,20 @@ export class BlogsService {
 
   async deleteBlogById(id: string): Promise<BlogDocument | null> {
     return this.blogsRepository.deleteBlogById(id);
+  }
+
+  async createPostByBlogId(
+    blogId: string,
+    blogPostDto: CreateBlogPostDto,
+  ): Promise<PostDocument | null> {
+    const blog = await this.blogsRepository.findBlogById(blogId);
+    if (!blog) return null;
+
+    const newPost = await this.postsRepository.createPostByBlogId(
+      blogId,
+      blog.name,
+      blogPostDto,
+    );
+    return this.postsRepository.save(newPost);
   }
 }

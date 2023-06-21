@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Post, PostDocument, PostModelType } from './post.schema';
 import { validID } from 'src/utils';
 import { CreatePostDto } from './dto/create-post.dto';
+import { CreateBlogPostDto } from 'src/blogs/dto/create-blog-post.dto';
 
 @Injectable()
 export class PostsRepository {
@@ -10,9 +11,9 @@ export class PostsRepository {
 
   async createPost(
     postDto: CreatePostDto,
-    blodName: string,
+    blogName: string,
   ): Promise<PostDocument> {
-    return this.PostModel.createPost(postDto, blodName, this.PostModel);
+    return this.PostModel.createPost(postDto, blogName, this.PostModel);
   }
 
   async deletePostById(id: string): Promise<PostDocument | null> {
@@ -27,6 +28,20 @@ export class PostsRepository {
 
   async deletePosts() {
     await this.PostModel.deleteMany({});
+  }
+
+  async createPostByBlogId(
+    blogId: string,
+    blogName: string,
+    blogPostDto: CreateBlogPostDto,
+  ): Promise<PostDocument> {
+    const postDto: CreatePostDto = {
+      title: blogPostDto.title,
+      content: blogPostDto.content,
+      shortDescription: blogPostDto.shortDescription,
+      blogId: blogId,
+    };
+    return this.PostModel.createPost(postDto, blogName, this.PostModel);
   }
 
   async save(post: PostDocument): Promise<PostDocument> {
