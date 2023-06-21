@@ -20,7 +20,7 @@ export class PostsRepository {
     return this.PostModel.findByIdAndDelete(id);
   }
 
-  async findBlogById(id: string): Promise<PostDocument | null> {
+  async findPostById(id: string): Promise<PostDocument | null> {
     if (!validID(id)) return null;
     return this.PostModel.findById(id).exec();
   }

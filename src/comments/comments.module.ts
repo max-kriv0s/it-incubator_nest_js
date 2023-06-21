@@ -12,6 +12,6 @@ import { Comment, CommentSchema } from './comment.schema';
   ],
   controllers: [CommentsController],
   providers: [CommentsService, CommetsRepository, CommentsQueryRepository],
-  exports: [CommetsRepository],
+  exports: [CommetsRepository, CommentsQueryRepository],
 })
 export class CommentsModule {}

@@ -6,6 +6,7 @@ import {
   HttpCode,
   HttpException,
   HttpStatus,
+  NotFoundException,
   Param,
   Post,
   Put,
@@ -18,12 +19,15 @@ import { calcResultDto } from 'src/utils';
 import { PaginatorPostView, ViewPostDto } from './dto/view-post.dto';
 import { CreatePostDto } from './dto/create-post.dto';
 import { QueryParams, ResultCode } from 'src/dto';
+import { PaginatorCommentView } from 'src/comments/dto/view-comment.dto';
+import { CommentsQueryRepository } from 'src/comments/comments-query.repository';
 
 @Controller('posts')
 export class PostsController {
   constructor(
     private readonly postsQueryRepository: PostsQueryRepository,
     private readonly postsService: PostsService,
+    private readonly commentsQueryRepository: CommentsQueryRepository,
   ) {}
 
   @Get()
@@ -109,6 +113,30 @@ export class PostsController {
       }
 
       return;
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @Get(':postId/comments')
+  async findCommentsByPostId(
+    @Param('postId') postId: string,
+    @Query() queryParams: QueryParams,
+  ): Promise<PaginatorCommentView> {
+    try {
+      const post = await this.postsService.findPostById(postId);
+      if (!post) throw new NotFoundException('Post not found');
+
+      // const userId = req.userId;
+
+      const comments = await this.commentsQueryRepository.findCommentsByPostId(
+        postId,
+        queryParams,
+        // userId,
+      );
+      if (!comments) throw new NotFoundException('Post not found');
+
+      return comments;
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }

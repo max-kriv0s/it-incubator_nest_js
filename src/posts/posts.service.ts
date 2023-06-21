@@ -35,7 +35,7 @@ export class PostsService {
     const blog = await this.blogsRepository.findBlogById(postDto.blogId);
     if (!blog) return getResultDto(ResultCode.NotFound, null, 'Blog not found');
 
-    const post = await this.postsRepository.findBlogById(id);
+    const post = await this.postsRepository.findPostById(id);
     if (!post) return getResultDto(ResultCode.NotFound, null, 'Post not found');
 
     post.updatePost(postDto, blog._id, blog.name);
@@ -46,5 +46,9 @@ export class PostsService {
 
   async deletePostById(id: string): Promise<PostDocument | null> {
     return this.postsRepository.deletePostById(id);
+  }
+
+  async findPostById(id: string): Promise<PostDocument | null> {
+    return this.postsRepository.findPostById(id);
   }
 }

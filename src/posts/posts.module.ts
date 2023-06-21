@@ -6,11 +6,13 @@ import { PostsRepository } from './posts.repository';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Post, PostSchema } from './post.schema';
 import { BlogsModule } from 'src/blogs/blogs.module';
+import { CommentsModule } from 'src/comments/comments.module';
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: Post.name, schema: PostSchema }]),
     BlogsModule,
+    CommentsModule,
   ],
   controllers: [PostsController],
   providers: [PostsService, PostsRepository, PostsQueryRepository],
