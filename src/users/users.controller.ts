@@ -28,42 +28,30 @@ export class UsersController {
   async getUsers(
     @Query() queryParams: QueryUserDto,
   ): Promise<PaginatorUserView> {
-    try {
-      return this.usersQueryRepository.getAllUsersView(queryParams);
-    } catch (error) {
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+    return this.usersQueryRepository.getAllUsersView(queryParams);
   }
 
   @Post()
   async createUser(@Body() userDto: CreateUserDto): Promise<ViewUserDto> {
-    try {
-      const createdUser = await this.usersService.createUser(userDto);
+    const createdUser = await this.usersService.createUser(userDto);
 
-      const result = await this.usersQueryRepository.getUserViewById(
-        createdUser._id,
-      );
-      return calcResultDto<ViewUserDto>(
-        result.code,
-        result.data as ViewUserDto,
-        result.errorMessage,
-      );
-    } catch (error) {
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+    const result = await this.usersQueryRepository.getUserViewById(
+      createdUser._id,
+    );
+    return calcResultDto<ViewUserDto>(
+      result.code,
+      result.data as ViewUserDto,
+      result.errorMessage,
+    );
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteUser(@Param('id') id: string) {
-    try {
-      const deletedUser = await this.usersService.deleteUserById(id);
-      if (!deletedUser)
-        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    const deletedUser = await this.usersService.deleteUserById(id);
+    if (!deletedUser)
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
 
-      return;
-    } catch (error) {
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+    return;
   }
 }

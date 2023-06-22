@@ -34,88 +34,66 @@ export class PostsController {
   async getPosts(
     @Query() queryParams: QueryParams,
   ): Promise<PaginatorPostView> {
-    try {
-      return this.postsQueryRepository.getPosts(queryParams);
-    } catch (error) {
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+    return this.postsQueryRepository.getPosts(queryParams);
   }
 
   @Post()
   async createPost(
     @Body() postDto: CreatePostDto,
   ): Promise<ViewPostDto | null> {
-    try {
-      const resultCreatedPost = await this.postsService.createPost(postDto);
-      if (resultCreatedPost.code !== ResultCode.Success) {
-        return calcResultDto<null>(
-          resultCreatedPost.code,
-          null,
-          resultCreatedPost.errorMessage,
-        );
-      }
-
-      const createdPost = resultCreatedPost.data;
-      if (!createdPost) {
-        throw new HttpException(
-          'Post not created',
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
-      }
-
-      const result = await this.postsQueryRepository.getPostById(
-        createdPost._id,
+    const resultCreatedPost = await this.postsService.createPost(postDto);
+    if (resultCreatedPost.code !== ResultCode.Success) {
+      return calcResultDto<null>(
+        resultCreatedPost.code,
+        null,
+        resultCreatedPost.errorMessage,
       );
-
-      return calcResultDto<ViewPostDto>(
-        result.code,
-        result.data as ViewPostDto,
-        result.errorMessage,
-      );
-    } catch (error) {
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+    const createdPost = resultCreatedPost.data;
+    if (!createdPost) {
+      throw new HttpException(
+        'Post not created',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+
+    const result = await this.postsQueryRepository.getPostById(createdPost._id);
+
+    return calcResultDto<ViewPostDto>(
+      result.code,
+      result.data as ViewPostDto,
+      result.errorMessage,
+    );
   }
 
   @Get(':id')
   async getPostById(@Param('id') id: string): Promise<ViewPostDto> {
-    try {
-      const result = await this.postsQueryRepository.getPostById(id);
+    const result = await this.postsQueryRepository.getPostById(id);
 
-      return calcResultDto<ViewPostDto>(
-        result.code,
-        result.data as ViewPostDto,
-        result.errorMessage,
-      );
-    } catch (error) {
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+    return calcResultDto<ViewPostDto>(
+      result.code,
+      result.data as ViewPostDto,
+      result.errorMessage,
+    );
   }
 
   @Put(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async updateBlog(@Param('id') id: string, @Body() postDto: UpdatePostDto) {
-    try {
-      const result = await this.postsService.updatePost(id, postDto);
-      return calcResultDto(result.code, result.data, result.errorMessage);
-    } catch (error) {
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+    const result = await this.postsService.updatePost(id, postDto);
+    return calcResultDto(result.code, result.data, result.errorMessage);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteBlog(@Param('id') id: string) {
-    try {
-      const deletedPost = this.postsService.deletePostById(id);
-      if (!deletedPost) {
-        throw new HttpException('Post not found', HttpStatus.NOT_FOUND);
-      }
-
-      return;
-    } catch (error) {
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    const deletedPost = this.postsService.deletePostById(id);
+    if (!deletedPost) {
+      throw new HttpException('Post not found', HttpStatus.NOT_FOUND);
     }
+
+    return;
   }
 
   @Get(':postId/comments')
@@ -123,22 +101,18 @@ export class PostsController {
     @Param('postId') postId: string,
     @Query() queryParams: QueryParams,
   ): Promise<PaginatorCommentView> {
-    try {
-      const post = await this.postsService.findPostById(postId);
-      if (!post) throw new NotFoundException('Post not found');
+    const post = await this.postsService.findPostById(postId);
+    if (!post) throw new NotFoundException('Post not found');
 
-      // const userId = req.userId;
+    // const userId = req.userId;
 
-      const comments = await this.commentsQueryRepository.findCommentsByPostId(
-        postId,
-        queryParams,
-        // userId,
-      );
-      if (!comments) throw new NotFoundException('Post not found');
+    const comments = await this.commentsQueryRepository.findCommentsByPostId(
+      postId,
+      queryParams,
+      // userId,
+    );
+    if (!comments) throw new NotFoundException('Post not found');
 
-      return comments;
-    } catch (error) {
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+    return comments;
   }
 }

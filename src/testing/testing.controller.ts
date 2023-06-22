@@ -1,10 +1,4 @@
-import {
-  Controller,
-  Delete,
-  HttpCode,
-  HttpException,
-  HttpStatus,
-} from '@nestjs/common';
+import { Controller, Delete, HttpCode, HttpStatus } from '@nestjs/common';
 import { TestingService } from './testing.service';
 
 @Controller('testing')
@@ -14,10 +8,6 @@ export class TestingController {
   @Delete('all-data')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteAllData() {
-    try {
-      return this.testingService.deleteAllData();
-    } catch (error) {
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+    return this.testingService.deleteAllData();
   }
 }

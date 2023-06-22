@@ -35,30 +35,20 @@ export class BlogsController {
   async getBlogs(
     @Query() queryParams: QueryParams,
   ): Promise<PaginatorBlogView> {
-    try {
-      return this.blogsQueryRepository.getBlogs(queryParams);
-    } catch (error) {
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+    return this.blogsQueryRepository.getBlogs(queryParams);
   }
 
   @Post()
   async createBlog(@Body() blogDto: CreateBlogDto): Promise<ViewBlogDto> {
-    try {
-      const createdBlog = await this.blogsService.createBlog(blogDto);
+    const createdBlog = await this.blogsService.createBlog(blogDto);
 
-      const result = await this.blogsQueryRepository.getBlogById(
-        createdBlog._id,
-      );
+    const result = await this.blogsQueryRepository.getBlogById(createdBlog._id);
 
-      return calcResultDto<ViewBlogDto>(
-        result.code,
-        result.data as ViewBlogDto,
-        result.errorMessage,
-      );
-    } catch (error) {
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+    return calcResultDto<ViewBlogDto>(
+      result.code,
+      result.data as ViewBlogDto,
+      result.errorMessage,
+    );
   }
 
   @Get(':blogId/posts')
@@ -66,18 +56,14 @@ export class BlogsController {
     @Param('blogId') blogId: string,
     @Query() queryParams: QueryParams,
   ): Promise<PaginatorPostView> {
-    try {
-      const posts = await this.postsQueryRepository.findPostsByBlogId(
-        blogId,
-        queryParams,
-        // req.userId,
-      );
-      if (!posts) throw new NotFoundException('Blog not found');
+    const posts = await this.postsQueryRepository.findPostsByBlogId(
+      blogId,
+      queryParams,
+      // req.userId,
+    );
+    if (!posts) throw new NotFoundException('Blog not found');
 
-      return posts;
-    } catch (error) {
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+    return posts;
   }
 
   @Post(':blogId/posts')
@@ -85,66 +71,50 @@ export class BlogsController {
     @Param('blogId') blogId: string,
     @Body() blogPostDto: CreateBlogPostDto,
   ): Promise<ViewPostDto> {
-    try {
-      const newPost = await this.blogsService.createPostByBlogId(
-        blogId,
-        blogPostDto,
-      );
-      if (!newPost) throw new NotFoundException('Blog not found');
+    const newPost = await this.blogsService.createPostByBlogId(
+      blogId,
+      blogPostDto,
+    );
+    if (!newPost) throw new NotFoundException('Blog not found');
 
-      const result = await this.postsQueryRepository.getPostById(
-        newPost._id,
-        // req.userId,
-      );
+    const result = await this.postsQueryRepository.getPostById(
+      newPost._id,
+      // req.userId,
+    );
 
-      return calcResultDto<ViewPostDto>(
-        result.code,
-        result.data as ViewPostDto,
-        result.errorMessage,
-      );
-    } catch (error) {
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+    return calcResultDto<ViewPostDto>(
+      result.code,
+      result.data as ViewPostDto,
+      result.errorMessage,
+    );
   }
 
   @Get(':id')
   async getBlogById(@Param('id') id: string): Promise<ViewBlogDto> {
-    try {
-      const result = await this.blogsQueryRepository.getBlogById(id);
+    const result = await this.blogsQueryRepository.getBlogById(id);
 
-      return calcResultDto<ViewBlogDto>(
-        result.code,
-        result.data as ViewBlogDto,
-        result.errorMessage,
-      );
-    } catch (error) {
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+    return calcResultDto<ViewBlogDto>(
+      result.code,
+      result.data as ViewBlogDto,
+      result.errorMessage,
+    );
   }
 
   @Put(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async updateBlog(@Param('id') id: string, @Body() blogDto: UpdateBlogDto) {
-    try {
-      const result = await this.blogsService.updateBlog(id, blogDto);
-      return calcResultDto(result.code, result.data, result.errorMessage);
-    } catch (error) {
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+    const result = await this.blogsService.updateBlog(id, blogDto);
+    return calcResultDto(result.code, result.data, result.errorMessage);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteBlog(@Param('id') id: string) {
-    try {
-      const deletedBlog = this.blogsService.deleteBlogById(id);
-      if (!deletedBlog) {
-        throw new HttpException('Blog not found', HttpStatus.NOT_FOUND);
-      }
-
-      return;
-    } catch (error) {
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    const deletedBlog = this.blogsService.deleteBlogById(id);
+    if (!deletedBlog) {
+      throw new HttpException('Blog not found', HttpStatus.NOT_FOUND);
     }
+
+    return;
   }
 }
