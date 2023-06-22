@@ -1,6 +1,6 @@
 {
-    "version": 2,
-    "name": "it-incubator_homework_01",
+    "version": 1,
+    "name": "it-incubator_nest_js",
     "builds": [
         {
             "src": "src/main.ts",
@@ -10,7 +10,7 @@
     "routes": [
         {
             "src": "/(.*)",
-            "dest": "src/index.ts"
+            "dest": "src/main.ts"
         }
     ]
 }
