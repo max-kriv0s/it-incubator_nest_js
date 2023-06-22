@@ -25,6 +25,8 @@ export class PostsService {
     }
     const newPost = await this.postsRepository.createPost(postDto, blog.name);
     const createdPost = await this.postsRepository.save(newPost);
+
+    // нужно возвращать ID
     return getResultDto<PostDocument>(ResultCode.Success, createdPost);
   }
 

@@ -9,10 +9,7 @@ import { CreateBlogPostDto } from '../blogs/dto/create-blog-post.dto';
 export class PostsRepository {
   constructor(@InjectModel(Post.name) private PostModel: PostModelType) {}
 
-  async createPost(
-    postDto: CreatePostDto,
-    blogName: string,
-  ): Promise<PostDocument> {
+  createPost(postDto: CreatePostDto, blogName: string): PostDocument {
     return this.PostModel.createPost(postDto, blogName, this.PostModel);
   }
 

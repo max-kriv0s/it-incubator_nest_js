@@ -28,7 +28,7 @@ export class Blog {
     blogDto: CreateBlogDto,
     BlogModel: BlogModelType,
   ): BlogDocument {
-    const data = {
+    const data: CreateBlogDto & { createdAt: string } = {
       name: blogDto.name,
       description: blogDto.description,
       websiteUrl: blogDto.websiteUrl,

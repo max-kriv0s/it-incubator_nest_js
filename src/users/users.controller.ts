@@ -16,6 +16,7 @@ import { UsersQueryRepository } from './users-query.repository';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { calcResultDto } from '../utils';
+import { ParamsDto } from 'src/dto';
 
 @Controller('users')
 export class UsersController {
@@ -47,6 +48,7 @@ export class UsersController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
+  // async deleteUser(@Param() param: ParamsDto) {
   async deleteUser(@Param('id') id: string) {
     const deletedUser = await this.usersService.deleteUserById(id);
     if (!deletedUser)
