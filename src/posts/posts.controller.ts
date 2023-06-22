@@ -88,7 +88,7 @@ export class PostsController {
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteBlog(@Param('id') id: string) {
-    const deletedPost = this.postsService.deletePostById(id);
+    const deletedPost = await this.postsService.deletePostById(id);
     if (!deletedPost) {
       throw new HttpException('Post not found', HttpStatus.NOT_FOUND);
     }
