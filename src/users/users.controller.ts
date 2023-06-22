@@ -15,7 +15,7 @@ import { PaginatorUserView, ViewUserDto } from './dto/view-user.dto';
 import { UsersQueryRepository } from './users-query.repository';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { calcResultDto } from 'src/utils';
+import { calcResultDto } from 'src/utils/utils';
 
 @Controller('users')
 export class UsersController {

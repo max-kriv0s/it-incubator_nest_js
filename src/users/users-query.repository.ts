@@ -5,7 +5,7 @@ import { User, UserDocument, UserModelType } from './user.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { ResultCode, ResultDto } from 'src/dto';
 import { Types } from 'mongoose';
-import { getResultDto, validID } from 'src/utils';
+import { getResultDto, validID } from 'src/utils/utils';
 
 @Injectable()
 export class UsersQueryRepository {

@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Blog, BlogDocument, BlogModelType } from './blog.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
-import { getResultDto, validID } from 'src/utils';
+import { getResultDto, validID } from 'src/utils/utils';
 import { PaginatorBlogView, ViewBlogDto } from './dto/view-blog.dto';
 import { QueryParams, ResultCode, ResultDto } from 'src/dto';
 

@@ -4,7 +4,7 @@ import { BlogsRepository } from './blogs.repository';
 import { BlogDocument } from './blog.schema';
 import { UpdateBlogDto } from './dto/update-blog.dto';
 import { ResultCode, ResultDto } from 'src/dto';
-import { getResultDto } from 'src/utils';
+import { getResultDto } from 'src/utils/utils';
 import { CreateBlogPostDto } from './dto/create-blog-post.dto';
 import { PostDocument } from 'src/posts/post.schema';
 import { PostsRepository } from 'src/posts/posts.repository';

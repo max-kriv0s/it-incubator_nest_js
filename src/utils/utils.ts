@@ -1,5 +1,5 @@
 import { Types } from 'mongoose';
-import { ResultCode, ResultDto } from './dto';
+import { ResultCode, ResultDto } from '../dto';
 import { HttpException, HttpStatus } from '@nestjs/common';
 
 export function validID(id: string): boolean {
