@@ -6,6 +6,7 @@ export function validID(id: string): boolean {
   return Types.ObjectId.isValid(id);
 }
 
+
 export function getResultDto<T>(
   code: ResultCode,
   data: T | null = null,
