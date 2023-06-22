@@ -15,7 +15,7 @@ import {
 import { PostsQueryRepository } from './posts-query.repository';
 import { PostsService } from './posts.service';
 import { UpdatePostDto } from './dto/update-post.dto';
-import { calcResultDto } from 'src/utils/utils';
+import { calcResultDto } from 'src/other-utils';
 import { PaginatorPostView, ViewPostDto } from './dto/view-post.dto';
 import { CreatePostDto } from './dto/create-post.dto';
 import { QueryParams, ResultCode } from 'src/dto';

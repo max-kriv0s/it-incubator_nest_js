@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { validID } from 'src/utils/utils';
+import { validID } from 'src/other-utils';
 import { User, UserDocument, UserModelType } from './user.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { CreateUserDto } from './dto/create-user.dto';

@@ -18,7 +18,7 @@ import { PaginatorBlogView, ViewBlogDto } from './dto/view-blog.dto';
 import { BlogsService } from './blogs.service';
 import { CreateBlogDto } from './dto/create-blog.dto';
 import { UpdateBlogDto } from './dto/update-blog.dto';
-import { calcResultDto } from 'src/utils/utils';
+import { calcResultDto } from 'src/other-utils';
 import { PaginatorPostView, ViewPostDto } from 'src/posts/dto/view-post.dto';
 import { PostsQueryRepository } from 'src/posts/posts-query.repository';
 import { CreateBlogPostDto } from './dto/create-blog-post.dto';
