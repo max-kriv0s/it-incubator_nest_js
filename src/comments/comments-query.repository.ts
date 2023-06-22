@@ -3,9 +3,9 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Comment, CommentDocument, CommentModelType } from './comment.schema';
 import { Types } from 'mongoose';
 import { PaginatorCommentView, ViewCommentDto } from './dto/view-comment.dto';
-import { QueryParams, ResultCode, ResultDto } from 'src/dto';
+import { QueryParams, ResultCode, ResultDto } from '../dto';
 import { getResultDto, validID } from '../utils';
-import { LikeStatus } from 'src/likes/dto/like-status';
+import { LikeStatus } from '../likes/dto/like-status';
 
 @Injectable()
 export class CommentsQueryRepository {

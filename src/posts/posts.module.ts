@@ -5,9 +5,9 @@ import { PostsQueryRepository } from './posts-query.repository';
 import { PostsRepository } from './posts.repository';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Post, PostSchema } from './post.schema';
-import { BlogsModule } from 'src/blogs/blogs.module';
-import { CommentsModule } from 'src/comments/comments.module';
-import { Blog, BlogSchema } from 'src/blogs/blog.schema';
+import { BlogsModule } from '../blogs/blogs.module';
+import { CommentsModule } from '../comments/comments.module';
+import { Blog, BlogSchema } from '../blogs/blog.schema';
 
 @Module({
   imports: [

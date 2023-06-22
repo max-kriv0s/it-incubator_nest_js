@@ -3,11 +3,11 @@ import { CreateBlogDto } from './dto/create-blog.dto';
 import { BlogsRepository } from './blogs.repository';
 import { BlogDocument } from './blog.schema';
 import { UpdateBlogDto } from './dto/update-blog.dto';
-import { ResultCode, ResultDto } from 'src/dto';
+import { ResultCode, ResultDto } from '../dto';
 import { getResultDto } from '../utils';
 import { CreateBlogPostDto } from './dto/create-blog-post.dto';
-import { PostDocument } from 'src/posts/post.schema';
-import { PostsRepository } from 'src/posts/posts.repository';
+import { PostDocument } from '../posts/post.schema';
+import { PostsRepository } from '../posts/posts.repository';
 
 @Injectable()
 export class BlogsService {

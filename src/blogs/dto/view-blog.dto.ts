@@ -1,4 +1,4 @@
-import { Paginator } from 'src/dto';
+import { Paginator } from '../dto';
 
 export class ViewBlogDto {
   readonly id: string;

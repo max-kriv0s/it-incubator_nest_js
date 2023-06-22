@@ -1,6 +1,6 @@
-import { Paginator } from 'src/dto';
-import { LikeStatus } from 'src/likes/dto/like-status';
-import { ViewLikeDetailsDto } from 'src/likes/dto/view-like.dto';
+import { Paginator } from '../../dto';
+import { LikeStatus } from '../../likes/dto/like-status';
+import { ViewLikeDetailsDto } from '../../likes/dto/view-like.dto';
 
 export class ExtendedLikesInfoViewDto {
   readonly likesCount: number;

@@ -2,11 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { Post, PostDocument, PostModelType } from './post.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
-import { QueryParams, ResultCode, ResultDto } from 'src/dto';
+import { QueryParams, ResultCode, ResultDto } from '../dto';
 import { PaginatorPostView, ViewPostDto } from './dto/view-post.dto';
 import { getResultDto, validID } from '../utils';
-import { LikeStatus } from 'src/likes/dto/like-status';
-import { Blog, BlogModelType } from 'src/blogs/blog.schema';
+import { LikeStatus } from '../likes/dto/like-status';
+import { Blog, BlogModelType } from '../blogs/blog.schema';
 
 @Injectable()
 export class PostsQueryRepository {

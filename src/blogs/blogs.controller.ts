@@ -13,14 +13,14 @@ import {
   Query,
 } from '@nestjs/common';
 import { BlogsQueryRepository } from './blogs-query.repository';
-import { QueryParams } from 'src/dto';
+import { QueryParams } from '../dto';
 import { PaginatorBlogView, ViewBlogDto } from './dto/view-blog.dto';
 import { BlogsService } from './blogs.service';
 import { CreateBlogDto } from './dto/create-blog.dto';
 import { UpdateBlogDto } from './dto/update-blog.dto';
 import { calcResultDto } from '../utils';
-import { PaginatorPostView, ViewPostDto } from 'src/posts/dto/view-post.dto';
-import { PostsQueryRepository } from 'src/posts/posts-query.repository';
+import { PaginatorPostView, ViewPostDto } from '../posts/dto/view-post.dto';
+import { PostsQueryRepository } from '../posts/posts-query.repository';
 import { CreateBlogPostDto } from './dto/create-blog-post.dto';
 
 @Controller('blogs')

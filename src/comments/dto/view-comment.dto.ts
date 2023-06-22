@@ -1,5 +1,6 @@
-import { Paginator } from 'src/dto';
-import { LikeStatus } from 'src/likes/dto/like-status';
+
+import { Paginator } from '../../dto';
+import { LikeStatus } from '../../likes/dto/like-status';
 
 export class ViewCommentDto {
   readonly id: string;

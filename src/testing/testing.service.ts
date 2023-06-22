@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { BlogsRepository } from 'src/blogs/blogs.repository';
-import { CommetsRepository } from 'src/comments/comments.repository';
-import { PostsRepository } from 'src/posts/posts.repository';
-import { UsersRepository } from 'src/users/users.repository';
+import { BlogsRepository } from '../blogs/blogs.repository';
+import { CommetsRepository } from '../comments/comments.repository';
+import { PostsRepository } from '../posts/posts.repository';
+import { UsersRepository } from '../users/users.repository';
 
 @Injectable()
 export class TestingService {

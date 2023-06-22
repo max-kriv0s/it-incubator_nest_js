@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { PostsRepository } from './posts.repository';
 import { PostDocument } from './post.schema';
-import { ResultCode, ResultDto } from 'src/dto';
+import { ResultCode, ResultDto } from '../dto';
 import { getResultDto } from '../utils';
 import { UpdatePostDto } from './dto/update-post.dto';
-import { BlogsRepository } from 'src/blogs/blogs.repository';
+import { BlogsRepository } from '../blogs/blogs.repository';
 import { CreatePostDto } from './dto/create-post.dto';
 
 @Injectable()

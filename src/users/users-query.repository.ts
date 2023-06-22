@@ -3,7 +3,7 @@ import { QueryUserDto } from './dto/query-user.dto';
 import { PaginatorUserView, ViewUserDto } from './dto/view-user.dto';
 import { User, UserDocument, UserModelType } from './user.schema';
 import { InjectModel } from '@nestjs/mongoose';
-import { ResultCode, ResultDto } from 'src/dto';
+import { ResultCode, ResultDto } from '../dto';
 import { Types } from 'mongoose';
 import { getResultDto, validID } from '../utils';
 

@@ -18,9 +18,9 @@ import { UpdatePostDto } from './dto/update-post.dto';
 import { calcResultDto } from '../utils';
 import { PaginatorPostView, ViewPostDto } from './dto/view-post.dto';
 import { CreatePostDto } from './dto/create-post.dto';
-import { QueryParams, ResultCode } from 'src/dto';
-import { PaginatorCommentView } from 'src/comments/dto/view-comment.dto';
-import { CommentsQueryRepository } from 'src/comments/comments-query.repository';
+import { QueryParams, ResultCode } from '../dto';
+import { PaginatorCommentView } from '../comments/dto/view-comment.dto';
+import { CommentsQueryRepository } from '../comments/comments-query.repository';
 
 @Controller('posts')
 export class PostsController {
