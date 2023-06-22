@@ -4,7 +4,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
 import { QueryParams, ResultCode, ResultDto } from 'src/dto';
 import { PaginatorPostView, ViewPostDto } from './dto/view-post.dto';
-import { getResultDto, validID } from 'src/utils';
+import { getResultDto, validID } from '../utils';
 import { LikeStatus } from 'src/likes/dto/like-status';
 import { Blog, BlogModelType } from 'src/blogs/blog.schema';
 

@@ -4,7 +4,7 @@ import { Comment, CommentDocument, CommentModelType } from './comment.schema';
 import { Types } from 'mongoose';
 import { PaginatorCommentView, ViewCommentDto } from './dto/view-comment.dto';
 import { QueryParams, ResultCode, ResultDto } from 'src/dto';
-import { getResultDto, validID } from 'src/utils';
+import { getResultDto, validID } from '../utils';
 import { LikeStatus } from 'src/likes/dto/like-status';
 
 @Injectable()

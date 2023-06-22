@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PostsRepository } from './posts.repository';
 import { PostDocument } from './post.schema';
 import { ResultCode, ResultDto } from 'src/dto';
-import { getResultDto } from 'src/utils';
+import { getResultDto } from '../utils';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { BlogsRepository } from 'src/blogs/blogs.repository';
 import { CreatePostDto } from './dto/create-post.dto';
