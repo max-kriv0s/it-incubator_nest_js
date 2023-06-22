@@ -1,29 +1,40 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+  Post,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Comment, CommentDocument, CommentModelType } from './comment.schema';
 import { Types } from 'mongoose';
 import { PaginatorCommentView, ViewCommentDto } from './dto/view-comment.dto';
-import { QueryParams, ResultCode, ResultDto } from '../dto';
-import { getResultDto, validID } from '../utils';
+import { QueryParams } from '../dto';
+import { validID } from '../utils';
 import { LikeStatus } from '../likes/dto/like-status';
+import { PostModelType } from 'src/posts/post.schema';
 
 @Injectable()
 export class CommentsQueryRepository {
   constructor(
     @InjectModel(Comment.name) private CommentModel: CommentModelType,
+    @InjectModel(Post.name) private PostModel: PostModelType,
   ) {}
 
   async findCommentsByPostId(
     postId: string,
     queryParams: QueryParams,
     userId?: string,
-  ): Promise<PaginatorCommentView | null> {
-    if (!validID(postId)) return null;
+  ): Promise<PaginatorCommentView> {
+    if (!validID(postId))
+      throw new InternalServerErrorException('incorrect value id');
 
     const pageNumber: number = +queryParams.pageNumber || 1;
     const pageSize: number = +queryParams.pageSize || 10;
     const sortBy: string = queryParams.sortBy || 'createdAt';
     const sortDirection = queryParams.sortDirection || 'desc';
+
+    const post = await this.PostModel.findById(postId).exec();
+    if (!post) throw new NotFoundException('Post not found');
 
     const filter = { postId: postId };
     const totalCount: number = await this.CommentModel.countDocuments(filter);
@@ -49,26 +60,14 @@ export class CommentsQueryRepository {
   async getCommentViewById(
     id: Types.ObjectId | string,
     userId?: string,
-  ): Promise<ResultDto<ViewCommentDto>> {
-    if (typeof id === 'string' && !validID(id)) {
-      return getResultDto<ViewCommentDto>(
-        ResultCode.ServerError,
-        null,
-        'incorrect value id',
-      );
-    }
+  ): Promise<ViewCommentDto> {
+    if (typeof id === 'string' && !validID(id))
+      throw new InternalServerErrorException('incorrect value id');
 
     const comment = await this.CommentModel.findById(id).exec();
-    if (!comment) {
-      return getResultDto<ViewCommentDto>(
-        ResultCode.NotFound,
-        null,
-        'Comment not found',
-      );
-    }
+    if (!comment) throw new NotFoundException('Comment not found');
 
-    const commentView = await this.commentDBToCommentView(comment, userId);
-    return getResultDto<ViewCommentDto>(ResultCode.Success, commentView);
+    return this.commentDBToCommentView(comment, userId);
   }
 
   async commentDBToCommentView(

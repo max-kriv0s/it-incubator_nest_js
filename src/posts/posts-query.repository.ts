@@ -1,10 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { Post, PostDocument, PostModelType } from './post.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
-import { QueryParams, ResultCode, ResultDto } from '../dto';
+import { QueryParams } from '../dto';
 import { PaginatorPostView, ViewPostDto } from './dto/view-post.dto';
-import { getResultDto, validID } from '../utils';
+import { validID } from '../utils';
 import { LikeStatus } from '../likes/dto/like-status';
 import { Blog, BlogModelType } from '../blogs/blog.schema';
 
@@ -47,16 +51,17 @@ export class PostsQueryRepository {
     blogId: string,
     queryParams: QueryParams,
     userId?: string,
-  ): Promise<PaginatorPostView | null> {
+  ): Promise<PaginatorPostView> {
     const pageNumber: number = +queryParams.pageNumber || 1;
     const pageSize: number = +queryParams.pageSize || 10;
     const sortBy: string = queryParams.sortBy || 'createdAt';
     const sortDirection = queryParams.sortDirection || 'desc';
 
-    if (!validID(blogId)) return null;
+    if (!validID(blogId))
+      throw new InternalServerErrorException('incorrect value blog id');
 
     const blog = await this.BlogModel.findById(blogId);
-    if (!blog) return null;
+    if (!blog) throw new NotFoundException('Blog not found');
 
     const filter = { blogId: blog._id };
     const totalCount: number = await this.PostModel.countDocuments(filter);
@@ -82,26 +87,14 @@ export class PostsQueryRepository {
   async getPostById(
     id: Types.ObjectId | string,
     userId?: string,
-  ): Promise<ResultDto<ViewPostDto>> {
-    if (typeof id === 'string' && !validID(id)) {
-      return getResultDto<ViewPostDto>(
-        ResultCode.ServerError,
-        null,
-        'incorrect value id',
-      );
-    }
+  ): Promise<ViewPostDto> {
+    if (typeof id === 'string' && !validID(id))
+      throw new InternalServerErrorException('incorrect value id');
 
     const post = await this.PostModel.findById(id).exec();
-    if (!post) {
-      return getResultDto<ViewPostDto>(
-        ResultCode.NotFound,
-        null,
-        'Post not found',
-      );
-    }
+    if (!post) throw new NotFoundException('Post not found');
 
-    const postView = await this.postDBToPostView(post, userId);
-    return getResultDto<ViewPostDto>(ResultCode.Success, postView);
+    return this.postDBToPostView(post, userId);
   }
 
   async postDBToPostView(

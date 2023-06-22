@@ -1,11 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { QueryUserDto } from './dto/query-user.dto';
 import { PaginatorUserView, ViewUserDto } from './dto/view-user.dto';
 import { User, UserDocument, UserModelType } from './user.schema';
 import { InjectModel } from '@nestjs/mongoose';
-import { ResultCode, ResultDto } from '../dto';
 import { Types } from 'mongoose';
-import { getResultDto, validID } from '../utils';
+import { validID } from '../utils';
 
 @Injectable()
 export class UsersQueryRepository {
@@ -53,28 +56,14 @@ export class UsersQueryRepository {
     };
   }
 
-  async getUserViewById(
-    id: Types.ObjectId | string,
-  ): Promise<ResultDto<ViewUserDto>> {
-    if (typeof id === 'string' && !validID(id)) {
-      return getResultDto<ViewUserDto>(
-        ResultCode.ServerError,
-        null,
-        'incorrect value id',
-      );
-    }
+  async getUserViewById(id: Types.ObjectId | string): Promise<ViewUserDto> {
+    if (typeof id === 'string' && !validID(id))
+      throw new InternalServerErrorException('incorrect value id');
 
     const user = await this.UserModel.findById(id).exec();
-    if (!user) {
-      return getResultDto<ViewUserDto>(
-        ResultCode.NotFound,
-        null,
-        'User not found',
-      );
-    }
+    if (!user) throw new NotFoundException('User not found');
 
-    const userView = await this.userDBToUserView(user);
-    return getResultDto<ViewUserDto>(ResultCode.Success, userView);
+    return this.userDBToUserView(user);
   }
 
   async userDBToUserView(user: UserDocument): Promise<ViewUserDto> {

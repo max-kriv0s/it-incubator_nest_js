@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { Blog, BlogDocument, BlogModelType } from './blog.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { CreateBlogDto } from './dto/create-blog.dto';
@@ -8,17 +8,20 @@ import { validID } from '../utils';
 export class BlogsRepository {
   constructor(@InjectModel(Blog.name) private BlogModel: BlogModelType) {}
 
-  async createBlog(blogDto: CreateBlogDto): Promise<BlogDocument> {
+  createBlog(blogDto: CreateBlogDto): BlogDocument {
     return this.BlogModel.createBlog(blogDto, this.BlogModel);
   }
 
   async findBlogById(id: string): Promise<BlogDocument | null> {
-    if (!validID(id)) return null;
+    if (!validID(id))
+      throw new InternalServerErrorException('incorrect value id');
+
     return this.BlogModel.findById(id).exec();
   }
 
   async deleteBlogById(id: string): Promise<BlogDocument | null> {
-    if (!validID(id)) return null;
+    if (!validID(id))
+      throw new InternalServerErrorException('incorrect value id');
     return this.BlogModel.findByIdAndDelete(id);
   }
 

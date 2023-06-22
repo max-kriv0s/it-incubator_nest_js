@@ -46,7 +46,11 @@ export class Post {
     blogName: string,
     PostModel: PostModelType,
   ): PostDocument {
-    const data = {
+    const data: Omit<CreatePostDto, 'blogId'> & {
+      blogId: Types.ObjectId;
+      blogName: string;
+      createdAt: string;
+    } = {
       title: postDto.title,
       shortDescription: postDto.shortDescription,
       content: postDto.content,

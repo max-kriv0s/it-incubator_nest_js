@@ -42,14 +42,14 @@ export class ParamsDto {
 //   };
 // }
 
-export enum ResultCode {
-  Success,
-  NotFound,
-  ServerError,
-}
+// export enum ResultCode {
+//   Success,
+//   NotFound,
+//   ServerError,
+// }
 
-export type ResultDto<T> = {
-  data: T | null;
-  code: ResultCode;
-  errorMessage: string;
-};
+// export type ResultDto<T> = {
+//   data: T | null;
+//   code: ResultCode;
+//   errorMessage: string;
+// };

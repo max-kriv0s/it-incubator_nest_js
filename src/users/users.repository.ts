@@ -8,7 +8,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 export class UsersRepository {
   constructor(@InjectModel(User.name) private UserModel: UserModelType) {}
 
-  async createUser(userDto: CreateUserDto): Promise<UserDocument> {
+  createUser(userDto: CreateUserDto): UserDocument {
     return this.UserModel.createUser(userDto, this.UserModel);
   }
 

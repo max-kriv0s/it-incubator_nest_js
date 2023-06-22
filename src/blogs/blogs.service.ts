@@ -1,12 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateBlogDto } from './dto/create-blog.dto';
 import { BlogsRepository } from './blogs.repository';
-import { BlogDocument } from './blog.schema';
 import { UpdateBlogDto } from './dto/update-blog.dto';
-import { ResultCode, ResultDto } from '../dto';
-import { getResultDto } from '../utils';
 import { CreateBlogPostDto } from './dto/create-blog-post.dto';
-import { PostDocument } from '../posts/post.schema';
 import { PostsRepository } from '../posts/posts.repository';
 
 @Injectable()
@@ -16,41 +12,38 @@ export class BlogsService {
     private readonly postsRepository: PostsRepository,
   ) {}
 
-  async createBlog(blogDto: CreateBlogDto): Promise<BlogDocument> {
-    const newBlog = await this.blogsRepository.createBlog(blogDto);
+  async createBlog(blogDto: CreateBlogDto): Promise<string> {
+    const newBlog = this.blogsRepository.createBlog(blogDto);
     const createdBlog = await this.blogsRepository.save(newBlog);
-    return createdBlog;
+    return createdBlog._id.toString();
   }
 
-  async updateBlog(
-    id: string,
-    blogDto: UpdateBlogDto,
-  ): Promise<ResultDto<null>> {
+  async updateBlog(id: string, blogDto: UpdateBlogDto) {
     const blog = await this.blogsRepository.findBlogById(id);
-    if (!blog) return getResultDto(ResultCode.NotFound, null, 'Blog not found');
+    if (!blog) throw new NotFoundException('Blog not found');
 
     blog.updateBlog(blogDto);
     await this.blogsRepository.save(blog);
-
-    return getResultDto(ResultCode.Success);
   }
 
-  async deleteBlogById(id: string): Promise<BlogDocument | null> {
-    return this.blogsRepository.deleteBlogById(id);
+  async deleteBlogById(id: string) {
+    const deletedBlog = await this.blogsRepository.deleteBlogById(id);
+    if (!deletedBlog) throw new NotFoundException('Blog not found');
   }
 
   async createPostByBlogId(
     blogId: string,
     blogPostDto: CreateBlogPostDto,
-  ): Promise<PostDocument | null> {
+  ): Promise<string> {
     const blog = await this.blogsRepository.findBlogById(blogId);
-    if (!blog) return null;
+    if (!blog) throw new NotFoundException('Blog not found');
 
-    const newPost = await this.postsRepository.createPostByBlogId(
+    const newPost = this.postsRepository.createPostByBlogId(
       blogId,
       blog.name,
       blogPostDto,
     );
-    return this.postsRepository.save(newPost);
+    const createdPost = await this.postsRepository.save(newPost);
+    return createdPost._id.toString();
   }
 }

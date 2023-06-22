@@ -53,14 +53,14 @@ export class User {
   @Prop()
   refreshToken: string;
 
-  @Prop({ required: true })
+  @Prop()
   passwordRecovery: UserPasswordRecovery;
 
   static createUser(
     userDto: CreateUserDto,
     UserModel: UserModelType,
   ): UserDocument {
-    const data = {
+    const data: Omit<User, '_id'> = {
       accountData: {
         login: userDto.login,
         password: userDto.password,
@@ -73,7 +73,10 @@ export class User {
         isConfirmed: true,
       },
       refreshToken: '',
-      passwordRecovery: {},
+      passwordRecovery: {
+        recoveryCode: '',
+        expirationDate: new Date(0),
+      },
     };
 
     const newUser = new UserModel(data);

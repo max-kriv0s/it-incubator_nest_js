@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Post, PostDocument, PostModelType } from './post.schema';
 import { validID } from '../utils';
@@ -14,12 +14,15 @@ export class PostsRepository {
   }
 
   async deletePostById(id: string): Promise<PostDocument | null> {
-    if (!validID(id)) return null;
+    if (!validID(id))
+      throw new InternalServerErrorException('incorrect value id');
+
     return this.PostModel.findByIdAndDelete(id);
   }
 
   async findPostById(id: string): Promise<PostDocument | null> {
-    if (!validID(id)) return null;
+    if (!validID(id))
+      throw new InternalServerErrorException('incorrect value id');
     return this.PostModel.findById(id).exec();
   }
 
@@ -27,11 +30,11 @@ export class PostsRepository {
     await this.PostModel.deleteMany({});
   }
 
-  async createPostByBlogId(
+  createPostByBlogId(
     blogId: string,
     blogName: string,
     blogPostDto: CreateBlogPostDto,
-  ): Promise<PostDocument> {
+  ): PostDocument {
     const postDto: CreatePostDto = {
       title: blogPostDto.title,
       content: blogPostDto.content,

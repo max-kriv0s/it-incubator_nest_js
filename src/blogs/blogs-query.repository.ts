@@ -1,10 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { Blog, BlogDocument, BlogModelType } from './blog.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
 import { PaginatorBlogView, ViewBlogDto } from './dto/view-blog.dto';
-import { QueryParams, ResultCode, ResultDto } from '../dto';
-import { getResultDto, validID } from '../utils';
+import { QueryParams } from '../dto';
+import { validID } from '../utils';
 
 @Injectable()
 export class BlogsQueryRepository {
@@ -42,26 +46,14 @@ export class BlogsQueryRepository {
     };
   }
 
-  async getBlogById(
-    id: Types.ObjectId | string,
-  ): Promise<ResultDto<ViewBlogDto>> {
+  async getBlogById(id: Types.ObjectId | string): Promise<ViewBlogDto> {
     if (typeof id === 'string' && !validID(id))
-      return getResultDto<ViewBlogDto>(
-        ResultCode.ServerError,
-        null,
-        'incorrect value id',
-      );
+      throw new InternalServerErrorException('incorrect value id');
 
     const blog = await this.BlogModel.findById(id).exec();
-    if (!blog)
-      return getResultDto<ViewBlogDto>(
-        ResultCode.NotFound,
-        null,
-        'Blog not found',
-      );
+    if (!blog) throw new NotFoundException('Blog not found');
 
-    const blogView = await this.blogDBToBlogView(blog);
-    return getResultDto<ViewBlogDto>(ResultCode.Success, blogView);
+    return this.blogDBToBlogView(blog);
   }
 
   async blogDBToBlogView(blog: BlogDocument): Promise<ViewBlogDto> {

@@ -4,9 +4,7 @@ import {
   Delete,
   Get,
   HttpCode,
-  HttpException,
   HttpStatus,
-  NotFoundException,
   Param,
   Post,
   Put,
@@ -18,7 +16,6 @@ import { PaginatorBlogView, ViewBlogDto } from './dto/view-blog.dto';
 import { BlogsService } from './blogs.service';
 import { CreateBlogDto } from './dto/create-blog.dto';
 import { UpdateBlogDto } from './dto/update-blog.dto';
-import { calcResultDto } from '../utils';
 import { PaginatorPostView, ViewPostDto } from '../posts/dto/view-post.dto';
 import { PostsQueryRepository } from '../posts/posts-query.repository';
 import { CreateBlogPostDto } from './dto/create-blog-post.dto';
@@ -40,15 +37,8 @@ export class BlogsController {
 
   @Post()
   async createBlog(@Body() blogDto: CreateBlogDto): Promise<ViewBlogDto> {
-    const createdBlog = await this.blogsService.createBlog(blogDto);
-
-    const result = await this.blogsQueryRepository.getBlogById(createdBlog._id);
-
-    return calcResultDto<ViewBlogDto>(
-      result.code,
-      result.data as ViewBlogDto,
-      result.errorMessage,
-    );
+    const blogId = await this.blogsService.createBlog(blogDto);
+    return this.blogsQueryRepository.getBlogById(blogId);
   }
 
   @Get(':blogId/posts')
@@ -56,14 +46,11 @@ export class BlogsController {
     @Param('blogId') blogId: string,
     @Query() queryParams: QueryParams,
   ): Promise<PaginatorPostView> {
-    const posts = await this.postsQueryRepository.findPostsByBlogId(
+    return this.postsQueryRepository.findPostsByBlogId(
       blogId,
       queryParams,
       // req.userId,
     );
-    if (!posts) throw new NotFoundException('Blog not found');
-
-    return posts;
   }
 
   @Post(':blogId/posts')
@@ -71,50 +58,31 @@ export class BlogsController {
     @Param('blogId') blogId: string,
     @Body() blogPostDto: CreateBlogPostDto,
   ): Promise<ViewPostDto> {
-    const newPost = await this.blogsService.createPostByBlogId(
+    const postId = await this.blogsService.createPostByBlogId(
       blogId,
       blogPostDto,
     );
-    if (!newPost) throw new NotFoundException('Blog not found');
 
-    const result = await this.postsQueryRepository.getPostById(
-      newPost._id,
+    return this.postsQueryRepository.getPostById(
+      postId,
       // req.userId,
-    );
-
-    return calcResultDto<ViewPostDto>(
-      result.code,
-      result.data as ViewPostDto,
-      result.errorMessage,
     );
   }
 
   @Get(':id')
   async getBlogById(@Param('id') id: string): Promise<ViewBlogDto> {
-    const result = await this.blogsQueryRepository.getBlogById(id);
-
-    return calcResultDto<ViewBlogDto>(
-      result.code,
-      result.data as ViewBlogDto,
-      result.errorMessage,
-    );
+    return await this.blogsQueryRepository.getBlogById(id);
   }
 
   @Put(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async updateBlog(@Param('id') id: string, @Body() blogDto: UpdateBlogDto) {
-    const result = await this.blogsService.updateBlog(id, blogDto);
-    return calcResultDto(result.code, result.data, result.errorMessage);
+    return this.blogsService.updateBlog(id, blogDto);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteBlog(@Param('id') id: string) {
-    const deletedBlog = await this.blogsService.deleteBlogById(id);
-    if (!deletedBlog) {
-      throw new HttpException('Blog not found', HttpStatus.NOT_FOUND);
-    }
-
-    return;
+    return this.blogsService.deleteBlogById(id);
   }
 }
