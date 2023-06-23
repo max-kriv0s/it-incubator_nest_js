@@ -5,6 +5,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  NotFoundException,
   Param,
   Post,
   Put,
@@ -62,6 +63,7 @@ export class BlogsController {
       blogId,
       blogPostDto,
     );
+    if (!postId) throw new NotFoundException('Blog not found');
 
     return this.postsQueryRepository.getPostById(
       postId,

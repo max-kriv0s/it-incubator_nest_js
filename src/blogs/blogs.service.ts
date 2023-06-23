@@ -34,9 +34,9 @@ export class BlogsService {
   async createPostByBlogId(
     blogId: string,
     blogPostDto: CreateBlogPostDto,
-  ): Promise<string> {
+  ): Promise<string | null> {
     const blog = await this.blogsRepository.findBlogById(blogId);
-    if (!blog) throw new NotFoundException('Blog not found');
+    if (!blog) return null;
 
     const newPost = this.postsRepository.createPostByBlogId(
       blogId,
