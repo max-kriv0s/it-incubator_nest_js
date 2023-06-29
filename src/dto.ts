@@ -1,11 +1,31 @@
-import { IsMongoId } from 'class-validator';
+import { IsEnum, IsMongoId, IsOptional, IsString } from 'class-validator';
+
+enum sortDirection {
+  asc = 'asc',
+  desc = 'desc',
+}
 
 export class QueryParams {
+  @IsString()
+  @IsOptional()
   readonly searchNameTerm: string;
+
+  @IsString()
+  @IsOptional()
   readonly pageNumber: string;
+
+  @IsString()
+  @IsOptional()
   readonly pageSize: string;
+
+  @IsString()
+  @IsOptional()
   readonly sortBy: string;
-  readonly sortDirection: 'asc' | 'desc';
+
+  @IsString()
+  @IsOptional()
+  @IsEnum(sortDirection)
+  readonly sortDirection: sortDirection;
 }
 
 export class Paginator {
@@ -15,9 +35,19 @@ export class Paginator {
   readonly totalCount: number;
 }
 
-export class ParamsDto {
+export class ParamIdDto {
   @IsMongoId()
   id: string;
+}
+
+export class ParamBlogIdDto {
+  @IsMongoId()
+  blogId: string;
+}
+
+export class ParamDeviceIdDto {
+  @IsMongoId()
+  deviceId: string;
 }
 
 // export class ObjectTeamIdParameterDTO {
