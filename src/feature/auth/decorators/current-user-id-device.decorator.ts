@@ -1,7 +1,7 @@
 import { ExecutionContext, createParamDecorator } from '@nestjs/common';
 import { refreshTokenDto } from '../dto/refresh-token.dto';
 
-export const CurrentUserIdDeviceId = createParamDecorator(
+export const CurrentUser = createParamDecorator(
   (data: unknown, context: ExecutionContext): refreshTokenDto => {
     const request = context.switchToHttp().getRequest();
 
