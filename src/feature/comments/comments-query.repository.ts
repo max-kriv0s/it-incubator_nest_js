@@ -65,10 +65,10 @@ export class CommentsQueryRepository {
   ): Promise<ViewCommentDto> {
     const statusMyLike = LikeStatus.None;
 
-    if (userId && validID(userId)) {
+    if (userId) {
       //   const myLike = await LikeModel.findOne({
       //     commentId: comment._id,
-      //     userId: userId,
+      //     userId: new Types.ObjectId(userId),
       //   }).exec();
       //   if (myLike) statusMyLike = myLike.status;
     }
