@@ -11,7 +11,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ViewSecurityDeviceDto } from './dto/view-security-device.dto';
-import { CurrentUserIdDeviceId } from '../auth/decorators/current-user-id-device.decorator';
+import { CurrentUser } from '../auth/decorators/current-user-id-device.decorator';
 import { RefreshJwtAuthGuard } from '../auth/guard/jwt-refresh.guard';
 import { SecurityDevicesQueryRepository } from './security-devices -query.repository';
 import { refreshTokenDto } from '../auth/dto/refresh-token.dto';
@@ -28,7 +28,7 @@ export class SecurityDevicesController {
   @UseGuards(RefreshJwtAuthGuard)
   @Get()
   async getSecurityDevices(
-    @CurrentUserIdDeviceId() tokenDto: refreshTokenDto,
+    @CurrentUser() tokenDto: refreshTokenDto,
   ): Promise<ViewSecurityDeviceDto[]> {
     const devices =
       await this.securityDevicesQueryRepository.getAllDevicesSessionsByUserID(
@@ -41,9 +41,7 @@ export class SecurityDevicesController {
   @UseGuards(RefreshJwtAuthGuard)
   @Delete()
   @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteSecurityDevices(
-    @CurrentUserIdDeviceId() tokenDto: refreshTokenDto,
-  ) {
+  async deleteSecurityDevices(@CurrentUser() tokenDto: refreshTokenDto) {
     const isDeleted =
       await this.securityDevicesService.deleteAllDevicesSessionsByUserID(
         tokenDto.userId,
@@ -59,7 +57,7 @@ export class SecurityDevicesController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteSecurityDeviceByID(
     @Param() params: ParamDeviceIdDto,
-    @CurrentUserIdDeviceId() tokenDto: refreshTokenDto,
+    @CurrentUser() tokenDto: refreshTokenDto,
   ) {
     const result =
       await this.securityDevicesService.deleteUserSessionByDeviceID(
