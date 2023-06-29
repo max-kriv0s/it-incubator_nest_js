@@ -28,7 +28,7 @@ export class SecurityDevicesService {
     const newSecurityDevices =
       this.securityDevicesRepository.CreateSecurityDevice(data);
     await this.securityDevicesRepository.save(newSecurityDevices);
-    return newSecurityDevices._id.toString();
+    return newSecurityDevices.id;
   }
 
   getNewSecurityDeviceId(): string {
