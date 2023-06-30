@@ -8,6 +8,8 @@ import { CreateBlogPostDto } from '../blogs/dto/create-blog-post.dto';
 import { CreateCommentDto } from '../comments/dto/create-comment.dto';
 import { UsersService } from '../users/users.service';
 import { CommentsService } from '../comments/comments.service';
+import { LikeStatus } from '../likes/dto/like-status';
+import { LikePostsService } from './like-posts.service';
 
 @Injectable()
 export class PostsService {
@@ -16,6 +18,7 @@ export class PostsService {
     private readonly blogsRepository: BlogsRepository,
     private readonly usersService: UsersService,
     private readonly commentsService: CommentsService,
+    private readonly likePostsService: LikePostsService,
   ) {}
 
   async createPost(postDto: CreatePostDto): Promise<string> {
@@ -80,5 +83,29 @@ export class PostsService {
       user.accountData.login,
       createCommentDto,
     );
+  }
+
+  async likeStatusByPostID(
+    postId: string,
+    userId: string,
+    likeStatus: LikeStatus,
+  ): Promise<boolean> {
+    const post = await this.postsRepository.findPostById(postId);
+    if (!post) return false;
+
+    const user = await this.usersService.findUserById(userId);
+    if (!user) return false;
+
+    const countLikeDislyke = await this.likePostsService.ChangeLike(
+      postId,
+      userId,
+      user.accountData.login,
+      likeStatus,
+    );
+    post.updateCountLikeDislike(countLikeDislyke);
+    post.newestLikes = await this.likePostsService.getNewestLikes(post.id);
+
+    await this.postsRepository.save(post);
+    return true;
   }
 }
