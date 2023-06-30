@@ -44,6 +44,15 @@ import { AccessJwtStrategy } from './feature/auth/strategies/jwt.strategy';
 import { RefreshJwtStrategy } from './feature/auth/strategies/jwt-refresh.strategy';
 import { SecurityDevicesController } from './feature/security-devices/security-device.controller';
 import { SecurityDevicesQueryRepository } from './feature/security-devices/security-devices -query.repository';
+import { LikePostsRepository } from './feature/posts/like-posts.repository';
+import { LikePosts, LikePostsSchema } from './feature/posts/like-posts.schema';
+import {
+  LikeComments,
+  LikeCommentsSchema,
+} from './feature/comments/like-comments.schema';
+import { LikePostsService } from './feature/posts/like-posts.service';
+import { LikeCommentsService } from './feature/comments/like-comments.service';
+import { LikeCommentsRepository } from './feature/comments/like-comments.repository';
 
 @Module({
   imports: [
@@ -68,6 +77,8 @@ import { SecurityDevicesQueryRepository } from './feature/security-devices/secur
       { name: Blog.name, schema: BlogSchema },
       { name: Comment.name, schema: CommentSchema },
       { name: SecurityDevices.name, schema: SecurityDevicesSchema },
+      { name: LikePosts.name, schema: LikePostsSchema },
+      { name: LikeComments.name, schema: LikeCommentsSchema },
     ]),
     PassportModule,
     JwtModule.register({}),
@@ -105,6 +116,10 @@ import { SecurityDevicesQueryRepository } from './feature/security-devices/secur
     AccessJwtStrategy,
     RefreshJwtStrategy,
     SecurityDevicesQueryRepository,
+    LikePostsRepository,
+    LikePostsService,
+    LikeCommentsService,
+    LikeCommentsRepository,
   ],
 })
 export class AppModule {}
