@@ -19,7 +19,7 @@ export class Blog {
   websiteUrl: string;
 
   @Prop({ required: true })
-  createdAt: string;
+  createdAt: Date;
 
   @Prop({ default: false })
   isMembership: boolean;
@@ -28,11 +28,11 @@ export class Blog {
     blogDto: CreateBlogDto,
     BlogModel: BlogModelType,
   ): BlogDocument {
-    const data: CreateBlogDto & { createdAt: string } = {
+    const data: CreateBlogDto & { createdAt: Date } = {
       name: blogDto.name,
       description: blogDto.description,
       websiteUrl: blogDto.websiteUrl,
-      createdAt: new Date().toISOString(),
+      createdAt: new Date(),
     };
 
     return new BlogModel(data);
