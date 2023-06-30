@@ -2,6 +2,8 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Model, Types } from 'mongoose';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { CreatePostDto } from './dto/create-post.dto';
+import { ViewLikeDetailsDto } from '../likes/dto/view-like.dto';
+import { CountLikeDislikeDto } from '../likes/dto/count-like-dislike.dto';
 
 export type PostDocument = HydratedDocument<Post>;
 
@@ -25,7 +27,7 @@ export class Post {
   blogName: string;
 
   @Prop({ required: true })
-  createdAt: string;
+  createdAt: Date;
 
   @Prop({ default: 0 })
   likesCount: number;
@@ -33,12 +35,20 @@ export class Post {
   @Prop({ default: 0 })
   dislikesCount: number;
 
+  @Prop({ default: [] })
+  newestLikes: ViewLikeDetailsDto[];
+
   updatePost(postDto: UpdatePostDto, blogId: Types.ObjectId, blogName: string) {
     this.title = postDto.title;
     this.shortDescription = postDto.shortDescription;
     this.content = postDto.content;
     this.blogId = blogId;
     this.blogName = blogName;
+  }
+
+  updateCountLikeDislike(countDto: CountLikeDislikeDto) {
+    this.likesCount += countDto.countLike;
+    this.dislikesCount += countDto.countDislike;
   }
 
   static createPost(
@@ -49,14 +59,14 @@ export class Post {
     const data: Omit<CreatePostDto, 'blogId'> & {
       blogId: Types.ObjectId;
       blogName: string;
-      createdAt: string;
+      createdAt: Date;
     } = {
       title: postDto.title,
       shortDescription: postDto.shortDescription,
       content: postDto.content,
       blogId: new Types.ObjectId(postDto.blogId),
       blogName: blogName,
-      createdAt: new Date().toISOString(),
+      createdAt: new Date(),
       // likesCount: 0,
       // dislikesCount: 0,
     };
@@ -69,6 +79,7 @@ export const PostSchema = SchemaFactory.createForClass(Post);
 
 PostSchema.methods = {
   updatePost: Post.prototype.updatePost,
+  updateCountLikeDislike: Post.prototype.updateCountLikeDislike,
 };
 
 export type PostModelStaticType = {
