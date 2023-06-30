@@ -2,6 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Model, Types } from 'mongoose';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
+import { CountLikeDislikeDto } from '../likes/dto/count-like-dislike.dto';
 
 export type CommentDocument = HydratedDocument<Comment>;
 
@@ -25,7 +26,7 @@ export class Comment {
   commentatorInfo: CommentatorInfo;
 
   @Prop({ required: true })
-  createdAt: string;
+  createdAt: Date;
 
   @Prop({ required: true })
   postId: Types.ObjectId;
@@ -49,7 +50,7 @@ export class Comment {
         userId: new Types.ObjectId(userId),
         userLogin: userLogin,
       },
-      createdAt: new Date().toISOString(),
+      createdAt: new Date(),
       postId: new Types.ObjectId(postId),
       likesCount: 0,
       dislikesCount: 0,
@@ -60,12 +61,18 @@ export class Comment {
   updateComment(commentDto: UpdateCommentDto) {
     this.content = commentDto.content;
   }
+
+  updateCountLikeDislike(countDto: CountLikeDislikeDto) {
+    this.likesCount += countDto.countLike;
+    this.dislikesCount += countDto.countDislike;
+  }
 }
 
 export const CommentSchema = SchemaFactory.createForClass(Comment);
 
 CommentSchema.methods = {
   updateComment: Comment.prototype.updateComment,
+  updateCountLikeDislike: Comment.prototype.updateCountLikeDislike,
 };
 
 export type CommentModelStaticType = {
