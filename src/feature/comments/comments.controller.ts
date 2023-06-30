@@ -18,6 +18,7 @@ import { ParamCommentId } from './dto/param-comment-id.dto';
 import { CommentsService } from './comments.service';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { CurrentUserId } from '../auth/decorators/current-user-id.param.decorator';
+import { LikeInputDto } from '../likes/dto/like-input.dto';
 
 @Controller('comments')
 export class CommentsController {
@@ -68,6 +69,23 @@ export class CommentsController {
     if (!result.commentExists) throw new NotFoundException();
     if (!result.isUserComment) throw new ForbiddenException();
 
+    return;
+  }
+
+  @UseGuards(AccessJwtAuthGuard)
+  @Put(':commentId/like-status')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async likeStatusByCommentID(
+    @Param() params: ParamCommentId,
+    @Body() dto: LikeInputDto,
+    @CurrentUserId() userId: string,
+  ) {
+    const commentСhanged = await this.commentsService.likeStatusByCommentID(
+      params.commentId,
+      userId,
+      dto.likeStatus,
+    );
+    if (!commentСhanged) throw new NotFoundException('Comment not found');
     return;
   }
 }
