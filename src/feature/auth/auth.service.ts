@@ -90,8 +90,8 @@ export class AuthService {
     return {
       userId: result.sub,
       deviceId: result.deviceId,
-      issuedAd: new Date(result.iat * 1000).toISOString(),
-      expirationTime: new Date(result.exp * 1000).toISOString(),
+      issuedAd: new Date(result.iat * 1000),
+      expirationTime: new Date(result.exp * 1000),
     };
   }
 }
