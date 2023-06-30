@@ -16,7 +16,7 @@ export class AccountData {
   email: string;
 
   @Prop({ required: true })
-  createdAt: string;
+  createdAt: Date;
 }
 
 @Schema()
@@ -65,7 +65,7 @@ export class User {
         login: userDto.login,
         password: userDto.password,
         email: userDto.email,
-        createdAt: new Date().toISOString(),
+        createdAt: new Date(),
       },
       emailConfirmation: {
         confirmationCode: '',
