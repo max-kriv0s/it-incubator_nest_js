@@ -15,10 +15,10 @@ export class SecurityDevices {
   title: string;
 
   @Prop({ required: true })
-  lastActiveDate: string;
+  lastActiveDate: Date;
 
   @Prop({ required: true })
-  expirationTime: string;
+  expirationTime: Date;
 
   @Prop({ required: true })
   userId: Types.ObjectId;
