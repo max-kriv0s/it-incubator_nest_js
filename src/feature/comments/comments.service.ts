@@ -3,10 +3,15 @@ import { CommentsRepository } from './comments.repository';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { ResultUpdateComment } from './dto/result-update-comment.dto';
+import { LikeStatus } from '../likes/dto/like-status';
+import { LikeCommentsService } from './like-comments.service';
 
 @Injectable()
 export class CommentsService {
-  constructor(private readonly commentsRepository: CommentsRepository) {}
+  constructor(
+    private readonly commentsRepository: CommentsRepository,
+    private readonly likeCommentsService: LikeCommentsService,
+  ) {}
 
   async createCommentByPostId(
     postId: string,
@@ -49,5 +54,24 @@ export class CommentsService {
     comment.updateComment(commentDto);
     await this.commentsRepository.save(comment);
     return result;
+  }
+
+  async likeStatusByCommentID(
+    commentId: string,
+    userId: string,
+    likeStatus: LikeStatus,
+  ): Promise<boolean> {
+    const comment = await this.commentsRepository.findCommentByID(commentId);
+    if (!comment) return false;
+
+    const countLikeDislyke = await this.likeCommentsService.ChangeLike(
+      commentId,
+      userId,
+      likeStatus,
+    );
+    comment.updateCountLikeDislike(countLikeDislyke);
+
+    await this.commentsRepository.save(comment);
+    return true;
   }
 }
