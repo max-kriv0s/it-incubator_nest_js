@@ -1,22 +1,19 @@
-import {
-  Injectable,
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Post, PostDocument, PostModelType } from './post.schema';
 import { InjectModel } from '@nestjs/mongoose';
-import { Types } from 'mongoose';
 import { QueryParams } from '../../dto';
 import { PaginatorPostView, ViewPostDto } from './dto/view-post.dto';
-import { validID } from '../../utils';
 import { LikeStatus } from '../likes/dto/like-status';
 import { Blog, BlogModelType } from '../blogs/blog.schema';
+import { LikePosts, LikePostsModelType } from './like-posts.schema';
+import { CastToObjectId } from '../../utils';
 
 @Injectable()
 export class PostsQueryRepository {
   constructor(
     @InjectModel(Post.name) private PostModel: PostModelType,
     @InjectModel(Blog.name) private BlogModel: BlogModelType,
+    @InjectModel(LikePosts.name) private LikePostsModel: LikePostsModelType,
   ) {}
 
   async getPosts(
@@ -81,13 +78,7 @@ export class PostsQueryRepository {
     };
   }
 
-  async getPostById(
-    id: Types.ObjectId | string,
-    userId?: string,
-  ): Promise<ViewPostDto> {
-    if (typeof id === 'string' && !validID(id))
-      throw new InternalServerErrorException('incorrect value id');
-
+  async getPostById(id: string, userId?: string): Promise<ViewPostDto> {
     const post = await this.PostModel.findById(id).exec();
     if (!post) throw new NotFoundException('Post not found');
 
@@ -98,26 +89,15 @@ export class PostsQueryRepository {
     post: PostDocument,
     userId?: string,
   ): Promise<ViewPostDto> {
-    const statusMyLike = LikeStatus.None;
+    let statusMyLike = LikeStatus.None;
 
-    if (userId && validID(userId)) {
-      //   const myLike = await LikePostModel.findOne({
-      //     postId: post._id,
-      //     userId: userId,
-      //   }).exec();
-      //   if (myLike) statusMyLike = myLike.status;
+    if (userId) {
+      const myLike = await this.LikePostsModel.findOne({
+        postId: post._id,
+        userId: CastToObjectId(userId),
+      }).exec();
+      if (myLike) statusMyLike = myLike.status;
     }
-
-    // это можно хранить в постах, пересчитывая при изменении лайка
-    const newestLikes = [];
-    // const newestLikes: LikeDetailsViewModel[] = await LikePostModel.find(
-    //   { postId: post._id, status: LikeStatus.Like },
-    //   ['addedAt', 'userId', 'login', '-_id'],
-    //   {
-    //     sort: { addedAt: -1 },
-    //     limit: 3,
-    //   },
-    // ).lean();
 
     return {
       id: post._id.toString(),
@@ -126,12 +106,12 @@ export class PostsQueryRepository {
       content: post.content,
       blogId: post.blogId.toString(),
       blogName: post.blogName,
-      createdAt: post.createdAt,
+      createdAt: post.createdAt.toISOString(),
       extendedLikesInfo: {
         likesCount: post.likesCount,
         dislikesCount: post.dislikesCount,
         myStatus: statusMyLike,
-        newestLikes: newestLikes,
+        newestLikes: post.newestLikes,
       },
     };
   }
