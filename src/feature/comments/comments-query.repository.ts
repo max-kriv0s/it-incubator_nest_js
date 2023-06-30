@@ -4,7 +4,6 @@ import { Comment, CommentDocument, CommentModelType } from './comment.schema';
 import { Types } from 'mongoose';
 import { PaginatorCommentView, ViewCommentDto } from './dto/view-comment.dto';
 import { QueryParams } from '../../dto';
-import { validID } from '../../utils';
 import { LikeStatus } from '../likes/dto/like-status';
 import { Post, PostModelType } from '../posts/post.schema';
 
@@ -80,7 +79,7 @@ export class CommentsQueryRepository {
         userId: comment.commentatorInfo.userId.toString(),
         userLogin: comment.commentatorInfo.userLogin,
       },
-      createdAt: comment.createdAt,
+      createdAt: comment.createdAt.toISOString(),
       likesInfo: {
         likesCount: comment.likesCount,
         dislikesCount: comment.dislikesCount,
