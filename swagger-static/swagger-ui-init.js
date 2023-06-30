@@ -173,6 +173,27 @@ window.onload = function() {
           }
         }
       },
+      "/posts/{postId}/like-status": {
+        "put": {
+          "operationId": "PostsController_likeStatusByPostId",
+          "parameters": [],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LikeInputDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "204": {
+              "description": ""
+            }
+          }
+        }
+      },
       "/comments/{id}": {
         "get": {
           "operationId": "CommentsController_findCommentByID",
@@ -203,6 +224,27 @@ window.onload = function() {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/UpdateCommentDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "204": {
+              "description": ""
+            }
+          }
+        }
+      },
+      "/comments/{commentId}/like-status": {
+        "put": {
+          "operationId": "CommentsController_likeStatusByCommentID",
+          "parameters": [],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LikeInputDto"
                 }
               }
             }
@@ -414,6 +456,10 @@ window.onload = function() {
           "properties": {}
         },
         "CreateCommentDto": {
+          "type": "object",
+          "properties": {}
+        },
+        "LikeInputDto": {
           "type": "object",
           "properties": {}
         },
