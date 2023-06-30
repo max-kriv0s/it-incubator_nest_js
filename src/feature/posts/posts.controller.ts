@@ -28,6 +28,7 @@ import { BasicAuthGuard } from '../auth/guard/basic-auth.guard';
 import { CurrentUserId } from '../auth/decorators/current-user-id.param.decorator';
 import { CreateCommentDto } from '../comments/dto/create-comment.dto';
 import { ParamPostIdDto } from './dto/param-post-id.dto';
+import { LikeInputDto } from '../likes/dto/like-input.dto';
 
 @Controller('posts')
 export class PostsController {
@@ -109,7 +110,23 @@ export class PostsController {
       userId,
     );
     if (!comment) throw new NotFoundException('Comment not fount');
-
     return comment;
+  }
+
+  @UseGuards(AccessJwtAuthGuard)
+  @Put(':postId/like-status')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async likeStatusByPostId(
+    @Param() params: ParamPostIdDto,
+    @CurrentUserId() userId: string,
+    @Body() dto: LikeInputDto,
+  ) {
+    const postСhanged = await this.postsService.likeStatusByPostID(
+      params.postId,
+      userId,
+      dto.likeStatus,
+    );
+    if (!postСhanged) throw new NotFoundException('Post not found');
+    return;
   }
 }
