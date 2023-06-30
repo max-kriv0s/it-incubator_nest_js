@@ -1,7 +1,6 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Post, PostDocument, PostModelType } from './post.schema';
-import { validID } from '../../utils';
 import { CreatePostDto } from './dto/create-post.dto';
 import { CreateBlogPostDto } from '../blogs/dto/create-blog-post.dto';
 
@@ -14,15 +13,10 @@ export class PostsRepository {
   }
 
   async deletePostById(id: string): Promise<PostDocument | null> {
-    if (!validID(id))
-      throw new InternalServerErrorException('incorrect value id');
-
     return this.PostModel.findByIdAndDelete(id);
   }
 
   async findPostById(id: string): Promise<PostDocument | null> {
-    if (!validID(id))
-      throw new InternalServerErrorException('incorrect value id');
     return this.PostModel.findById(id).exec();
   }
 
