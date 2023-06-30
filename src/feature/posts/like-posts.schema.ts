@@ -3,10 +3,10 @@ import { HydratedDocument, Model, Types } from 'mongoose';
 import { LikeStatus } from '../likes/dto/like-status';
 import { CastToObjectId } from '../../utils';
 
-export type PostLikeDocument = HydratedDocument<PostLike>;
+export type LikePostsDocument = HydratedDocument<LikePosts>;
 
 @Schema()
-export class PostLike {
+export class LikePosts {
   _id: Types.ObjectId;
 
   @Prop({ required: true })
@@ -32,13 +32,13 @@ export class PostLike {
     return this.status;
   }
 
-  static createPostLike(
+  static createLikePosts(
     postId: string,
     userId: string,
     login: string,
     status: LikeStatus,
-    PostLikeModel: PostLikeModelType,
-  ): PostLikeDocument {
+    LikePostsModel: LikePostsModelType,
+  ): LikePostsDocument {
     const data = {
       postId: CastToObjectId(postId),
       userId: CastToObjectId(userId),
@@ -47,30 +47,30 @@ export class PostLike {
       status: status,
     };
 
-    return new PostLikeModel(data);
+    return new LikePostsModel(data);
   }
 }
 
-export const PostLikeSchema = SchemaFactory.createForClass(PostLike);
+export const LikePostsSchema = SchemaFactory.createForClass(LikePosts);
 
-PostLikeSchema.methods = {
-  setStatus: PostLike.prototype.setStatus,
-  getStatus: PostLike.prototype.getStatus,
+LikePostsSchema.methods = {
+  setStatus: LikePosts.prototype.setStatus,
+  getStatus: LikePosts.prototype.getStatus,
 };
 
-export type PostLikeModelStaticType = {
-  createPostLike: (
+export type LikePostsModelStaticType = {
+  createLikePosts: (
     postId: string,
     userId: string,
     login: string,
     status: LikeStatus,
-    PostLikeModel: PostLikeModelType,
-  ) => PostLikeDocument;
+    LikePostsModel: LikePostsModelType,
+  ) => LikePostsDocument;
 };
 
-const postLikeStatusMethods: PostLikeModelStaticType = {
-  createPostLike: PostLike.createPostLike,
+const likePostsStatusMethods: LikePostsModelStaticType = {
+  createLikePosts: LikePosts.createLikePosts,
 };
-PostLikeSchema.statics = postLikeStatusMethods;
+LikePostsSchema.statics = likePostsStatusMethods;
 
-export type PostLikeModelType = Model<PostLike> & PostLikeModelStaticType;
+export type LikePostsModelType = Model<LikePosts> & LikePostsModelStaticType;
