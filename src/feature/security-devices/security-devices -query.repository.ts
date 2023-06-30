@@ -33,7 +33,7 @@ export class SecurityDevicesQueryRepository {
     return {
       ip: device.ip,
       title: device.title,
-      lastActiveDate: device.lastActiveDate,
+      lastActiveDate: device.lastActiveDate.toISOString(),
       deviceId: device._id.toString(),
     };
   }
