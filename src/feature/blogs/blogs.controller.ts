@@ -22,7 +22,7 @@ import { UpdateBlogDto } from './dto/update-blog.dto';
 import { PaginatorPostView, ViewPostDto } from '../posts/dto/view-post.dto';
 import { PostsQueryRepository } from '../posts/posts-query.repository';
 import { CreateBlogPostDto } from './dto/create-blog-post.dto';
-import { BasicAuthGuard } from 'src/feature/auth/guard/basic-auth.guard';
+import { BasicAuthGuard } from '../../feature/auth/guard/basic-auth.guard';
 import { CurrentUserId } from '../auth/decorators/current-user-id.param.decorator';
 
 @Controller('blogs')

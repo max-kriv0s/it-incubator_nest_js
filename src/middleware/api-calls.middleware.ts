@@ -1,7 +1,7 @@
 import { Injectable, NestMiddleware } from '@nestjs/common';
 import { ThrottlerException } from '@nestjs/throttler';
 import { Request, Response, NextFunction } from 'express';
-import { ApiCallsService } from 'src/feature/api-calls/api-calls.service';
+import { ApiCallsService } from '../feature/api-calls/api-calls.service';
 
 @Injectable()
 export class ApiCallsMiddleware implements NestMiddleware {

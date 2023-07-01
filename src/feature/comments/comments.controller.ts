@@ -11,7 +11,7 @@ import {
   Put,
   UseGuards,
 } from '@nestjs/common';
-import { ParamIdDto } from 'src/dto';
+import { ParamIdDto } from '../../dto';
 import { CommentsQueryRepository } from './comments-query.repository';
 import { AccessJwtAuthGuard } from '../auth/guard/jwt.guard';
 import { ParamCommentId } from './dto/param-comment-id.dto';

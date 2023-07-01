@@ -16,7 +16,7 @@ import { RefreshJwtAuthGuard } from '../auth/guard/jwt-refresh.guard';
 import { SecurityDevicesQueryRepository } from './security-devices -query.repository';
 import { refreshTokenDto } from '../auth/dto/refresh-token.dto';
 import { SecurityDevicesService } from './security-devices.service';
-import { ParamDeviceIdDto } from 'src/dto';
+import { ParamDeviceIdDto } from '../../dto';
 
 @Controller('security/devices')
 export class SecurityDevicesController {

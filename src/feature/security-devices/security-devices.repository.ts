@@ -7,7 +7,7 @@ import {
 } from './security-devices.schema';
 import { CreateSecurityDeviceDto } from './dto/create-security-device.dto';
 import { Types } from 'mongoose';
-import { CastToObjectId } from 'src/utils';
+import { CastToObjectId } from '../../utils';
 
 @Injectable()
 export class SecurityDevicesRepository {

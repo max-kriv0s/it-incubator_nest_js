@@ -5,7 +5,7 @@ import { Types } from 'mongoose';
 import { TokenDataDto } from '../auth/dto/token-data.dto';
 import { ResultDeleteDevice } from './dto/result-delete-device.dto';
 import { UpdateSecurityDeviceDto } from './dto/update-security-device.dto';
-import { CastToObjectId } from 'src/utils';
+import { CastToObjectId } from '../../utils';
 
 @Injectable()
 export class SecurityDevicesService {

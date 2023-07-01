@@ -16,8 +16,8 @@ import { PaginatorUserView, ViewUserDto } from './dto/view-user.dto';
 import { UsersQueryRepository } from './users-query.repository';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { ParamIdDto } from 'src/dto';
-import { BasicAuthGuard } from 'src/feature/auth/guard/basic-auth.guard';
+import { ParamIdDto } from '../../dto';
+import { BasicAuthGuard } from '../../feature/auth/guard/basic-auth.guard';
 @Controller('users')
 export class UsersController {
   constructor(

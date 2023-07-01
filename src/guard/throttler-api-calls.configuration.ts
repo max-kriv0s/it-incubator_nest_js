@@ -3,7 +3,7 @@ import {
   ThrottlerModuleOptions,
   ThrottlerOptionsFactory,
 } from '@nestjs/throttler';
-import { ApiCallsConfig } from 'src/feature/api-calls/configuration/api-calls.configuration';
+import { ApiCallsConfig } from '../feature/api-calls/configuration/api-calls.configuration';
 
 @Injectable()
 export class ThrottlerConfigService implements ThrottlerOptionsFactory {

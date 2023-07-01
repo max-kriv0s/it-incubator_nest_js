@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { BaseConfig } from 'src/configuration/base.configuration';
+import { BaseConfig } from '../../configuration/base.configuration';
 
 @Injectable()
 export class EmailConfig extends BaseConfig {

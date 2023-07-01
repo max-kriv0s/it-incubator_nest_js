@@ -5,7 +5,7 @@ import {
   LikeCommentsModelType,
 } from './like-comments.schema';
 import { InjectModel } from '@nestjs/mongoose';
-import { CastToObjectId } from 'src/utils';
+import { CastToObjectId } from '../../utils';
 import { LikeStatus } from '../likes/dto/like-status';
 
 @Injectable()
