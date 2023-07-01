@@ -30,11 +30,11 @@ export class CommentsController {
   @Get(':id')
   async findCommentByID(
     @Param() params: ParamIdDto,
-    // @CurrentUserId() userId: string,
+    @CurrentUserId(false) userId: string,
   ) {
     const comment = await this.commentsQueryRepository.getCommentViewById(
       params.id,
-      //   userId,
+      userId,
     );
     if (!comment) throw new NotFoundException();
 
