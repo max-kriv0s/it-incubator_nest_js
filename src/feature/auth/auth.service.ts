@@ -94,4 +94,37 @@ export class AuthService {
       expirationTime: new Date(result.exp * 1000),
     };
   }
+
+  async updateUserRefreshToken(
+    userId: string,
+    deviceId: string,
+    ip: string,
+    userAgent: string,
+  ): Promise<TokensDto | null> {
+    const user = await this.usersService.findUserById(userId);
+    if (!user) return null;
+
+    const tokens = await this.createTokens(userId, deviceId);
+
+    const dataRefreshTokenDto = await this.getDataRefreshTokenDto(
+      tokens.refreshToken,
+    );
+
+    const isUpdateSecurityDevice =
+      await this.securityDevicesService.updateSecurityDeviceSession(
+        dataRefreshTokenDto,
+        ip,
+        userAgent,
+      );
+    if (!isUpdateSecurityDevice) return null;
+
+    return tokens;
+  }
+
+  async logoutUserSessionByDeviceID(deviceId: string, userId: string) {
+    return this.securityDevicesService.logoutUserSessionByDeviceID(
+      deviceId,
+      userId,
+    );
+  }
 }
