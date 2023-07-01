@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -58,6 +58,15 @@ import { EmailConfig } from './infrastructure/configuration/email.configuration'
 import { EmailAdapter } from './infrastructure/email-adapter';
 import { AppConfig } from './configuration/app.configuration';
 import { MongooseConfigService } from './configuration/mongouse-service.configuration';
+import { ThrottlerBehindProxyGuard } from './guard/throttler-behind-proxy.guard';
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { ApiCallsConfig } from './feature/api-calls/configuration/api-calls.configuration';
+import { ApiCallsRepository } from './feature/api-calls/api-calls.repository';
+import { ApiCallsService } from './feature/api-calls/api-calls.service';
+import { ApiCallSchema, ApiCalls } from './feature/api-calls/api-calls.schema';
+import { ThrottlerConfigService } from './guard/throttler-api-calls.configuration';
+import { OptionalJwtRefreshTokenGuard } from './feature/auth/guard/optional-jwt-refresh-token.guard';
 
 @Module({
   imports: [
@@ -80,9 +89,15 @@ import { MongooseConfigService } from './configuration/mongouse-service.configur
       { name: SecurityDevices.name, schema: SecurityDevicesSchema },
       { name: LikePosts.name, schema: LikePostsSchema },
       { name: LikeComments.name, schema: LikeCommentsSchema },
+      { name: ApiCalls.name, schema: ApiCallSchema },
     ]),
     PassportModule,
     JwtModule.register({}),
+    ThrottlerModule.forRootAsync({
+      imports: [ConfigModule, AppModule],
+      inject: [ConfigService, ApiCallsConfig],
+      useClass: ThrottlerConfigService,
+    }),
   ],
   controllers: [
     AppController,
@@ -126,6 +141,18 @@ import { MongooseConfigService } from './configuration/mongouse-service.configur
     EmailManagerService,
     EmailConfig,
     EmailAdapter,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerBehindProxyGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: OptionalJwtRefreshTokenGuard,
+    },
+    ApiCallsConfig,
+    ApiCallsService,
+    ApiCallsRepository,
   ],
+  exports: [ApiCallsConfig],
 })
 export class AppModule {}
