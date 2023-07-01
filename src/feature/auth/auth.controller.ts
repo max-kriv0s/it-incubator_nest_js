@@ -127,8 +127,10 @@ export class AuthController {
   async confirmRegistration(
     @Body() confirmDto: RegistrationConfirmationCodeDto,
   ) {
-    const error = await this.usersService.confirmRegistration(confirmDto.code);
-    if (error)
+    const isConfirmed = await this.usersService.confirmRegistration(
+      confirmDto.code,
+    );
+    if (!isConfirmed)
       throw new BadRequestException([
         { message: 'User update error', field: 'code' },
       ]);
@@ -141,7 +143,7 @@ export class AuthController {
     const error = await this.usersService.createUserForEmailConfirmation(
       userDto,
     );
-    if (error) throw new BadRequestException(error);
+    if (error) throw new BadRequestException([error]);
   }
 
   @UseGuards(ApiCallsThrottlerGuard)
@@ -153,7 +155,7 @@ export class AuthController {
     const error = await this.usersService.resendingConfirmationCodeToUser(
       emailDto.email,
     );
-    if (error) throw new BadRequestException(error);
+    if (error) throw new BadRequestException([error]);
   }
 
   @UseGuards(RefreshJwtAuthGuard)
