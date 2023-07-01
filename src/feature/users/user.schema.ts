@@ -4,6 +4,11 @@ import { CreateUserDto } from './dto/create-user.dto';
 
 export type UserDocument = HydratedDocument<User>;
 
+export type UserServiceDto = {
+  accountData: AccountData;
+  emailConfirmation: UserEmailConfirmation;
+};
+
 @Schema()
 export class AccountData {
   @Prop({ required: true })
@@ -60,7 +65,7 @@ export class User {
     userDto: CreateUserDto,
     UserModel: UserModelType,
   ): UserDocument {
-    const data: Omit<User, '_id'> = {
+    const data = {
       accountData: {
         login: userDto.login,
         password: userDto.password,
@@ -82,9 +87,32 @@ export class User {
     const newUser = new UserModel(data);
     return newUser;
   }
+
+  updatePasswordRecovery(passwordRecovery: UserPasswordRecovery) {
+    this.passwordRecovery = passwordRecovery;
+  }
+
+  updateUserPassword(newPassworHash: string) {
+    this.accountData.password = newPassworHash;
+  }
+
+  isConfirmed() {
+    this.emailConfirmation.isConfirmed = true;
+  }
+
+  updateEmailConfirmation(emailConfimation: UserEmailConfirmation) {
+    this.emailConfirmation = emailConfimation;
+  }
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
+
+UserSchema.methods = {
+  updatePasswordRecovery: User.prototype.updatePasswordRecovery,
+  updateUserPassword: User.prototype.updateUserPassword,
+  isConfirmed: User.prototype.isConfirmed,
+  updateEmailConfirmation: User.prototype.updateEmailConfirmation,
+};
 
 export type UserModelStaticType = {
   createUser: (
