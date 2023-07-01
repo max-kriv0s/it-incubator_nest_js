@@ -23,6 +23,7 @@ import { PaginatorPostView, ViewPostDto } from '../posts/dto/view-post.dto';
 import { PostsQueryRepository } from '../posts/posts-query.repository';
 import { CreateBlogPostDto } from './dto/create-blog-post.dto';
 import { BasicAuthGuard } from 'src/feature/auth/guard/basic-auth.guard';
+import { CurrentUserId } from '../auth/decorators/current-user-id.param.decorator';
 
 @Controller('blogs')
 export class BlogsController {
@@ -54,11 +55,12 @@ export class BlogsController {
   async findPostsByBlogId(
     @Param() params: ParamBlogIdDto,
     @Query() queryParams: QueryParams,
+    @CurrentUserId(false) userId: string,
   ): Promise<PaginatorPostView> {
     const postsView = await this.postsQueryRepository.findPostsByBlogId(
       params.blogId,
       queryParams,
-      // req.userId,
+      userId,
     );
     if (!postsView) throw new NotFoundException('Blog not found');
 
@@ -70,6 +72,7 @@ export class BlogsController {
   async createPostByBlogId(
     @Param() params: ParamBlogIdDto,
     @Body() blogPostDto: CreateBlogPostDto,
+    @CurrentUserId(false) userId: string,
   ): Promise<ViewPostDto> {
     const postId = await this.blogsService.createPostByBlogId(
       params.blogId,
@@ -77,10 +80,7 @@ export class BlogsController {
     );
     if (!postId) throw new NotFoundException('Blog not found');
 
-    return this.postsQueryRepository.getPostById(
-      postId,
-      // req.userId,
-    );
+    return this.postsQueryRepository.getPostById(postId, userId);
   }
 
   @Get(':id')
