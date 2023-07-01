@@ -50,6 +50,11 @@ export class ParamDeviceIdDto {
   deviceId: string;
 }
 
+export type FieldError = {
+  message: string;
+  field: string;
+};
+
 // export class ObjectTeamIdParameterDTO {
 //   @IsMongoIdObject({ message: 'Incorrect objectId' })
 //   teamId: string;
