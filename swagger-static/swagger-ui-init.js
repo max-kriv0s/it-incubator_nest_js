@@ -396,6 +396,142 @@ window.onload = function() {
           }
         }
       },
+      "/auth/password-recovery": {
+        "post": {
+          "operationId": "AuthController_passwordRecovery",
+          "parameters": [],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegistrationEmailResendingDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "204": {
+              "description": ""
+            }
+          }
+        }
+      },
+      "/auth/new-password": {
+        "post": {
+          "operationId": "AuthController_newPassword",
+          "parameters": [],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NewPasswordRecoveryInputDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "204": {
+              "description": ""
+            }
+          }
+        }
+      },
+      "/auth/refresh-token": {
+        "post": {
+          "operationId": "AuthController_updateUserRefreshToken",
+          "parameters": [
+            {
+              "name": "user-agent",
+              "required": true,
+              "in": "header",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": ""
+            }
+          }
+        }
+      },
+      "/auth/registration-confirmation": {
+        "post": {
+          "operationId": "AuthController_confirmRegistration",
+          "parameters": [],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegistrationConfirmationCodeDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "204": {
+              "description": ""
+            }
+          }
+        }
+      },
+      "/auth/registration": {
+        "post": {
+          "operationId": "AuthController_createUserForEmailConfirmation",
+          "parameters": [],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateUserDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "204": {
+              "description": ""
+            }
+          }
+        }
+      },
+      "/auth/registration-email-resending": {
+        "post": {
+          "operationId": "AuthController_resendingConfirmationCodeToUser",
+          "parameters": [],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegistrationEmailResendingDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "204": {
+              "description": ""
+            }
+          }
+        }
+      },
+      "/auth/logout": {
+        "post": {
+          "operationId": "AuthController_logoutUserSessionByDeviceID",
+          "parameters": [],
+          "responses": {
+            "204": {
+              "description": ""
+            }
+          }
+        }
+      },
       "/security/devices": {
         "get": {
           "operationId": "SecurityDevicesController_getSecurityDevices",
@@ -480,6 +616,18 @@ window.onload = function() {
           "properties": {}
         },
         "LoginInputDto": {
+          "type": "object",
+          "properties": {}
+        },
+        "RegistrationEmailResendingDto": {
+          "type": "object",
+          "properties": {}
+        },
+        "NewPasswordRecoveryInputDto": {
+          "type": "object",
+          "properties": {}
+        },
+        "RegistrationConfirmationCodeDto": {
           "type": "object",
           "properties": {}
         }
