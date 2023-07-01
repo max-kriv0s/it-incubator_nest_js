@@ -34,4 +34,18 @@ export class UsersRepository {
   async findUserById(userId: string): Promise<UserDocument | null> {
     return this.UserModel.findById(userId);
   }
+
+  async findUserByRecoveryCode(
+    recoveryCode: string,
+  ): Promise<UserDocument | null> {
+    return this.UserModel.findOne({
+      'passwordRecovery.recoveryCode': recoveryCode,
+    });
+  }
+
+  async findUserByCodeConfirmation(code: string): Promise<UserDocument | null> {
+    return this.UserModel.findOne({
+      'emailConfirmation.confirmationCode': code,
+    }).exec();
+  }
 }
