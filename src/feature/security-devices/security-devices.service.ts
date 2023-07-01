@@ -4,6 +4,8 @@ import { CreateSecurityDeviceDto } from './dto/create-security-device.dto';
 import { Types } from 'mongoose';
 import { TokenDataDto } from '../auth/dto/token-data.dto';
 import { ResultDeleteDevice } from './dto/result-delete-device.dto';
+import { UpdateSecurityDeviceDto } from './dto/update-security-device.dto';
+import { CastToObjectId } from 'src/utils';
 
 @Injectable()
 export class SecurityDevicesService {
@@ -17,12 +19,12 @@ export class SecurityDevicesService {
     userAgent: string,
   ): Promise<string> {
     const data: CreateSecurityDeviceDto = {
-      _id: new Types.ObjectId(dataRefreshTokenDto.deviceId),
+      _id: CastToObjectId(dataRefreshTokenDto.deviceId),
       ip: ip,
       title: this.getNameUserAgent(userAgent),
       lastActiveDate: dataRefreshTokenDto.issuedAd,
       expirationTime: dataRefreshTokenDto.expirationTime,
-      userId: new Types.ObjectId(dataRefreshTokenDto.userId),
+      userId: CastToObjectId(dataRefreshTokenDto.userId),
     };
 
     const newSecurityDevices =
@@ -73,5 +75,39 @@ export class SecurityDevicesService {
         userId,
       );
     return result;
+  }
+
+  async updateSecurityDeviceSession(
+    dataRefreshTokenDto: TokenDataDto,
+    ip: string,
+    userAgent: string,
+  ): Promise<boolean> {
+    const device = await this.securityDevicesRepository.findSessionByDeviceID(
+      dataRefreshTokenDto.deviceId,
+    );
+    if (!device) return false;
+
+    const dataUpdate: UpdateSecurityDeviceDto = {
+      ip: ip,
+      title: this.getNameUserAgent(userAgent),
+      lastActiveDate: dataRefreshTokenDto.issuedAd,
+      expirationTime: dataRefreshTokenDto.expirationTime,
+      userId: CastToObjectId(dataRefreshTokenDto.userId),
+    };
+
+    device.updateSecurityDeviceSession(dataUpdate);
+    await this.securityDevicesRepository.save(device);
+
+    return true;
+  }
+
+  async logoutUserSessionByDeviceID(
+    deviceID: string,
+    userId: string,
+  ): Promise<boolean> {
+    return this.securityDevicesRepository.deleteUserSessionByDeviceID(
+      deviceID,
+      userId,
+    );
   }
 }
