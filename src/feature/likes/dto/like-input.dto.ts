@@ -1,4 +1,9 @@
-import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsString,
+  ValidationArguments,
+} from 'class-validator';
 import { LikeStatus } from './like-status';
 
 export class LikeInputDto {
