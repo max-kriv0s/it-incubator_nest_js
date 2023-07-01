@@ -6,12 +6,14 @@ import { PaginatorCommentView, ViewCommentDto } from './dto/view-comment.dto';
 import { QueryParams } from '../../dto';
 import { LikeStatus } from '../likes/dto/like-status';
 import { Post, PostModelType } from '../posts/post.schema';
+import { LikeCommentsService } from './like-comments.service';
 
 @Injectable()
 export class CommentsQueryRepository {
   constructor(
     @InjectModel(Comment.name) private CommentModel: CommentModelType,
     @InjectModel(Post.name) private PostModel: PostModelType,
+    private readonly likeCommentsService: LikeCommentsService,
   ) {}
 
   async findCommentsByPostId(
@@ -62,14 +64,15 @@ export class CommentsQueryRepository {
     comment: CommentDocument,
     userId?: string,
   ): Promise<ViewCommentDto> {
-    const statusMyLike = LikeStatus.None;
+    let statusMyLike = LikeStatus.None;
 
     if (userId) {
-      //   const myLike = await LikeModel.findOne({
-      //     commentId: comment._id,
-      //     userId: new Types.ObjectId(userId),
-      //   }).exec();
-      //   if (myLike) statusMyLike = myLike.status;
+      const myLike =
+        await this.likeCommentsService.findLikeByCommentIdAndUserId(
+          comment.id,
+          userId,
+        );
+      if (myLike) statusMyLike = myLike.status;
     }
 
     return {
