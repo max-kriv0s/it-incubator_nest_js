@@ -1,9 +1,8 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { MongooseModule } from '@nestjs/mongoose';
-import configuration from './infrastructure/configuration/configuration';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { TestingService } from './feature/testing/testing.service';
@@ -53,23 +52,25 @@ import {
 import { LikePostsService } from './feature/posts/like-posts.service';
 import { LikeCommentsService } from './feature/comments/like-comments.service';
 import { LikeCommentsRepository } from './feature/comments/like-comments.repository';
+import { UsersConfig } from './feature/users/configuration/users.configuration';
+import { EmailManagerService } from './feature/email-managers/email-manager.service';
+import { EmailConfig } from './infrastructure/configuration/email.configuration';
+import { EmailAdapter } from './infrastructure/email-adapter';
+import { AppConfig } from './configuration/app.configuration';
+import { MongooseConfigService } from './configuration/mongouse-service.configuration';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       envFilePath: '.env',
       isGlobal: true,
-      load: [configuration],
     }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'swagger-static'),
       serveRoot: process.env.NODE_ENV === 'development' ? '/' : '/swagger',
     }),
     MongooseModule.forRootAsync({
-      inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => ({
-        uri: configService.get('mongoUri'),
-      }),
+      useClass: MongooseConfigService,
     }),
     MongooseModule.forFeature([
       { name: User.name, schema: UserSchema },
@@ -95,7 +96,9 @@ import { LikeCommentsRepository } from './feature/comments/like-comments.reposit
   ],
   providers: [
     AppService,
+    AppConfig,
     TestingService,
+    UsersConfig,
     UsersService,
     UsersRepository,
     UsersQueryRepository,
@@ -120,6 +123,9 @@ import { LikeCommentsRepository } from './feature/comments/like-comments.reposit
     LikePostsService,
     LikeCommentsService,
     LikeCommentsRepository,
+    EmailManagerService,
+    EmailConfig,
+    EmailAdapter,
   ],
 })
 export class AppModule {}
