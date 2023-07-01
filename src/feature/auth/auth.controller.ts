@@ -29,6 +29,7 @@ import { CurrentUser } from './decorators/current-user-id-device.decorator';
 import { refreshTokenDto } from './dto/refresh-token.dto';
 import { RegistrationConfirmationCodeDto } from './dto/registration-confirmation-code.dto';
 import { CreateUserDto } from '../users/dto/create-user.dto';
+import { ApiCallsThrottlerGuard } from 'src/guard/throttler-api-calls.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -38,6 +39,7 @@ export class AuthController {
     private readonly usersService: UsersService,
   ) {}
 
+  @UseGuards(ApiCallsThrottlerGuard)
   @Post('login')
   @HttpCode(HttpStatus.OK)
   async login(
@@ -71,6 +73,7 @@ export class AuthController {
     return user;
   }
 
+  @UseGuards(ApiCallsThrottlerGuard)
   @Post('password-recovery')
   @HttpCode(HttpStatus.NO_CONTENT)
   async passwordRecovery(@Body() emailDto: RegistrationEmailResendingDto) {
@@ -79,6 +82,7 @@ export class AuthController {
     return;
   }
 
+  @UseGuards(ApiCallsThrottlerGuard)
   @Post('new-password')
   @HttpCode(HttpStatus.NO_CONTENT)
   async newPassword(@Body() newPasswordDto: NewPasswordRecoveryInputDto) {
@@ -117,6 +121,7 @@ export class AuthController {
     return { accessToken: tokens.accessToken };
   }
 
+  @UseGuards(ApiCallsThrottlerGuard)
   @Post('registration-confirmation')
   @HttpCode(HttpStatus.NO_CONTENT)
   async confirmRegistration(
@@ -129,6 +134,7 @@ export class AuthController {
       ]);
   }
 
+  @UseGuards(ApiCallsThrottlerGuard)
   @Post('registration')
   @HttpCode(HttpStatus.NO_CONTENT)
   async createUserForEmailConfirmation(@Body() userDto: CreateUserDto) {
@@ -138,6 +144,7 @@ export class AuthController {
     if (error) throw new BadRequestException(error);
   }
 
+  @UseGuards(ApiCallsThrottlerGuard)
   @Post('registration-email-resending')
   @HttpCode(HttpStatus.NO_CONTENT)
   async resendingConfirmationCodeToUser(
