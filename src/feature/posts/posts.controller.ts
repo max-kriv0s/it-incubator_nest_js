@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -29,6 +30,7 @@ import { CurrentUserId } from '../auth/decorators/current-user-id.param.decorato
 import { CreateCommentDto } from '../comments/dto/create-comment.dto';
 import { ParamPostIdDto } from './dto/param-post-id.dto';
 import { LikeInputDto } from '../likes/dto/like-input.dto';
+import { GetFieldError } from '../../utils';
 
 @Controller('posts')
 export class PostsController {
@@ -53,6 +55,10 @@ export class PostsController {
     @CurrentUserId(false) userId: string,
   ): Promise<ViewPostDto> {
     const postId = await this.postsService.createPost(postDto);
+    if (!postId)
+      throw new BadRequestException([
+        GetFieldError('Blog not found', 'blogId'),
+      ]);
     return this.postsQueryRepository.getPostById(postId, userId);
   }
 
@@ -71,7 +77,16 @@ export class PostsController {
     @Param() params: ParamIdDto,
     @Body() postDto: UpdatePostDto,
   ) {
-    return this.postsService.updatePost(params.id, postDto);
+    const result = await this.postsService.updatePost(params.id, postDto);
+
+    if (!result.blogExists) {
+      throw new BadRequestException([
+        GetFieldError('Blog not found', 'blogId'),
+      ]);
+    }
+
+    if (!result.postExists) throw new NotFoundException();
+    return true;
   }
 
   @UseGuards(BasicAuthGuard)

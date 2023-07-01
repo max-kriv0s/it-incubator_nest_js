@@ -10,6 +10,7 @@ import { UsersService } from '../users/users.service';
 import { CommentsService } from '../comments/comments.service';
 import { LikeStatus } from '../likes/dto/like-status';
 import { LikePostsService } from './like-posts.service';
+import { ResultUpdatePost } from './dto/result-update-post.dto';
 
 @Injectable()
 export class PostsService {
@@ -21,9 +22,9 @@ export class PostsService {
     private readonly likePostsService: LikePostsService,
   ) {}
 
-  async createPost(postDto: CreatePostDto): Promise<string> {
+  async createPost(postDto: CreatePostDto): Promise<string | null> {
     const blog = await this.blogsRepository.findBlogById(postDto.blogId);
-    if (!blog) throw new NotFoundException('Blog not found');
+    if (!blog) return null;
 
     const newPost = this.postsRepository.createPost(postDto, blog.name);
     const createdPost = await this.postsRepository.save(newPost);
@@ -31,15 +32,26 @@ export class PostsService {
     return createdPost._id.toString();
   }
 
-  async updatePost(id: string, postDto: UpdatePostDto) {
+  async updatePost(
+    id: string,
+    postDto: UpdatePostDto,
+  ): Promise<ResultUpdatePost> {
+    const result: ResultUpdatePost = {
+      postExists: false,
+      blogExists: false,
+    };
+
     const blog = await this.blogsRepository.findBlogById(postDto.blogId);
-    if (!blog) throw new NotFoundException('Blog not found');
+    if (!blog) return result;
+    result.blogExists = true;
 
     const post = await this.postsRepository.findPostById(id);
-    if (!post) throw new NotFoundException('Post not found');
+    if (!post) return result;
+    result.postExists = true;
 
     post.updatePost(postDto, blog._id, blog.name);
     await this.postsRepository.save(post);
+    return result;
   }
 
   async deletePostById(id: string) {
