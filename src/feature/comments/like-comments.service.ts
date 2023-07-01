@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { LikeStatus } from '../likes/dto/like-status';
 import { CountLikeDislikeDto } from '../likes/dto/count-like-dislike.dto';
 import { LikeCommentsRepository } from './like-comments.repository';
+import { LikeCommentsDocument } from './like-comments.schema';
 
 @Injectable()
 export class LikeCommentsService {
@@ -70,5 +71,15 @@ export class LikeCommentsService {
     }
 
     return result;
+  }
+
+  async findLikeByCommentIdAndUserId(
+    commentId: string,
+    userId: string,
+  ): Promise<LikeCommentsDocument | null> {
+    return this.likeCommentsRepository.findLikeByCommentIdAndUserId(
+      commentId,
+      userId,
+    );
   }
 }
