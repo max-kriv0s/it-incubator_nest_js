@@ -41,20 +41,27 @@ export class PostsController {
   @Get()
   async getPosts(
     @Query() queryParams: QueryParams,
+    @CurrentUserId(false) userId: string,
   ): Promise<PaginatorPostView> {
-    return this.postsQueryRepository.getPosts(queryParams);
+    return this.postsQueryRepository.getPosts(queryParams, userId);
   }
 
   @UseGuards(BasicAuthGuard)
   @Post()
-  async createPost(@Body() postDto: CreatePostDto): Promise<ViewPostDto> {
+  async createPost(
+    @Body() postDto: CreatePostDto,
+    @CurrentUserId(false) userId: string,
+  ): Promise<ViewPostDto> {
     const postId = await this.postsService.createPost(postDto);
-    return this.postsQueryRepository.getPostById(postId);
+    return this.postsQueryRepository.getPostById(postId, userId);
   }
 
   @Get(':id')
-  async getPostById(@Param() params: ParamIdDto): Promise<ViewPostDto> {
-    return this.postsQueryRepository.getPostById(params.id);
+  async getPostById(
+    @Param() params: ParamIdDto,
+    @CurrentUserId(false) userId: string,
+  ): Promise<ViewPostDto> {
+    return this.postsQueryRepository.getPostById(params.id, userId);
   }
 
   @UseGuards(BasicAuthGuard)
@@ -74,12 +81,11 @@ export class PostsController {
     return this.postsService.deletePostById(params.id);
   }
 
-  @UseGuards(AccessJwtAuthGuard)
   @Get(':postId/comments')
   async findCommentsByPostId(
     @Param() params: ParamPostIdDto,
     @Query() queryParams: QueryParams,
-    @CurrentUserId() userId: string,
+    @CurrentUserId(false) userId: string,
   ): Promise<PaginatorCommentView> {
     const comments = await this.commentsQueryRepository.findCommentsByPostId(
       params.postId,
