@@ -18,7 +18,6 @@ import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { ParamIdDto } from 'src/dto';
 import { BasicAuthGuard } from 'src/feature/auth/guard/basic-auth.guard';
-
 @Controller('users')
 export class UsersController {
   constructor(
