@@ -7,6 +7,7 @@ import {
 } from './security-devices.schema';
 import { CreateSecurityDeviceDto } from './dto/create-security-device.dto';
 import { Types } from 'mongoose';
+import { CastToObjectId } from 'src/utils';
 
 @Injectable()
 export class SecurityDevicesRepository {
@@ -57,8 +58,8 @@ export class SecurityDevicesRepository {
     userId: string,
   ): Promise<boolean> {
     const result = await this.SecurityDevicesModel.deleteOne({
-      _id: new Types.ObjectId(deviceID),
-      userId: new Types.ObjectId(userId),
+      _id: CastToObjectId(deviceID),
+      userId: CastToObjectId(userId),
     });
     return result.deletedCount === 1;
   }
