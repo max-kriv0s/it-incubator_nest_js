@@ -1,16 +1,20 @@
+import { Transform } from 'class-transformer';
 import { IsNotEmpty, IsString, Matches, MaxLength } from 'class-validator';
 
 export class CreateBlogDto {
+  @Transform(({ value }) => value?.trim())
   @IsNotEmpty()
   @IsString()
   @MaxLength(15)
   readonly name: string;
 
+  @Transform(({ value }) => value?.trim())
   @IsNotEmpty()
   @IsString()
   @MaxLength(500)
   readonly description: string;
 
+  @Transform(({ value }) => value?.trim())
   @IsNotEmpty()
   @IsString()
   @MaxLength(100)

@@ -44,11 +44,16 @@ export class CommentsController {
   @UseGuards(AccessJwtAuthGuard)
   @Delete(':commentId')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteCommentByID(@Param() params: ParamCommentId) {
-    const isDeleted = await this.commentsService.deleteCommentByID(
+  async deleteCommentByID(
+    @Param() params: ParamCommentId,
+    @CurrentUserId() userId: string,
+  ) {
+    const result = await this.commentsService.deleteCommentByID(
       params.commentId,
+      userId,
     );
-    if (!isDeleted) throw new NotFoundException();
+    if (!result.commentExists) throw new NotFoundException();
+    if (!result.isUserComment) throw new ForbiddenException();
 
     return;
   }
