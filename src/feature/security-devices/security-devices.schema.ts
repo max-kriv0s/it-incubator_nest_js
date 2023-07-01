@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Model, Types } from 'mongoose';
 import { CreateSecurityDeviceDto } from './dto/create-security-device.dto';
+import { UpdateSecurityDeviceDto } from './dto/update-security-device.dto';
 
 export type SecurityDevicesDocument = HydratedDocument<SecurityDevices>;
 
@@ -29,10 +30,23 @@ export class SecurityDevices {
   ): SecurityDevicesDocument {
     return new SecurityDevicesModel(securityDevicesDto);
   }
+
+  updateSecurityDeviceSession(dataUpdate: UpdateSecurityDeviceDto) {
+    this.ip = dataUpdate.ip;
+    this.title = dataUpdate.title;
+    this.lastActiveDate = dataUpdate.lastActiveDate;
+    this.expirationTime = dataUpdate.expirationTime;
+    this.userId = dataUpdate.userId;
+  }
 }
 
 export const SecurityDevicesSchema =
   SchemaFactory.createForClass(SecurityDevices);
+
+SecurityDevicesSchema.methods = {
+  updateSecurityDeviceSession:
+    SecurityDevices.prototype.updateSecurityDeviceSession,
+};
 
 export type SecurityDevicesModelStaticType = {
   createSecurityDevices: (
