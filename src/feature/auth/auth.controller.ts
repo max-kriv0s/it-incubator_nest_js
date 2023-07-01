@@ -30,6 +30,7 @@ import { refreshTokenDto } from './dto/refresh-token.dto';
 import { RegistrationConfirmationCodeDto } from './dto/registration-confirmation-code.dto';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { ApiCallsThrottlerGuard } from '../../guard/throttler-api-calls.guard';
+import { GetFieldError } from 'src/utils';
 
 @Controller('auth')
 export class AuthController {
@@ -132,7 +133,7 @@ export class AuthController {
     );
     if (!isConfirmed)
       throw new BadRequestException([
-        { message: 'User update error', field: 'code' },
+        GetFieldError('User update error', 'code'),
       ]);
   }
 
