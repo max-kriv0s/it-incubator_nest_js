@@ -1,8 +1,15 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Model, Types } from 'mongoose';
 import { LikeStatus } from '../likes/dto/like-status';
+import { CastToObjectId } from '../../utils';
 
 export type LikeCommentsDocument = HydratedDocument<LikeComments>;
+
+type CreateLike = {
+  commentId: Types.ObjectId;
+  userId: Types.ObjectId;
+  status: LikeStatus;
+};
 
 @Schema()
 export class LikeComments {
@@ -31,7 +38,13 @@ export class LikeComments {
     status: LikeStatus,
     LikeModel: LikeCommentsModelType,
   ): LikeCommentsDocument {
-    return new LikeModel({ commentId, userId, status });
+    const data: CreateLike = {
+      commentId: CastToObjectId(commentId),
+      userId: CastToObjectId(userId),
+      status: status,
+    };
+
+    return new LikeModel(data);
   }
 }
 
