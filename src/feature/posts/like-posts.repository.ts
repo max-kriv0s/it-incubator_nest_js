@@ -8,6 +8,7 @@ import { CastToObjectId } from '../../utils';
 import { InjectModel } from '@nestjs/mongoose';
 import { LikeStatus } from '../likes/dto/like-status';
 import { ViewLikeDetailsDto } from '../likes/dto/view-like.dto';
+import { NewestLikes } from './post.schema';
 
 @Injectable()
 export class LikePostsRepository {
@@ -40,7 +41,7 @@ export class LikePostsRepository {
     );
   }
 
-  async getNewestLikes(postId: string): Promise<ViewLikeDetailsDto[]> {
+  async getNewestLikes(postId: string): Promise<NewestLikes[]> {
     return this.LikePostsModel.find(
       { postId: CastToObjectId(postId), status: LikeStatus.Like },
       ['addedAt', 'userId', 'login', '-_id'],

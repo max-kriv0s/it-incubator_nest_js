@@ -2,10 +2,21 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Model, Types } from 'mongoose';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { CreatePostDto } from './dto/create-post.dto';
-import { ViewLikeDetailsDto } from '../likes/dto/view-like.dto';
 import { CountLikeDislikeDto } from '../likes/dto/count-like-dislike.dto';
 
 export type PostDocument = HydratedDocument<Post>;
+
+@Schema()
+export class NewestLikes {
+  @Prop({ required: true })
+  addedAt: Date;
+
+  @Prop({ required: true })
+  userId: string;
+
+  @Prop({ required: true })
+  login: string;
+}
 
 @Schema()
 export class Post {
@@ -36,7 +47,7 @@ export class Post {
   dislikesCount: number;
 
   @Prop({ default: [] })
-  newestLikes: ViewLikeDetailsDto[];
+  newestLikes: NewestLikes[];
 
   updatePost(postDto: UpdatePostDto, blogId: Types.ObjectId, blogName: string) {
     this.title = postDto.title;

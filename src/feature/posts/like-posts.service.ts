@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PostDocument } from './post.schema';
+import { NewestLikes, PostDocument } from './post.schema';
 import { LikePostsRepository } from './like-posts.repository';
 import { LikeStatus } from '../likes/dto/like-status';
 import { LikePostsDocument } from './like-posts.schema';
@@ -75,7 +75,7 @@ export class LikePostsService {
     return result;
   }
 
-  async getNewestLikes(postId: string): Promise<ViewLikeDetailsDto[]> {
+  async getNewestLikes(postId: string): Promise<NewestLikes[]> {
     return this.likePostsRepository.getNewestLikes(postId);
   }
 }

@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Post, PostDocument, PostModelType } from './post.schema';
+import { NewestLikes, Post, PostDocument, PostModelType } from './post.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { QueryParams } from '../../dto';
 import { PaginatorPostView, ViewPostDto } from './dto/view-post.dto';
@@ -7,6 +7,7 @@ import { LikeStatus } from '../likes/dto/like-status';
 import { Blog, BlogModelType } from '../blogs/blog.schema';
 import { LikePosts, LikePostsModelType } from './like-posts.schema';
 import { CastToObjectId } from '../../utils';
+import { ViewLikeDetailsDto } from '../likes/dto/view-like.dto';
 
 @Injectable()
 export class PostsQueryRepository {
@@ -111,8 +112,18 @@ export class PostsQueryRepository {
         likesCount: post.likesCount,
         dislikesCount: post.dislikesCount,
         myStatus: statusMyLike,
-        newestLikes: post.newestLikes,
+        newestLikes: await Promise.all(
+          post.newestLikes.map((like) => this.newestLikesToView(like)),
+        ),
       },
+    };
+  }
+
+  async newestLikesToView(like: NewestLikes): Promise<ViewLikeDetailsDto> {
+    return {
+      addedAt: like.addedAt.toISOString(),
+      userId: like.userId,
+      login: like.login,
     };
   }
 }
