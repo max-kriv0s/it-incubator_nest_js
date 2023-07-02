@@ -110,4 +110,19 @@ export class SecurityDevicesService {
       userId,
     );
   }
+
+  async verifySecurityDeviceByToken(dataToken: TokenDataDto): Promise<boolean> {
+    const securitySession =
+      await this.securityDevicesRepository.findUserSessionByDeviceID(
+        dataToken.userId,
+        dataToken.deviceId,
+      );
+    if (!securitySession) return false;
+
+    return (
+      securitySession.lastActiveDate === dataToken.issuedAd &&
+      securitySession._id.toString() === dataToken.deviceId &&
+      securitySession.userId.toString() === dataToken.userId
+    );
+  }
 }

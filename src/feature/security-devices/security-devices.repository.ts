@@ -63,4 +63,14 @@ export class SecurityDevicesRepository {
     });
     return result.deletedCount === 1;
   }
+
+  async findUserSessionByDeviceID(
+    userId: string,
+    deviceId: string,
+  ): Promise<SecurityDevicesDocument | null> {
+    return this.SecurityDevicesModel.findOne({
+      _id: CastToObjectId(deviceId),
+      userId: CastToObjectId(userId),
+    });
+  }
 }

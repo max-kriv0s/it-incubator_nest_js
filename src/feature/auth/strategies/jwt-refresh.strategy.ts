@@ -4,6 +4,8 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { AuthConfig } from '../configuration/auth.configuration';
 import { UsersService } from '../../../feature/users/users.service';
 import { Request } from 'express';
+import { SecurityDevicesService } from '../../../feature/security-devices/security-devices.service';
+import { TokenDataDto } from '../dto/token-data.dto';
 
 @Injectable()
 export class RefreshJwtStrategy extends PassportStrategy(
@@ -13,6 +15,7 @@ export class RefreshJwtStrategy extends PassportStrategy(
   constructor(
     private readonly authConfig: AuthConfig,
     private readonly usersService: UsersService,
+    private readonly securityDevicesService: SecurityDevicesService,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
@@ -29,6 +32,20 @@ export class RefreshJwtStrategy extends PassportStrategy(
 
     if (!payload.sub || !payload.deviceId)
       throw new UnauthorizedException('User not found');
+
+    const dataRefreshTokenDto: TokenDataDto = {
+      userId: payload.sub,
+      deviceId: payload.deviceId,
+      issuedAd: new Date(payload.iat * 1000),
+      expirationTime: new Date(payload.exp * 1000),
+    };
+
+    const isVerify =
+      await this.securityDevicesService.verifySecurityDeviceByToken(
+        dataRefreshTokenDto,
+      );
+    if (!isVerify) throw new UnauthorizedException();
+
     return { userId: payload.sub, deviceId: payload.deviceId };
   }
 
