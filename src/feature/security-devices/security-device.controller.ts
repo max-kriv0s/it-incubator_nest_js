@@ -65,7 +65,8 @@ export class SecurityDevicesController {
         tokenDto.userId,
       );
 
-    if (!result.isUserSecurityDevice) throw new ForbiddenException();
+    if (result.securityDeviceExists && !result.isUserSecurityDevice)
+      throw new ForbiddenException();
     if (!result.securityDeviceExists || !result.securityDeviceDeleted)
       throw new NotFoundException();
 
