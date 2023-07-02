@@ -66,7 +66,7 @@ import { ApiCallsRepository } from './feature/api-calls/api-calls.repository';
 import { ApiCallsService } from './feature/api-calls/api-calls.service';
 import { ApiCallSchema, ApiCalls } from './feature/api-calls/api-calls.schema';
 import { ThrottlerConfigService } from './guard/throttler-api-calls.configuration';
-import { OptionalJwtRefreshTokenGuard } from './feature/auth/guard/optional-jwt-refresh-token.guard';
+import { OptionalJwtTokenGuard } from './feature/auth/guard/optional-jwt-token.guard';
 
 @Module({
   imports: [
@@ -147,7 +147,7 @@ import { OptionalJwtRefreshTokenGuard } from './feature/auth/guard/optional-jwt-
     },
     {
       provide: APP_GUARD,
-      useClass: OptionalJwtRefreshTokenGuard,
+      useClass: OptionalJwtTokenGuard,
     },
     ApiCallsConfig,
     ApiCallsService,
