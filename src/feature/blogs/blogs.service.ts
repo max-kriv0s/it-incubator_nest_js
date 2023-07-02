@@ -46,4 +46,9 @@ export class BlogsService {
 
     return postId;
   }
+
+  async findBlogById(id: string): Promise<string | null> {
+    const blog = await this.blogsRepository.findBlogById(id);
+    return blog ? blog.id : null;
+  }
 }

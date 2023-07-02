@@ -1,5 +1,6 @@
 import { Transform } from 'class-transformer';
 import { IsMongoId, IsNotEmpty, IsString, MaxLength } from 'class-validator';
+import { BlogExists } from '../validators/blog-exists.validator';
 
 export class CreatePostDto {
   @Transform(({ value }) => value?.trim())
@@ -24,5 +25,6 @@ export class CreatePostDto {
   @IsNotEmpty()
   @IsString()
   @IsMongoId()
+  @BlogExists()
   readonly blogId: string;
 }
