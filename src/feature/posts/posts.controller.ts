@@ -73,7 +73,7 @@ export class PostsController {
   @UseGuards(BasicAuthGuard)
   @Put(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async updateBlog(
+  async updatePost(
     @Param() params: ParamIdDto,
     @Body() postDto: UpdatePostDto,
   ) {

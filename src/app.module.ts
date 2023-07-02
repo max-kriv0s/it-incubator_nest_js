@@ -67,6 +67,7 @@ import { ApiCallsService } from './feature/api-calls/api-calls.service';
 import { ApiCallSchema, ApiCalls } from './feature/api-calls/api-calls.schema';
 import { ThrottlerConfigService } from './guard/throttler-api-calls.configuration';
 import { OptionalJwtTokenGuard } from './feature/auth/guard/optional-jwt-token.guard';
+import { BlogExistsRule } from './feature/posts/validators/blog-exists.validator';
 
 @Module({
   imports: [
@@ -152,6 +153,7 @@ import { OptionalJwtTokenGuard } from './feature/auth/guard/optional-jwt-token.g
     ApiCallsConfig,
     ApiCallsService,
     ApiCallsRepository,
+    BlogExistsRule,
   ],
   exports: [ApiCallsConfig],
 })

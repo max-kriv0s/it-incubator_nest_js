@@ -115,7 +115,7 @@ window.onload = function() {
           }
         },
         "put": {
-          "operationId": "PostsController_updateBlog",
+          "operationId": "PostsController_updatePost",
           "parameters": [],
           "requestBody": {
             "required": true,
