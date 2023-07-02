@@ -6,6 +6,7 @@ import { UsersRepository } from '../users/users.repository';
 import { SecurityDevicesRepository } from '../security-devices/security-devices.repository';
 import { LikePostsRepository } from '../posts/like-posts.repository';
 import { ApiCallsRepository } from '../api-calls/api-calls.repository';
+import { LikeCommentsRepository } from '../comments/like-comments.repository';
 
 @Injectable()
 export class TestingService {
@@ -16,6 +17,7 @@ export class TestingService {
     private readonly postsRepository: PostsRepository,
     private readonly securityDevicesRepository: SecurityDevicesRepository,
     private readonly likePostsRepository: LikePostsRepository,
+    private readonly likeCommentsRepository: LikeCommentsRepository,
     private readonly apiCallsRepository: ApiCallsRepository,
   ) {}
 
@@ -26,7 +28,8 @@ export class TestingService {
       this.commentsRepository.deleteComments(),
       this.postsRepository.deletePosts(),
       this.securityDevicesRepository.deleteSecurityDevices(),
-      this.likePostsRepository.deletePostLikes(),
+      this.likePostsRepository.deleteLikesPosts(),
+      this.likeCommentsRepository.deleteLikesComments(),
       this.apiCallsRepository.deleteCalls(),
     ]);
   }

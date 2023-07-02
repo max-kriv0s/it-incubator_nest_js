@@ -52,7 +52,7 @@ export class LikePostsRepository {
     ).lean();
   }
 
-  async deletePostLikes() {
+  async deleteLikesPosts() {
     await this.LikePostsModel.deleteMany({});
   }
 
