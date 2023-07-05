@@ -11,7 +11,6 @@ import {
   Put,
   UseGuards,
 } from '@nestjs/common';
-import { ParamIdDto } from '../../dto';
 import { CommentsQueryRepository } from './comments-query.repository';
 import { AccessJwtAuthGuard } from '../auth/guard/jwt.guard';
 import { ParamCommentId } from './dto/param-comment-id.dto';
@@ -19,6 +18,7 @@ import { CommentsService } from './comments.service';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { CurrentUserId } from '../auth/decorators/current-user-id.param.decorator';
 import { LikeInputDto } from '../likes/dto/like-input.dto';
+import { IdValidationPipe } from '../../modules/pipes/id-validation.pipe';
 
 @Controller('comments')
 export class CommentsController {
@@ -29,11 +29,11 @@ export class CommentsController {
 
   @Get(':id')
   async findCommentByID(
-    @Param() params: ParamIdDto,
+    @Param('id', IdValidationPipe) id: string,
     @CurrentUserId(false) userId: string,
   ) {
     const comment = await this.commentsQueryRepository.getCommentViewById(
-      params.id,
+      id,
       userId,
     );
     if (!comment) throw new NotFoundException();

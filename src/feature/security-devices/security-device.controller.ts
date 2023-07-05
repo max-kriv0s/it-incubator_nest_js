@@ -16,7 +16,7 @@ import { RefreshJwtAuthGuard } from '../auth/guard/jwt-refresh.guard';
 import { SecurityDevicesQueryRepository } from './security-devices -query.repository';
 import { refreshTokenDto } from '../auth/dto/refresh-token.dto';
 import { SecurityDevicesService } from './security-devices.service';
-import { ParamDeviceIdDto } from '../../dto';
+import { IdValidationPipe } from '../../modules/pipes/id-validation.pipe';
 
 @Controller('security/devices')
 export class SecurityDevicesController {
@@ -56,12 +56,12 @@ export class SecurityDevicesController {
   @Delete(':deviceId')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteSecurityDeviceByID(
-    @Param() params: ParamDeviceIdDto,
+    @Param('deviceId', IdValidationPipe) deviceId: string,
     @CurrentUser() tokenDto: refreshTokenDto,
   ) {
     const result =
       await this.securityDevicesService.deleteUserSessionByDeviceID(
-        params.deviceId,
+        deviceId,
         tokenDto.userId,
       );
 

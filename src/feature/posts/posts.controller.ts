@@ -18,7 +18,7 @@ import { PostsService } from './posts.service';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { PaginatorPostView, ViewPostDto } from './dto/view-post.dto';
 import { CreatePostDto } from './dto/create-post.dto';
-import { ParamIdDto, QueryParams } from '../../dto';
+import { QueryParams } from '../../dto';
 import {
   PaginatorCommentView,
   ViewCommentDto,
@@ -31,6 +31,7 @@ import { CreateCommentDto } from '../comments/dto/create-comment.dto';
 import { ParamPostIdDto } from './dto/param-post-id.dto';
 import { LikeInputDto } from '../likes/dto/like-input.dto';
 import { GetFieldError } from '../../utils';
+import { IdValidationPipe } from '../../modules/pipes/id-validation.pipe';
 
 @Controller('posts')
 export class PostsController {
@@ -64,20 +65,20 @@ export class PostsController {
 
   @Get(':id')
   async getPostById(
-    @Param() params: ParamIdDto,
+    @Param('id', IdValidationPipe) id: string,
     @CurrentUserId(false) userId: string,
   ): Promise<ViewPostDto> {
-    return this.postsQueryRepository.getPostById(params.id, userId);
+    return this.postsQueryRepository.getPostById(id, userId);
   }
 
   @UseGuards(BasicAuthGuard)
   @Put(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async updatePost(
-    @Param() params: ParamIdDto,
+    @Param('id', IdValidationPipe) id: string,
     @Body() postDto: UpdatePostDto,
   ) {
-    const result = await this.postsService.updatePost(params.id, postDto);
+    const result = await this.postsService.updatePost(id, postDto);
 
     if (!result.blogExists) {
       throw new BadRequestException([
@@ -92,8 +93,8 @@ export class PostsController {
   @UseGuards(BasicAuthGuard)
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteBlog(@Param() params: ParamIdDto) {
-    return this.postsService.deletePostById(params.id);
+  async deleteBlog(@Param('id', IdValidationPipe) id: string) {
+    return this.postsService.deletePostById(id);
   }
 
   @Get(':postId/comments')

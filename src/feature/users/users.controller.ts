@@ -16,8 +16,8 @@ import { PaginatorUserView, ViewUserDto } from './dto/view-user.dto';
 import { UsersQueryRepository } from './users-query.repository';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { ParamIdDto } from '../../dto';
 import { BasicAuthGuard } from '../../feature/auth/guard/basic-auth.guard';
+import { IdValidationPipe } from '../../modules/pipes/id-validation.pipe';
 @Controller('users')
 export class UsersController {
   constructor(
@@ -47,8 +47,8 @@ export class UsersController {
   @UseGuards(BasicAuthGuard)
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteUser(@Param() params: ParamIdDto) {
-    const isDeleted = await this.usersService.deleteUserById(params.id);
+  async deleteUser(@Param('id', IdValidationPipe) id: string) {
+    const isDeleted = await this.usersService.deleteUserById(id);
     if (!isDeleted) throw new NotFoundException('User not found');
     return;
   }

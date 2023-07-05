@@ -9,21 +9,20 @@ import {
   NotFoundException,
   Param,
   Post,
-  Put,
   Query,
   UseGuards,
 } from '@nestjs/common';
 import { BlogsQueryRepository } from './blogs-query.repository';
-import { ParamBlogIdDto, ParamIdDto, QueryParams } from '../../dto';
+import { QueryParams } from '../../dto';
 import { PaginatorBlogView, ViewBlogDto } from './dto/view-blog.dto';
 import { BlogsService } from './blogs.service';
 import { CreateBlogDto } from './dto/create-blog.dto';
-import { UpdateBlogDto } from './dto/update-blog.dto';
 import { PaginatorPostView, ViewPostDto } from '../posts/dto/view-post.dto';
 import { PostsQueryRepository } from '../posts/posts-query.repository';
 import { CreateBlogPostDto } from './dto/create-blog-post.dto';
 import { BasicAuthGuard } from '../../feature/auth/guard/basic-auth.guard';
 import { CurrentUserId } from '../auth/decorators/current-user-id.param.decorator';
+import { IdValidationPipe } from '../../modules/pipes/id-validation.pipe';
 
 @Controller('blogs')
 export class BlogsController {
@@ -53,12 +52,12 @@ export class BlogsController {
 
   @Get(':blogId/posts')
   async findPostsByBlogId(
-    @Param() params: ParamBlogIdDto,
+    @Param('blogId', IdValidationPipe) blogId: string,
     @Query() queryParams: QueryParams,
     @CurrentUserId(false) userId: string,
   ): Promise<PaginatorPostView> {
     const postsView = await this.postsQueryRepository.findPostsByBlogId(
-      params.blogId,
+      blogId,
       queryParams,
       userId,
     );
@@ -70,12 +69,12 @@ export class BlogsController {
   @UseGuards(BasicAuthGuard)
   @Post(':blogId/posts')
   async createPostByBlogId(
-    @Param() params: ParamBlogIdDto,
+    @Param('blogId', IdValidationPipe) blogId: string,
     @Body() blogPostDto: CreateBlogPostDto,
     @CurrentUserId(false) userId: string,
   ): Promise<ViewPostDto> {
     const postId = await this.blogsService.createPostByBlogId(
-      params.blogId,
+      blogId,
       blogPostDto,
     );
     if (!postId) throw new NotFoundException('Blog not found');
@@ -84,29 +83,19 @@ export class BlogsController {
   }
 
   @Get(':id')
-  async getBlogById(@Param() params: ParamIdDto): Promise<ViewBlogDto> {
-    const blogView = await this.blogsQueryRepository.getBlogById(params.id);
+  async getBlogById(
+    @Param('id', IdValidationPipe) id: string,
+  ): Promise<ViewBlogDto> {
+    const blogView = await this.blogsQueryRepository.getBlogById(id);
     if (!blogView) throw new NotFoundException('Blog not found');
     return blogView;
   }
 
   @UseGuards(BasicAuthGuard)
-  @Put(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async updateBlog(
-    @Param() params: ParamIdDto,
-    @Body() blogDto: UpdateBlogDto,
-  ) {
-    const isUpdated = await this.blogsService.updateBlog(params.id, blogDto);
-    if (!isUpdated) throw new NotFoundException('Blog not found');
-    return isUpdated;
-  }
-
-  @UseGuards(BasicAuthGuard)
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteBlog(@Param() params: ParamIdDto) {
-    const isDeleted = await this.blogsService.deleteBlogById(params.id);
+  async deleteBlog(@Param('id', IdValidationPipe) id: string) {
+    const isDeleted = await this.blogsService.deleteBlogById(id);
     if (!isDeleted) throw new NotFoundException('Blog not found');
     return isDeleted;
   }
