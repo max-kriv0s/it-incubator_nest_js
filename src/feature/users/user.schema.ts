@@ -46,6 +46,18 @@ export class UserPasswordRecovery {
 }
 
 @Schema()
+export class BanInfo {
+  @Prop({ default: false })
+  isBanned: boolean;
+
+  @Prop()
+  banDate: Date;
+
+  @Prop()
+  banReason: string;
+}
+
+@Schema()
 export class User {
   _id: Types.ObjectId;
 
@@ -60,6 +72,9 @@ export class User {
 
   @Prop()
   passwordRecovery: UserPasswordRecovery;
+
+  @Prop()
+  banInfo: BanInfo;
 
   static createUser(
     userDto: CreateUserDto,
@@ -103,6 +118,10 @@ export class User {
   updateEmailConfirmation(emailConfimation: UserEmailConfirmation) {
     this.emailConfirmation = emailConfimation;
   }
+
+  isBaned() {
+    return this.banInfo.isBanned;
+  }
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
@@ -112,6 +131,7 @@ UserSchema.methods = {
   updateUserPassword: User.prototype.updateUserPassword,
   isConfirmed: User.prototype.isConfirmed,
   updateEmailConfirmation: User.prototype.updateEmailConfirmation,
+  isBaned: User.prototype.isBaned,
 };
 
 export type UserModelStaticType = {
