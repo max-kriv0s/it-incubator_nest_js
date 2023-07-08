@@ -66,7 +66,16 @@ window.onload = function() {
       "/users/{id}": {
         "delete": {
           "operationId": "UsersController_deleteUser",
-          "parameters": [],
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
           "responses": {
             "204": {
               "description": ""
@@ -107,7 +116,16 @@ window.onload = function() {
       "/posts/{id}": {
         "get": {
           "operationId": "PostsController_getPostById",
-          "parameters": [],
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
           "responses": {
             "200": {
               "description": ""
@@ -116,7 +134,16 @@ window.onload = function() {
         },
         "put": {
           "operationId": "PostsController_updatePost",
-          "parameters": [],
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
           "requestBody": {
             "required": true,
             "content": {
@@ -135,7 +162,16 @@ window.onload = function() {
         },
         "delete": {
           "operationId": "PostsController_deleteBlog",
-          "parameters": [],
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
           "responses": {
             "204": {
               "description": ""
@@ -197,7 +233,16 @@ window.onload = function() {
       "/comments/{id}": {
         "get": {
           "operationId": "CommentsController_findCommentByID",
-          "parameters": [],
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
           "responses": {
             "200": {
               "description": ""
@@ -265,91 +310,23 @@ window.onload = function() {
               "description": ""
             }
           }
-        },
-        "post": {
-          "operationId": "BlogsController_createBlog",
-          "parameters": [],
-          "requestBody": {
-            "required": true,
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CreateBlogDto"
-                }
-              }
-            }
-          },
-          "responses": {
-            "201": {
-              "description": ""
-            }
-          }
-        }
-      },
-      "/blogs/{blogId}/posts": {
-        "get": {
-          "operationId": "BlogsController_findPostsByBlogId",
-          "parameters": [],
-          "responses": {
-            "200": {
-              "description": ""
-            }
-          }
-        },
-        "post": {
-          "operationId": "BlogsController_createPostByBlogId",
-          "parameters": [],
-          "requestBody": {
-            "required": true,
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CreateBlogPostDto"
-                }
-              }
-            }
-          },
-          "responses": {
-            "201": {
-              "description": ""
-            }
-          }
         }
       },
       "/blogs/{id}": {
         "get": {
           "operationId": "BlogsController_getBlogById",
-          "parameters": [],
-          "responses": {
-            "200": {
-              "description": ""
-            }
-          }
-        },
-        "put": {
-          "operationId": "BlogsController_updateBlog",
-          "parameters": [],
-          "requestBody": {
-            "required": true,
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UpdateBlogDto"
-                }
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "string"
               }
             }
-          },
+          ],
           "responses": {
-            "204": {
-              "description": ""
-            }
-          }
-        },
-        "delete": {
-          "operationId": "BlogsController_deleteBlog",
-          "parameters": [],
-          "responses": {
-            "204": {
+            "200": {
               "description": ""
             }
           }
@@ -555,7 +532,206 @@ window.onload = function() {
       "/security/devices/{deviceId}": {
         "delete": {
           "operationId": "SecurityDevicesController_deleteSecurityDeviceByID",
+          "parameters": [
+            {
+              "name": "deviceId",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": ""
+            }
+          }
+        }
+      },
+      "/blogger/blogs/{id}": {
+        "put": {
+          "operationId": "BloggersController_updateExistingBlogById",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateBlogDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "204": {
+              "description": ""
+            }
+          }
+        },
+        "delete": {
+          "operationId": "BloggersController_deleteBlog",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": ""
+            }
+          }
+        }
+      },
+      "/blogger/blogs": {
+        "post": {
+          "operationId": "BloggersController_createBlog",
           "parameters": [],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateBlogDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": ""
+            }
+          }
+        },
+        "get": {
+          "operationId": "BloggersController_getBlogs",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": ""
+            }
+          }
+        }
+      },
+      "/blogger/blogs/{blogId}/posts": {
+        "post": {
+          "operationId": "BloggersController_createPostByBlogId",
+          "parameters": [
+            {
+              "name": "blogId",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateBlogPostDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": ""
+            }
+          }
+        },
+        "get": {
+          "operationId": "BloggersController_findPostsByBlogId",
+          "parameters": [
+            {
+              "name": "blogId",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": ""
+            }
+          }
+        }
+      },
+      "/blogger/blogs/{blogId}}/posts/{postId}": {
+        "put": {
+          "operationId": "BloggersController_updatePostById",
+          "parameters": [
+            {
+              "name": "blogId",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "postId",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlogPostUpdateDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "204": {
+              "description": ""
+            }
+          }
+        },
+        "delete": {
+          "operationId": "BloggersController_deletePostById",
+          "parameters": [
+            {
+              "name": "blogId",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "postId",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
           "responses": {
             "204": {
               "description": ""
@@ -603,18 +779,6 @@ window.onload = function() {
           "type": "object",
           "properties": {}
         },
-        "CreateBlogDto": {
-          "type": "object",
-          "properties": {}
-        },
-        "CreateBlogPostDto": {
-          "type": "object",
-          "properties": {}
-        },
-        "UpdateBlogDto": {
-          "type": "object",
-          "properties": {}
-        },
         "LoginInputDto": {
           "type": "object",
           "properties": {}
@@ -628,6 +792,22 @@ window.onload = function() {
           "properties": {}
         },
         "RegistrationConfirmationCodeDto": {
+          "type": "object",
+          "properties": {}
+        },
+        "UpdateBlogDto": {
+          "type": "object",
+          "properties": {}
+        },
+        "CreateBlogDto": {
+          "type": "object",
+          "properties": {}
+        },
+        "CreateBlogPostDto": {
+          "type": "object",
+          "properties": {}
+        },
+        "BlogPostUpdateDto": {
           "type": "object",
           "properties": {}
         }

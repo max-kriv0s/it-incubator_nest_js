@@ -68,6 +68,54 @@ import { ApiCallSchema, ApiCalls } from './feature/api-calls/api-calls.schema';
 import { ThrottlerConfigService } from './guard/throttler-api-calls.configuration';
 import { OptionalJwtTokenGuard } from './feature/auth/guard/optional-jwt-token.guard';
 import { BlogExistsRule } from './feature/posts/validators/blog-exists.validator';
+import { BloggersController } from './feature/bloggers/bloggers.controller';
+import { BloggerQueryRepository } from './feature/bloggers/db/blogger-query.repository';
+import { CqrsModule } from '@nestjs/cqrs';
+
+const apiCallsAdapters = [ApiCallsConfig, ApiCallsService, ApiCallsRepository];
+const authAdapters = [
+  AuthConfig,
+  AuthService,
+  BasicStategy,
+  AccessJwtStrategy,
+  RefreshJwtStrategy,
+];
+const bloggersAdapters = [BloggerQueryRepository];
+const blogsAdapters = [
+  BlogsService,
+  BlogsRepository,
+  BlogsQueryRepository,
+  BlogExistsRule,
+];
+const commentsAdapters = [
+  CommentsService,
+  CommentsRepository,
+  CommentsQueryRepository,
+  LikeCommentsService,
+  LikeCommentsRepository,
+];
+const postsAdapters = [
+  PostsService,
+  PostsRepository,
+  PostsQueryRepository,
+  LikePostsRepository,
+  LikePostsService,
+];
+const securityDevicesAdapters = [
+  SecurityDevicesService,
+  SecurityDevicesRepository,
+  SecurityDevicesQueryRepository,
+];
+const usersAdapters = [
+  UsersConfig,
+  UsersService,
+  UsersConfig,
+  UsersService,
+  UsersRepository,
+  UsersQueryRepository,
+  UsersRepository,
+  UsersQueryRepository,
+];
 
 @Module({
   imports: [
@@ -99,6 +147,7 @@ import { BlogExistsRule } from './feature/posts/validators/blog-exists.validator
       inject: [ConfigService, ApiCallsConfig],
       useClass: ThrottlerConfigService,
     }),
+    CqrsModule,
   ],
   controllers: [
     AppController,
@@ -109,36 +158,20 @@ import { BlogExistsRule } from './feature/posts/validators/blog-exists.validator
     BlogsController,
     AuthController,
     SecurityDevicesController,
+    BloggersController,
   ],
   providers: [
     AppService,
     AppConfig,
     TestingService,
-    UsersConfig,
-    UsersService,
-    UsersRepository,
-    UsersQueryRepository,
-    PostsService,
-    PostsRepository,
-    PostsQueryRepository,
-    CommentsService,
-    CommentsRepository,
-    CommentsQueryRepository,
-    BlogsService,
-    BlogsRepository,
-    BlogsQueryRepository,
-    AuthConfig,
-    AuthService,
-    BasicStategy,
-    SecurityDevicesService,
-    SecurityDevicesRepository,
-    AccessJwtStrategy,
-    RefreshJwtStrategy,
-    SecurityDevicesQueryRepository,
-    LikePostsRepository,
-    LikePostsService,
-    LikeCommentsService,
-    LikeCommentsRepository,
+    ...apiCallsAdapters,
+    ...authAdapters,
+    ...bloggersAdapters,
+    ...blogsAdapters,
+    ...commentsAdapters,
+    ...postsAdapters,
+    ...securityDevicesAdapters,
+    ...usersAdapters,
     EmailManagerService,
     EmailConfig,
     EmailAdapter,
@@ -150,10 +183,6 @@ import { BlogExistsRule } from './feature/posts/validators/blog-exists.validator
       provide: APP_GUARD,
       useClass: OptionalJwtTokenGuard,
     },
-    ApiCallsConfig,
-    ApiCallsService,
-    ApiCallsRepository,
-    BlogExistsRule,
   ],
   exports: [ApiCallsConfig],
 })

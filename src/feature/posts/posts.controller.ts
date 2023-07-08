@@ -32,6 +32,7 @@ import { ParamPostIdDto } from './dto/param-post-id.dto';
 import { LikeInputDto } from '../likes/dto/like-input.dto';
 import { GetFieldError } from '../../utils';
 import { IdValidationPipe } from '../../modules/pipes/id-validation.pipe';
+import { replyByNotification } from '../../modules/notification';
 
 @Controller('posts')
 export class PostsController {
@@ -60,7 +61,13 @@ export class PostsController {
       throw new BadRequestException([
         GetFieldError('Blog not found', 'blogId'),
       ]);
-    return this.postsQueryRepository.getPostById(postId, userId);
+    const postView = await this.postsQueryRepository.getPostById(
+      postId,
+      userId,
+    );
+
+    if (!postView) throw new NotFoundException('Post not found');
+    return postView;
   }
 
   @Get(':id')
@@ -68,7 +75,9 @@ export class PostsController {
     @Param('id', IdValidationPipe) id: string,
     @CurrentUserId(false) userId: string,
   ): Promise<ViewPostDto> {
-    return this.postsQueryRepository.getPostById(id, userId);
+    const postView = await this.postsQueryRepository.getPostById(id, userId);
+    if (!postView) throw new NotFoundException('Post not found');
+    return postView;
   }
 
   @UseGuards(BasicAuthGuard)
@@ -79,22 +88,16 @@ export class PostsController {
     @Body() postDto: UpdatePostDto,
   ) {
     const result = await this.postsService.updatePost(id, postDto);
-
-    if (!result.blogExists) {
-      throw new BadRequestException([
-        GetFieldError('Blog not found', 'blogId'),
-      ]);
-    }
-
-    if (!result.postExists) throw new NotFoundException();
-    return true;
+    return replyByNotification(result);
   }
 
   @UseGuards(BasicAuthGuard)
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteBlog(@Param('id', IdValidationPipe) id: string) {
-    return this.postsService.deletePostById(id);
+    const isDeleted = await this.postsService.deletePostById(id);
+    if (!isDeleted) throw new NotFoundException('Post not found');
+    return;
   }
 
   @Get(':postId/comments')

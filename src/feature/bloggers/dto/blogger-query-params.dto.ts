@@ -1,11 +1,11 @@
-import { IsEnum, IsMongoId, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsOptional, IsString } from 'class-validator';
 
 enum sortDirection {
   asc = 'asc',
   desc = 'desc',
 }
 
-export class QueryParams {
+export class BloggerQueryParams {
   @IsString()
   @IsOptional()
   readonly searchNameTerm: string;
@@ -27,15 +27,3 @@ export class QueryParams {
   @IsEnum(sortDirection)
   readonly sortDirection: sortDirection;
 }
-
-export class Paginator {
-  readonly pagesCount: number;
-  readonly page: number;
-  readonly pageSize: number;
-  readonly totalCount: number;
-}
-
-export type FieldError = {
-  message: string;
-  field: string;
-};

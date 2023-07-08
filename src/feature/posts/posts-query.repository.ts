@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { NewestLikes, Post, PostDocument, PostModelType } from './post.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { QueryParams } from '../../dto';
@@ -79,9 +79,9 @@ export class PostsQueryRepository {
     };
   }
 
-  async getPostById(id: string, userId?: string): Promise<ViewPostDto> {
+  async getPostById(id: string, userId?: string): Promise<ViewPostDto | null> {
     const post = await this.PostModel.findById(id).exec();
-    if (!post) throw new NotFoundException('Post not found');
+    if (!post) return null;
 
     return this.postDBToPostView(post, userId);
   }

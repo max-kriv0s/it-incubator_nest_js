@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Blog, BlogDocument, BlogModelType } from './blog.schema';
+import { Blog, BlogDocument, BlogModelType, CreateUserBlockDto } from './blog.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { CreateBlogDto } from './dto/create-blog.dto';
 
@@ -7,8 +7,8 @@ import { CreateBlogDto } from './dto/create-blog.dto';
 export class BlogsRepository {
   constructor(@InjectModel(Blog.name) private BlogModel: BlogModelType) {}
 
-  createBlog(blogDto: CreateBlogDto): BlogDocument {
-    return this.BlogModel.createBlog(blogDto, this.BlogModel);
+  createBlog(createDto: CreateUserBlockDto): BlogDocument {
+    return this.BlogModel.createBlog(createDto, this.BlogModel);
   }
 
   async findBlogById(id: string): Promise<BlogDocument | null> {

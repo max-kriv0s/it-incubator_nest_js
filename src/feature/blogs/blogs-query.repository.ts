@@ -16,7 +16,7 @@ export class BlogsQueryRepository {
     const pageSize: number = queryParams.pageSize ? +queryParams.pageSize : 10;
     const sortBy: string = queryParams.sortBy ?? 'createdAt';
     const sortDirection: string = queryParams.sortDirection ?? 'desc';
-    const filter: any = {};
+    const filter: any = { 'blogOwner.isBaned': false };
 
     if (searchNameTerm) {
       filter.name = { $regex: searchNameTerm, $options: 'i' };
@@ -44,6 +44,7 @@ export class BlogsQueryRepository {
   async getBlogById(id: string): Promise<ViewBlogDto | null> {
     const blog = await this.BlogModel.findById(id).exec();
     if (!blog) return null;
+    if (!blog.blogOwner.isBaned) return null;
 
     return this.blogDBToBlogView(blog);
   }

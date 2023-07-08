@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PostsRepository } from './posts.repository';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { BlogsRepository } from '../blogs/blogs.repository';
@@ -10,7 +10,10 @@ import { UsersService } from '../users/users.service';
 import { CommentsService } from '../comments/comments.service';
 import { LikeStatus } from '../likes/dto/like-status';
 import { LikePostsService } from './like-posts.service';
-import { ResultUpdatePost } from './dto/result-update-post.dto';
+import {
+  ResultCodeError,
+  ResultNotification,
+} from '../../modules/notification';
 
 @Injectable()
 export class PostsService {
@@ -35,28 +38,31 @@ export class PostsService {
   async updatePost(
     id: string,
     postDto: UpdatePostDto,
-  ): Promise<ResultUpdatePost> {
-    const result: ResultUpdatePost = {
-      postExists: false,
-      blogExists: false,
-    };
+  ): Promise<ResultNotification<boolean>> {
+    const result = new ResultNotification<boolean>();
 
     const blog = await this.blogsRepository.findBlogById(postDto.blogId);
-    if (!blog) return result;
-    result.blogExists = true;
+    if (!blog) {
+      result.addError('Blog not found', ResultCodeError.NotFound);
+      return result;
+    }
 
     const post = await this.postsRepository.findPostById(id);
-    if (!post) return result;
-    result.postExists = true;
+    if (!post) {
+      result.addError('Post not found', ResultCodeError.NotFound);
+      return result;
+    }
 
     post.updatePost(postDto, blog._id, blog.name);
     await this.postsRepository.save(post);
+
+    result.addData(true);
     return result;
   }
 
-  async deletePostById(id: string) {
-    const deletedPost = await this.postsRepository.deletePostById(id);
-    if (!deletedPost) throw new NotFoundException('Post not found');
+  async deletePostById(id: string): Promise<boolean> {
+    const result = await this.postsRepository.deletePostById(id);
+    return result !== null;
   }
 
   async findPostById(id: string): Promise<PostDocument | null> {
