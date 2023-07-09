@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Model, Types } from 'mongoose';
 import { CreateUserDto } from './dto/create-user.dto';
+import { BanUnbanUserDto } from './dto/ban-unban-user.dto';
 
 export type UserDocument = HydratedDocument<User>;
 
@@ -119,8 +120,16 @@ export class User {
     this.emailConfirmation = emailConfimation;
   }
 
-  isBaned() {
+  isBanned() {
     return this.banInfo.isBanned;
+  }
+
+  setBanUnbane(banDto: BanUnbanUserDto) {
+    this.banInfo.isBanned = banDto.isBanned;
+    if (banDto.isBanned) {
+      this.banInfo.banReason = banDto.banReason;
+      this.banInfo.banDate = new Date();
+    }
   }
 }
 
@@ -131,7 +140,8 @@ UserSchema.methods = {
   updateUserPassword: User.prototype.updateUserPassword,
   isConfirmed: User.prototype.isConfirmed,
   updateEmailConfirmation: User.prototype.updateEmailConfirmation,
-  isBaned: User.prototype.isBaned,
+  isBanned: User.prototype.isBanned,
+  setBanUnbane: User.prototype.setBanUnbane,
 };
 
 export type UserModelStaticType = {

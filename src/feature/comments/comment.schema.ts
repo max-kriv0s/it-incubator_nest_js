@@ -13,6 +13,9 @@ export class CommentatorInfo {
 
   @Prop({ required: true })
   userLogin: string;
+
+  @Prop({ default: false })
+  isBanned: boolean;
 }
 
 @Schema()
@@ -62,9 +65,13 @@ export class Comment {
     this.content = commentDto.content;
   }
 
-  updateCountLikeDislike(countDto: CountLikeDislikeDto) {
-    this.likesCount += countDto.countLike;
-    this.dislikesCount += countDto.countDislike;
+  // updateCountLikeDislike(countDto: CountLikeDislikeDto) {
+  //   this.likesCount += countDto.countLike;
+  //   this.dislikesCount += countDto.countDislike;
+  // }
+
+  setBanUnbaneUser(value: boolean) {
+    this.commentatorInfo.isBanned = value;
   }
 }
 
@@ -72,7 +79,8 @@ export const CommentSchema = SchemaFactory.createForClass(Comment);
 
 CommentSchema.methods = {
   updateComment: Comment.prototype.updateComment,
-  updateCountLikeDislike: Comment.prototype.updateCountLikeDislike,
+  // updateCountLikeDislike: Comment.prototype.updateCountLikeDislike,
+  setBanUnbaneUser: Comment.prototype.setBanUnbaneUser,
 };
 
 export type CommentModelStaticType = {

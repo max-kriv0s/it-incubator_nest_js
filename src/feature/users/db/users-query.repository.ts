@@ -1,15 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import { QueryUserDto } from './dto/query-user.dto';
-import { PaginatorUserView, ViewUserDto } from './dto/view-user.dto';
-import { User, UserDocument, UserModelType } from './user.schema';
+import { BanStatus, QueryUserDto } from '../dto/query-user.dto';
+import { PaginatorUserView, ViewUserDto } from '../dto/view-user.dto';
+import { User, UserDocument, UserModelType } from '../user.schema';
 import { InjectModel } from '@nestjs/mongoose';
-import { ViewMeDto } from '../auth/dto/view-me.dto';
+import { ViewMeDto } from '../../auth/dto/view-me.dto';
 
 @Injectable()
 export class UsersQueryRepository {
   constructor(@InjectModel(User.name) private UserModel: UserModelType) {}
 
   async getAllUsersView(queryParams: QueryUserDto): Promise<PaginatorUserView> {
+    const banStatus = queryParams.banStatus ?? BanStatus.all;
     const pageNumber = +queryParams.pageNumber || 1;
     const pageSize = +queryParams.pageSize || 10;
     const sortBy = queryParams.sortBy || 'createdAt';
@@ -32,6 +33,10 @@ export class UsersQueryRepository {
 
     let filter: any = {};
     if (filterOr.length > 0) filter = { $or: filterOr };
+
+    if (banStatus !== BanStatus.all) {
+      filter['banInfo.isBanned'] = banStatus === BanStatus.banned;
+    }
 
     const totalCount: number = await this.UserModel.countDocuments(filter);
     const skip = (pageNumber - 1) * pageSize;

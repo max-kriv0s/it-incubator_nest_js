@@ -18,7 +18,7 @@ export class BlogOwner {
   userLogin: string;
 
   @Prop({ default: false })
-  isBaned?: boolean;
+  isBanned?: boolean;
 }
 
 @Schema()
@@ -67,6 +67,10 @@ export class Blog {
   thisIsOwner(userId: string): boolean {
     return this.blogOwner.userId.toString() === userId;
   }
+
+  setBanUnbaneOwner(value: boolean) {
+    this.blogOwner.isBanned = value;
+  }
 }
 
 export const BlogSchema = SchemaFactory.createForClass(Blog);
@@ -74,6 +78,7 @@ export const BlogSchema = SchemaFactory.createForClass(Blog);
 BlogSchema.methods = {
   updateBlog: Blog.prototype.updateBlog,
   thisIsOwner: Blog.prototype.thisIsOwner,
+  setBanUnbaneOwner: Blog.prototype.setBanUnbaneOwner,
 };
 
 export type BlogModelStaticType = {

@@ -17,7 +17,6 @@ export class NewestLikes {
   @Prop({ required: true })
   login: string;
 }
-
 @Schema()
 export class Post {
   _id: Types.ObjectId;
@@ -57,10 +56,10 @@ export class Post {
     this.blogName = blogName;
   }
 
-  updateCountLikeDislike(countDto: CountLikeDislikeDto) {
-    this.likesCount += countDto.countLike;
-    this.dislikesCount += countDto.countDislike;
-  }
+  // updateCountLikeDislike(countDto: CountLikeDislikeDto) {
+  //   this.likesCount += countDto.countLike;
+  //   this.dislikesCount += countDto.countDislike;
+  // }
 
   static createPost(
     postDto: CreatePostDto,
@@ -84,13 +83,14 @@ export class Post {
 
     return new PostModel(data);
   }
+
 }
 
 export const PostSchema = SchemaFactory.createForClass(Post);
 
 PostSchema.methods = {
   updatePost: Post.prototype.updatePost,
-  updateCountLikeDislike: Post.prototype.updateCountLikeDislike,
+  // updateCountLikeDislike: Post.prototype.updateCountLikeDislike,
 };
 
 export type PostModelStaticType = {

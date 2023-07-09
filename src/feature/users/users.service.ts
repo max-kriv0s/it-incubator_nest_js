@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { UsersRepository } from './users.repository';
+import { UsersRepository } from './db/users.repository';
 import { CreateUserDto } from './dto/create-user.dto';
 import bcrypt from 'bcrypt';
 import { UserDocument, UserEmailConfirmation } from './user.schema';
@@ -10,6 +10,8 @@ import { UsersConfig } from './configuration/users.configuration';
 import { EmailManagerService } from '../email-managers/email-manager.service';
 import { FieldError } from '../../dto';
 import { GetFieldError } from '../../utils';
+import { ResultNotification } from 'src/modules/notification';
+import { BanUnbanUserDto } from './dto/ban-unban-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -45,6 +47,7 @@ export class UsersService {
   ): Promise<string | null> {
     const user = await this.usersRepository.findByLoginOrEmail(loginOrEmail);
     if (!user) return null;
+    if (user.isBanned()) return null;
 
     if (!user.emailConfirmation.isConfirmed) return null;
 

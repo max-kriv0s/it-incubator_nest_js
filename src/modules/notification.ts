@@ -13,6 +13,7 @@ export enum ResultCodeError {
 export type ResultNotificationErrorType = {
   message: string;
   code: number | null;
+  field: string;
 };
 
 // export class NotificationExtension {
@@ -27,18 +28,20 @@ export class ResultNotification<T = null> {
   code: ResultCodeError = 0;
   data: T | null = null;
   message = '';
+  field = '';
 
   hasError() {
     return this.code !== 0;
   }
 
-  addError(message: string, code: number | null = null) {
+  addError(message: string, code: number | null = null, field = '') {
     this.code = code ?? 1;
     this.message = message;
+    this.field = field;
   }
 
   getError(): ResultNotificationErrorType {
-    return { message: this.message, code: this.code };
+    return { message: this.message, code: this.code, field: this.field };
   }
 
   addData(data: T) {

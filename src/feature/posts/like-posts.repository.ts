@@ -4,7 +4,7 @@ import {
   LikePostsDocument,
   LikePostsModelType,
 } from './like-posts.schema';
-import { CastToObjectId } from '../../utils';
+import { castToObjectId } from '../../utils';
 import { InjectModel } from '@nestjs/mongoose';
 import { LikeStatus } from '../likes/dto/like-status';
 import { NewestLikes } from './post.schema';
@@ -20,8 +20,8 @@ export class LikePostsRepository {
     userId: string,
   ): Promise<LikePostsDocument | null> {
     return this.LikePostsModel.findOne({
-      postId: CastToObjectId(postId),
-      userId: CastToObjectId(userId),
+      postId: castToObjectId(postId),
+      userId: castToObjectId(userId),
     }).exec();
   }
 
@@ -42,7 +42,11 @@ export class LikePostsRepository {
 
   async getNewestLikes(postId: string): Promise<NewestLikes[]> {
     return this.LikePostsModel.find(
-      { postId: CastToObjectId(postId), status: LikeStatus.Like },
+      {
+        postId: castToObjectId(postId),
+        status: LikeStatus.Like,
+        userIsBanned: false,
+      },
       ['addedAt', 'userId', 'login', '-_id'],
       {
         sort: { addedAt: -1 },
@@ -57,5 +61,9 @@ export class LikePostsRepository {
 
   async save(likePosts: LikePostsDocument) {
     return likePosts.save();
+  }
+
+  async findLikesByUserId(userId: string) {
+    return this.LikePostsModel.find({ userId: castToObjectId(userId) });
   }
 }

@@ -77,17 +77,26 @@ export class CommentsService {
     userId: string,
     likeStatus: LikeStatus,
   ): Promise<boolean> {
-    const comment = await this.commentsRepository.findCommentByID(commentId);
-    if (!comment) return false;
+    const commentExists = await this.commentsRepository.commentExists(
+      commentId,
+    );
+    if (!commentExists) return false;
+    // const comment = await this.commentsRepository.findCommentByID(commentId);
+    // if (!comment) return false;
 
     const countLikeDislyke = await this.likeCommentsService.ChangeLike(
       commentId,
       userId,
       likeStatus,
     );
-    comment.updateCountLikeDislike(countLikeDislyke);
+    // comment.updateCountLikeDislike(countLikeDislyke);
+    // await this.commentsRepository.save(comment);
 
-    await this.commentsRepository.save(comment);
+    const isUpdated = await this.commentsRepository.updateCountLikeDislike(
+      commentId,
+      countLikeDislyke,
+    );
+    if (!isUpdated) return false;
     return true;
   }
 }

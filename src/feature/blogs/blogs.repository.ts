@@ -1,7 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { Blog, BlogDocument, BlogModelType, CreateUserBlockDto } from './blog.schema';
+import {
+  Blog,
+  BlogDocument,
+  BlogModelType,
+  CreateUserBlockDto,
+} from './blog.schema';
 import { InjectModel } from '@nestjs/mongoose';
-import { CreateBlogDto } from './dto/create-blog.dto';
+import { castToObjectId } from '../../utils';
 
 @Injectable()
 export class BlogsRepository {
@@ -25,5 +30,9 @@ export class BlogsRepository {
 
   async save(blog: BlogDocument): Promise<BlogDocument> {
     return blog.save();
+  }
+
+  async findBlogsByOwnerId(ownerId: string): Promise<BlogDocument[] | null> {
+    return this.BlogModel.find({ 'blogOwner.userId': castToObjectId(ownerId) });
   }
 }

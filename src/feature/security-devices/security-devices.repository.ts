@@ -6,7 +6,7 @@ import {
   SecurityDevicesModelType,
 } from './security-devices.schema';
 import { CreateSecurityDeviceDto } from './dto/create-security-device.dto';
-import { CastToObjectId } from '../../utils';
+import { castToObjectId } from '../../utils';
 
 @Injectable()
 export class SecurityDevicesRepository {
@@ -39,8 +39,8 @@ export class SecurityDevicesRepository {
     deviceId: string,
   ): Promise<boolean> {
     const result = await this.SecurityDevicesModel.deleteMany({
-      userId: CastToObjectId(userId),
-      _id: { $ne: CastToObjectId(deviceId) },
+      userId: castToObjectId(userId),
+      _id: { $ne: castToObjectId(deviceId) },
     });
 
     return result.acknowledged;
@@ -57,8 +57,8 @@ export class SecurityDevicesRepository {
     userId: string,
   ): Promise<boolean> {
     const result = await this.SecurityDevicesModel.deleteOne({
-      _id: CastToObjectId(deviceID),
-      userId: CastToObjectId(userId),
+      _id: castToObjectId(deviceID),
+      userId: castToObjectId(userId),
     });
     return result.deletedCount === 1;
   }
@@ -68,8 +68,16 @@ export class SecurityDevicesRepository {
     deviceId: string,
   ): Promise<SecurityDevicesDocument | null> {
     return this.SecurityDevicesModel.findOne({
-      _id: CastToObjectId(deviceId),
-      userId: CastToObjectId(userId),
+      _id: castToObjectId(deviceId),
+      userId: castToObjectId(userId),
     });
+  }
+
+  async deleteAllDevicesByUserID(userId: string): Promise<boolean> {
+    const result = await this.SecurityDevicesModel.deleteMany({
+      userId: castToObjectId(userId),
+    });
+
+    return result.acknowledged;
   }
 }

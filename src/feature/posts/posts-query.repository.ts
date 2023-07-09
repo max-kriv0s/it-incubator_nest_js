@@ -6,7 +6,7 @@ import { PaginatorPostView, ViewPostDto } from './dto/view-post.dto';
 import { LikeStatus } from '../likes/dto/like-status';
 import { Blog, BlogModelType } from '../blogs/blog.schema';
 import { LikePosts, LikePostsModelType } from './like-posts.schema';
-import { CastToObjectId } from '../../utils';
+import { castToObjectId } from '../../utils';
 import { ViewLikeDetailsDto } from '../likes/dto/view-like.dto';
 
 @Injectable()
@@ -26,9 +26,11 @@ export class PostsQueryRepository {
     const sortBy: string = queryParams.sortBy || 'createdAt';
     const sortDirection = queryParams.sortDirection || 'desc';
 
-    const totalCount: number = await this.PostModel.countDocuments({});
+    const filter = {};
+
+    const totalCount: number = await this.PostModel.countDocuments(filter);
     const skip = (pageNumber - 1) * pageSize;
-    const posts: PostDocument[] = await this.PostModel.find({}, null, {
+    const posts: PostDocument[] = await this.PostModel.find(filter, null, {
       sort: { [sortBy]: sortDirection === 'asc' ? 1 : -1 },
       skip: skip,
       limit: pageSize,
@@ -95,7 +97,7 @@ export class PostsQueryRepository {
     if (userId) {
       const myLike = await this.LikePostsModel.findOne({
         postId: post._id,
-        userId: CastToObjectId(userId),
+        userId: castToObjectId(userId),
       }).exec();
       if (myLike) statusMyLike = myLike.status;
     }

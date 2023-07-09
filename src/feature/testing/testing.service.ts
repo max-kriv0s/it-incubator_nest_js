@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { BlogsRepository } from '../blogs/blogs.repository';
 import { CommentsRepository } from '../comments/comments.repository';
 import { PostsRepository } from '../posts/posts.repository';
-import { UsersRepository } from '../users/users.repository';
+import { UsersRepository } from '../users/db/users.repository';
 import { SecurityDevicesRepository } from '../security-devices/security-devices.repository';
 import { LikePostsRepository } from '../posts/like-posts.repository';
 import { ApiCallsRepository } from '../api-calls/api-calls.repository';

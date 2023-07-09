@@ -7,8 +7,8 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { TestingService } from './feature/testing/testing.service';
 import { TestingController } from './feature/testing/testing.controller';
-import { UsersQueryRepository } from './feature/users/users-query.repository';
-import { UsersRepository } from './feature/users/users.repository';
+import { UsersQueryRepository } from './feature/users/db/users-query.repository';
+import { UsersRepository } from './feature/users/db/users.repository';
 import { UsersService } from './feature/users/users.service';
 import { UsersController } from './feature/users/users.controller';
 import { User, UserSchema } from './feature/users/user.schema';
@@ -71,6 +71,7 @@ import { BlogExistsRule } from './feature/posts/validators/blog-exists.validator
 import { BloggersController } from './feature/bloggers/bloggers.controller';
 import { BloggerQueryRepository } from './feature/bloggers/db/blogger-query.repository';
 import { CqrsModule } from '@nestjs/cqrs';
+import { UsersBlogsController } from './feature/users/users-blogs.controller';
 
 const apiCallsAdapters = [ApiCallsConfig, ApiCallsService, ApiCallsRepository];
 const authAdapters = [
@@ -115,6 +116,7 @@ const usersAdapters = [
   UsersQueryRepository,
   UsersRepository,
   UsersQueryRepository,
+  UsersBlogsQueryRepository,
 ];
 
 @Module({
@@ -153,6 +155,7 @@ const usersAdapters = [
     AppController,
     TestingController,
     UsersController,
+    UsersBlogsController,
     PostsController,
     CommentsController,
     BlogsController,

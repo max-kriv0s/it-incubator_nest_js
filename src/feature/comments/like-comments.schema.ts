@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Model, Types } from 'mongoose';
 import { LikeStatus } from '../likes/dto/like-status';
-import { CastToObjectId } from '../../utils';
+import { castToObjectId } from '../../utils';
 
 export type LikeCommentsDocument = HydratedDocument<LikeComments>;
 
@@ -21,6 +21,9 @@ export class LikeComments {
   @Prop({ required: true })
   userId: Types.ObjectId;
 
+  @Prop({ default: false })
+  userIsBanned: boolean;
+
   @Prop({ default: LikeStatus.None })
   status: LikeStatus;
 
@@ -39,12 +42,16 @@ export class LikeComments {
     LikeModel: LikeCommentsModelType,
   ): LikeCommentsDocument {
     const data: CreateLike = {
-      commentId: CastToObjectId(commentId),
-      userId: CastToObjectId(userId),
+      commentId: castToObjectId(commentId),
+      userId: castToObjectId(userId),
       status: status,
     };
 
     return new LikeModel(data);
+  }
+
+  setUserIsBanned(value: boolean) {
+    this.userIsBanned = value;
   }
 }
 
@@ -53,6 +60,7 @@ export const LikeCommentsSchema = SchemaFactory.createForClass(LikeComments);
 LikeCommentsSchema.methods = {
   setStatus: LikeComments.prototype.setStatus,
   getStatus: LikeComments.prototype.getStatus,
+  setUserIsBanned: LikeComments.prototype.setUserIsBanned,
 };
 
 export type LikeCommentsModelStaticType = {

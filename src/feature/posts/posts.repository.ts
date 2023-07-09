@@ -3,6 +3,8 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Post, PostDocument, PostModelType } from './post.schema';
 import { CreatePostDto } from './dto/create-post.dto';
 import { CreateBlogPostDto } from '../blogs/dto/create-blog-post.dto';
+import { CountLikeDislikeDto } from '../likes/dto/count-like-dislike.dto';
+import { castToObjectId } from '../../utils';
 
 @Injectable()
 export class PostsRepository {
@@ -40,5 +42,25 @@ export class PostsRepository {
 
   async save(post: PostDocument): Promise<PostDocument> {
     return post.save();
+  }
+
+  async updateCountLikeDislike(
+    id: string,
+    countDto: CountLikeDislikeDto,
+  ): Promise<PostDocument | null> {
+    return this.PostModel.findByIdAndUpdate(
+      id,
+      {
+        $inc: {
+          likesCount: countDto.countLike,
+          dislikesCount: countDto.countDislike,
+        },
+      },
+      { new: true },
+    );
+  }
+
+  async postExists(id: string): Promise<number> {
+    return this.PostModel.countDocuments({ _id: castToObjectId(id) });
   }
 }

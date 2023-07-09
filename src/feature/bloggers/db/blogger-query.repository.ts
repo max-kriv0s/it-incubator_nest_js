@@ -12,7 +12,7 @@ import {
   ViewBloggerBlogDto,
   ViewBloggerPostDto,
 } from '../dto/view-blogger-blogs.dto';
-import { CastToObjectId } from 'src/utils';
+import { castToObjectId } from 'src/utils';
 import {
   NewestLikes,
   Post,
@@ -49,7 +49,7 @@ export class BloggerQueryRepository {
     const pageSize: number = queryParams.pageSize ? +queryParams.pageSize : 10;
     const sortBy: string = queryParams.sortBy ?? 'createdAt';
     const sortDirection: string = queryParams.sortDirection ?? 'desc';
-    const filter: any = { 'blogOwner.userId': CastToObjectId(userId) };
+    const filter: any = { 'blogOwner.userId': castToObjectId(userId) };
 
     if (searchNameTerm) {
       filter.name = { $regex: searchNameTerm, $options: 'i' };
@@ -111,7 +111,7 @@ export class BloggerQueryRepository {
     if (userId) {
       const myLike = await this.LikePostsModel.findOne({
         postId: post._id,
-        userId: CastToObjectId(userId),
+        userId: castToObjectId(userId),
       }).exec();
       if (myLike) statusMyLike = myLike.status;
     }

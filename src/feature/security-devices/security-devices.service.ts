@@ -5,7 +5,7 @@ import { Types } from 'mongoose';
 import { TokenDataDto } from '../auth/dto/token-data.dto';
 import { ResultDeleteDevice } from './dto/result-delete-device.dto';
 import { UpdateSecurityDeviceDto } from './dto/update-security-device.dto';
-import { CastToObjectId } from '../../utils';
+import { castToObjectId } from '../../utils';
 
 @Injectable()
 export class SecurityDevicesService {
@@ -19,12 +19,12 @@ export class SecurityDevicesService {
     userAgent: string,
   ): Promise<string> {
     const data: CreateSecurityDeviceDto = {
-      _id: CastToObjectId(dataRefreshTokenDto.deviceId),
+      _id: castToObjectId(dataRefreshTokenDto.deviceId),
       ip: ip,
       title: this.getNameUserAgent(userAgent),
       lastActiveDate: dataRefreshTokenDto.issuedAd,
       expirationTime: dataRefreshTokenDto.expirationTime,
-      userId: CastToObjectId(dataRefreshTokenDto.userId),
+      userId: castToObjectId(dataRefreshTokenDto.userId),
     };
 
     const newSecurityDevices =
@@ -92,7 +92,7 @@ export class SecurityDevicesService {
       title: this.getNameUserAgent(userAgent),
       lastActiveDate: dataRefreshTokenDto.issuedAd,
       expirationTime: dataRefreshTokenDto.expirationTime,
-      userId: CastToObjectId(dataRefreshTokenDto.userId),
+      userId: castToObjectId(dataRefreshTokenDto.userId),
     };
 
     device.updateSecurityDeviceSession(dataUpdate);

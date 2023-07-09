@@ -108,8 +108,8 @@ export class PostsService {
     userId: string,
     likeStatus: LikeStatus,
   ): Promise<boolean> {
-    const post = await this.postsRepository.findPostById(postId);
-    if (!post) return false;
+    const postExists = await this.postsRepository.postExists(postId);
+    if (!postExists) return false;
 
     const user = await this.usersService.findUserById(userId);
     if (!user) return false;
@@ -120,7 +120,16 @@ export class PostsService {
       user.accountData.login,
       likeStatus,
     );
-    post.updateCountLikeDislike(countLikeDislyke);
+
+    const isUpdated = await this.postsRepository.updateCountLikeDislike(
+      postId,
+      countLikeDislyke,
+    );
+    if (!isUpdated) return false;
+
+    const post = await this.postsRepository.findPostById(postId);
+    if (!post) return false;
+    // post.updateCountLikeDislike(countLikeDislyke);
     post.newestLikes = await this.likePostsService.getNewestLikes(post.id);
 
     await this.postsRepository.save(post);

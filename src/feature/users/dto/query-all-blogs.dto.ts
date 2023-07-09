@@ -5,25 +5,10 @@ enum sortDirection {
   desc = 'desc',
 }
 
-export enum BanStatus {
-  all = 'all',
-  banned = 'banned',
-  notBanned = 'notBanned',
-}
-
-export class QueryUserDto {
-  @IsOptional()
-  @IsString()
-  @IsEnum(BanStatus)
-  readonly banStatus: BanStatus;
-
+export class QueryParamsAllBlogs {
   @IsString()
   @IsOptional()
-  readonly searchLoginTerm: string;
-
-  @IsString()
-  @IsOptional()
-  readonly searchEmailTerm: string;
+  readonly searchNameTerm: string;
 
   @IsString()
   @IsOptional()

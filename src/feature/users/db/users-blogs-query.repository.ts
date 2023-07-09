@@ -1,14 +1,23 @@
 import { Injectable } from '@nestjs/common';
-import { Blog, BlogDocument, BlogModelType } from './blog.schema';
+import { QueryParamsAllBlogs } from '../dto/query-all-blogs.dto';
+import {
+  PaginatorUsersBlogView,
+  UsersBlogViewDto,
+} from '../dto/users-blog-view-model.dto';
+import {
+  Blog,
+  BlogDocument,
+  BlogModelType,
+} from '../../../feature/blogs/blog.schema';
 import { InjectModel } from '@nestjs/mongoose';
-import { PaginatorBlogView, ViewBlogDto } from './dto/view-blog.dto';
-import { QueryParams } from '../../dto';
 
 @Injectable()
-export class BlogsQueryRepository {
+export class UsersBlogsQueryRepository {
   constructor(@InjectModel(Blog.name) private BlogModel: BlogModelType) {}
 
-  async getBlogs(queryParams: QueryParams): Promise<PaginatorBlogView> {
+  async getAllUsersBlogs(
+    queryParams: QueryParamsAllBlogs,
+  ): Promise<PaginatorUsersBlogView> {
     const searchNameTerm: string = queryParams.searchNameTerm ?? '';
     const pageNumber: number = queryParams.pageNumber
       ? +queryParams.pageNumber
@@ -16,7 +25,7 @@ export class BlogsQueryRepository {
     const pageSize: number = queryParams.pageSize ? +queryParams.pageSize : 10;
     const sortBy: string = queryParams.sortBy ?? 'createdAt';
     const sortDirection: string = queryParams.sortDirection ?? 'desc';
-    const filter: any = { 'blogOwner.isBanned': false };
+    const filter: any = {};
 
     if (searchNameTerm) {
       filter.name = { $regex: searchNameTerm, $options: 'i' };
@@ -36,20 +45,14 @@ export class BlogsQueryRepository {
       pageSize: pageSize,
       totalCount: totalCount,
       items: await Promise.all(
-        blogs.map((blog) => this.blogDBToBlogView(blog)),
+        blogs.map((blog) => this.usersBlogDBToUsersBlogView(blog)),
       ),
     };
   }
 
-  async getBlogById(id: string): Promise<ViewBlogDto | null> {
-    const blog = await this.BlogModel.findById(id).exec();
-    if (!blog) return null;
-    if (!blog.blogOwner.isBanned) return null;
-
-    return this.blogDBToBlogView(blog);
-  }
-
-  async blogDBToBlogView(blog: BlogDocument): Promise<ViewBlogDto> {
+  private async usersBlogDBToUsersBlogView(
+    blog: BlogDocument,
+  ): Promise<UsersBlogViewDto> {
     return {
       id: blog._id.toString(),
       name: blog.name,
@@ -57,6 +60,10 @@ export class BlogsQueryRepository {
       websiteUrl: blog.websiteUrl,
       createdAt: blog.createdAt.toISOString(),
       isMembership: blog.isMembership,
+      blogOwnerInfo: {
+        userId: blog.blogOwner.userId.toString(),
+        userLogin: blog.blogOwner.userLogin,
+      },
     };
   }
 }

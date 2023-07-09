@@ -29,7 +29,10 @@ export class CommentsQueryRepository {
     const post = await this.PostModel.findById(postId).exec();
     if (!post) return null;
 
-    const filter = { postId: new Types.ObjectId(postId) };
+    const filter = {
+      postId: new Types.ObjectId(postId),
+      'commentatorInfo.isBanned': false,
+    };
     const totalCount: number = await this.CommentModel.countDocuments(filter);
 
     const skip = (pageNumber - 1) * pageSize;
@@ -56,6 +59,7 @@ export class CommentsQueryRepository {
   ): Promise<ViewCommentDto | null> {
     const comment = await this.CommentModel.findById(id).exec();
     if (!comment) return null;
+    if (comment.commentatorInfo.isBanned) return null;
 
     return this.commentDBToCommentView(comment, userId);
   }

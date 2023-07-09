@@ -5,7 +5,7 @@ import {
   LikeCommentsModelType,
 } from './like-comments.schema';
 import { InjectModel } from '@nestjs/mongoose';
-import { CastToObjectId } from '../../utils';
+import { castToObjectId } from '../../utils';
 import { LikeStatus } from '../likes/dto/like-status';
 
 @Injectable()
@@ -20,8 +20,8 @@ export class LikeCommentsRepository {
     userId: string,
   ): Promise<LikeCommentsDocument | null> {
     return this.LikeCommentsModel.findOne({
-      commentId: CastToObjectId(commentId),
-      userId: CastToObjectId(userId),
+      commentId: castToObjectId(commentId),
+      userId: castToObjectId(userId),
     }).exec();
   }
 
@@ -40,5 +40,9 @@ export class LikeCommentsRepository {
 
   async save(like: LikeCommentsDocument) {
     return like.save();
+  }
+
+  async findLikesByUserId(userId: string) {
+    return this.LikeCommentsModel.find({ userId: castToObjectId(userId) });
   }
 }

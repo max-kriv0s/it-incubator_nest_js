@@ -19,7 +19,7 @@ import { Response } from 'express';
 import { AuthService } from './auth.service';
 import { ViewMeDto } from './dto/view-me.dto';
 import { CurrentUserId } from './decorators/current-user-id.param.decorator';
-import { UsersQueryRepository } from '../users/users-query.repository';
+import { UsersQueryRepository } from '../users/db/users-query.repository';
 import { AccessJwtAuthGuard } from './guard/jwt.guard';
 import { RegistrationEmailResendingDto } from './dto/registration-email-resending.dto';
 import { UsersService } from '../users/users.service';
