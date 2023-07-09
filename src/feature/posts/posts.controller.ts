@@ -50,25 +50,25 @@ export class PostsController {
     return this.postsQueryRepository.getPosts(queryParams, userId);
   }
 
-  @UseGuards(BasicAuthGuard)
-  @Post()
-  async createPost(
-    @Body() postDto: CreatePostDto,
-    @CurrentUserId(false) userId: string,
-  ): Promise<ViewPostDto> {
-    const postId = await this.postsService.createPost(postDto);
-    if (!postId)
-      throw new BadRequestException([
-        GetFieldError('Blog not found', 'blogId'),
-      ]);
-    const postView = await this.postsQueryRepository.getPostById(
-      postId,
-      userId,
-    );
+  // @UseGuards(BasicAuthGuard)
+  // @Post()
+  // async createPost(
+  //   @Body() postDto: CreatePostDto,
+  //   @CurrentUserId(false) userId: string,
+  // ): Promise<ViewPostDto> {
+  //   const postId = await this.postsService.createPost(postDto);
+  //   if (!postId)
+  //     throw new BadRequestException([
+  //       GetFieldError('Blog not found', 'blogId'),
+  //     ]);
+  //   const postView = await this.postsQueryRepository.getPostById(
+  //     postId,
+  //     userId,
+  //   );
 
-    if (!postView) throw new NotFoundException('Post not found');
-    return postView;
-  }
+  //   if (!postView) throw new NotFoundException('Post not found');
+  //   return postView;
+  // }
 
   @Get(':id')
   async getPostById(
@@ -80,25 +80,25 @@ export class PostsController {
     return postView;
   }
 
-  @UseGuards(BasicAuthGuard)
-  @Put(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async updatePost(
-    @Param('id', IdValidationPipe) id: string,
-    @Body() postDto: UpdatePostDto,
-  ) {
-    const result = await this.postsService.updatePost(id, postDto);
-    return replyByNotification(result);
-  }
+  // @UseGuards(BasicAuthGuard)
+  // @Put(':id')
+  // @HttpCode(HttpStatus.NO_CONTENT)
+  // async updatePost(
+  //   @Param('id', IdValidationPipe) id: string,
+  //   @Body() postDto: UpdatePostDto,
+  // ) {
+  //   const result = await this.postsService.updatePost(id, postDto);
+  //   return replyByNotification(result);
+  // }
 
-  @UseGuards(BasicAuthGuard)
-  @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteBlog(@Param('id', IdValidationPipe) id: string) {
-    const isDeleted = await this.postsService.deletePostById(id);
-    if (!isDeleted) throw new NotFoundException('Post not found');
-    return;
-  }
+  // @UseGuards(BasicAuthGuard)
+  // @Delete(':id')
+  // @HttpCode(HttpStatus.NO_CONTENT)
+  // async deleteBlog(@Param('id', IdValidationPipe) id: string) {
+  //   const isDeleted = await this.postsService.deletePostById(id);
+  //   if (!isDeleted) throw new NotFoundException('Post not found');
+  //   return;
+  // }
 
   @Get(':postId/comments')
   async findCommentsByPostId(
