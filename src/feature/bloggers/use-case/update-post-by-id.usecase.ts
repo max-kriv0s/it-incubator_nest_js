@@ -20,7 +20,9 @@ export class UpdatePostByIdCommand {
 }
 
 @CommandHandler(UpdatePostByIdCommand)
-export class UpdatePostByIdUseCase implements ICommandHandler {
+export class UpdatePostByIdUseCase
+  implements ICommandHandler<UpdatePostByIdCommand>
+{
   constructor(
     private readonly postsService: PostsService,
     private readonly blogsService: BlogsService,
@@ -42,7 +44,7 @@ export class UpdatePostByIdUseCase implements ICommandHandler {
     }
 
     const postUpdateDto: UpdatePostDto = {
-      title: command.updateDto.content,
+      title: command.updateDto.title,
       shortDescription: command.updateDto.shortDescription,
       content: command.updateDto.content,
       blogId: command.blogId,

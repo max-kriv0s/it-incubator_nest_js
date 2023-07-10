@@ -129,7 +129,7 @@ export class BloggersController {
   }
 
   @HttpCode(HttpStatus.NO_CONTENT)
-  @Put(':blogId}/posts/:postId')
+  @Put(':blogId/posts/:postId')
   async updatePostById(
     @Param('blogId', IdValidationPipe) blogId: string,
     @Param('postId', IdValidationPipe) postId: string,
@@ -143,7 +143,7 @@ export class BloggersController {
   }
 
   @HttpCode(HttpStatus.NO_CONTENT)
-  @Delete(':blogId}/posts/:postId')
+  @Delete(':blogId/posts/:postId')
   async deletePostById(
     @Param('blogId', IdValidationPipe) blogId: string,
     @Param('postId', IdValidationPipe) postId: string,

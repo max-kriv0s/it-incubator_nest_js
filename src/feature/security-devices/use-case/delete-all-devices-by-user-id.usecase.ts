@@ -6,7 +6,9 @@ export class DeleteAllDevicesByUsersIdCommand {
 }
 
 @CommandHandler(DeleteAllDevicesByUsersIdCommand)
-export class DeleteAllDevicesByUsersIdUseCase implements ICommandHandler {
+export class DeleteAllDevicesByUsersIdUseCase
+  implements ICommandHandler<DeleteAllDevicesByUsersIdCommand>
+{
   constructor(
     private readonly securityDevicesRepository: SecurityDevicesRepository,
   ) {}

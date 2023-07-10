@@ -11,7 +11,9 @@ export class CountLikesCommentsCommand {
 }
 
 @CommandHandler(CountLikesCommentsCommand)
-export class CountLikesCommentsUseCase implements ICommandHandler {
+export class CountLikesCommentsUseCase
+  implements ICommandHandler<CountLikesCommentsCommand>
+{
   constructor(
     private readonly commentsRepository: CommentsRepository,
     private readonly likeCommentsRepository: LikeCommentsRepository,

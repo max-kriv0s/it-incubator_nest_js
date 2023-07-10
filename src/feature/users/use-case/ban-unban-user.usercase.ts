@@ -21,7 +21,9 @@ export class BanUnbanUserCommand {
 }
 
 @CommandHandler(BanUnbanUserCommand)
-export class BanUnbanUserUseCase implements ICommandHandler {
+export class BanUnbanUserUseCase
+  implements ICommandHandler<BanUnbanUserCommand>
+{
   constructor(
     private commandBus: CommandBus,
     private readonly usersRepository: UsersRepository,

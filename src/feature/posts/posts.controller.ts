@@ -1,8 +1,6 @@
 import {
-  BadRequestException,
   Body,
   Controller,
-  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -15,9 +13,7 @@ import {
 } from '@nestjs/common';
 import { PostsQueryRepository } from './posts-query.repository';
 import { PostsService } from './posts.service';
-import { UpdatePostDto } from './dto/update-post.dto';
 import { PaginatorPostView, ViewPostDto } from './dto/view-post.dto';
-import { CreatePostDto } from './dto/create-post.dto';
 import { QueryParams } from '../../dto';
 import {
   PaginatorCommentView,
@@ -25,14 +21,11 @@ import {
 } from '../comments/dto/view-comment.dto';
 import { CommentsQueryRepository } from '../comments/comments-query.repository';
 import { AccessJwtAuthGuard } from '../auth/guard/jwt.guard';
-import { BasicAuthGuard } from '../auth/guard/basic-auth.guard';
 import { CurrentUserId } from '../auth/decorators/current-user-id.param.decorator';
 import { CreateCommentDto } from '../comments/dto/create-comment.dto';
 import { ParamPostIdDto } from './dto/param-post-id.dto';
 import { LikeInputDto } from '../likes/dto/like-input.dto';
-import { GetFieldError } from '../../utils';
 import { IdValidationPipe } from '../../modules/pipes/id-validation.pipe';
-import { replyByNotification } from '../../modules/notification';
 
 @Controller('posts')
 export class PostsController {

@@ -6,7 +6,9 @@ export class SetBanUnbanBlogsCommand {
 }
 
 @CommandHandler(SetBanUnbanBlogsCommand)
-export class SetBanUnbanBlogsUseCase implements ICommandHandler {
+export class SetBanUnbanBlogsUseCase
+  implements ICommandHandler<SetBanUnbanBlogsCommand>
+{
   constructor(private readonly blogsRepository: BlogsRepository) {}
 
   async execute(command: SetBanUnbanBlogsCommand): Promise<boolean> {

@@ -74,7 +74,7 @@ export class User {
   @Prop()
   passwordRecovery: UserPasswordRecovery;
 
-  @Prop()
+  @Prop({ required: true })
   banInfo: BanInfo;
 
   static createUser(
@@ -98,6 +98,7 @@ export class User {
         recoveryCode: '',
         expirationDate: new Date(0),
       },
+      banInfo: {},
     };
 
     const newUser = new UserModel(data);

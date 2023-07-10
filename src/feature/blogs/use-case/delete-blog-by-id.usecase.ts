@@ -11,7 +11,9 @@ export class DeleteBlogByIdCommand {
 }
 
 @CommandHandler(DeleteBlogByIdCommand)
-export class DeleteBlogByIdUseCase implements ICommandHandler {
+export class DeleteBlogByIdUseCase
+  implements ICommandHandler<DeleteBlogByIdCommand>
+{
   constructor(
     private readonly blogsRepository: BlogsRepository,
     private readonly blogsService: BlogsService,

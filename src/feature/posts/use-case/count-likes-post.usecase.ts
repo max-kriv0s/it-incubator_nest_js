@@ -10,7 +10,9 @@ export class CountLikesPostsCommand {
 }
 
 @CommandHandler(CountLikesPostsCommand)
-export class CountLikesPostsUseCase implements ICommandHandler {
+export class CountLikesPostsUseCase
+  implements ICommandHandler<CountLikesPostsCommand>
+{
   constructor(
     private readonly postsRepository: PostsRepository,
     private readonly likePostsRepository: LikePostsRepository,
@@ -22,12 +24,11 @@ export class CountLikesPostsUseCase implements ICommandHandler {
     );
     if (!likes) return false;
 
-    await Promise.all(
-      likes.map((like) => {
-        this.updateBanLike(like, command.ban);
-        this.updateCountLikeDislike(like);
-      }),
-    );
+    for (const like of likes) {
+      await this.updateBanLike(like, command.ban);
+      await this.updateCountLikeDislike(like, command.ban);
+      await this.updatePostNewestLikes(like.postId.toString());
+    }
 
     return true;
   }
@@ -37,14 +38,24 @@ export class CountLikesPostsUseCase implements ICommandHandler {
     this.likePostsRepository.save(like);
   }
 
-  private async updateCountLikeDislike(like: LikePostsDocument) {
+  private async updateCountLikeDislike(like: LikePostsDocument, ban: boolean) {
+    const count = ban ? -1 : 1;
+
     const countDto: CountLikeDislikeDto = {
-      countLike: like.status === LikeStatus.Like ? -1 : 0,
-      countDislike: like.status === LikeStatus.Dislike ? -1 : 0,
+      countLike: like.status === LikeStatus.Like ? count : 0,
+      countDislike: like.status === LikeStatus.Dislike ? count : 0,
     };
     this.postsRepository.updateCountLikeDislike(
       like.postId.toString(),
       countDto,
     );
+  }
+
+  private async updatePostNewestLikes(postId: string) {
+    const post = await this.postsRepository.findPostById(postId);
+    if (post) {
+      post.newestLikes = await this.likePostsRepository.getNewestLikes(post.id);
+      await this.postsRepository.save(post);
+    }
   }
 }

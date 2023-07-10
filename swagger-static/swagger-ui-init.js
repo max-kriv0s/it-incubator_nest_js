@@ -699,7 +699,7 @@ window.onload = function() {
           }
         }
       },
-      "/blogger/blogs/{blogId}}/posts/{postId}": {
+      "/blogger/blogs/{blogId}/posts/{postId}": {
         "put": {
           "operationId": "BloggersController_updatePostById",
           "parameters": [

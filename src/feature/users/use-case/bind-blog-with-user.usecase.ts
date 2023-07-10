@@ -11,7 +11,9 @@ export class BindBlogWithUserCommand {
 }
 
 @CommandHandler(BindBlogWithUserCommand)
-export class BindBlogWithUserUseCase implements ICommandHandler {
+export class BindBlogWithUserUseCase
+  implements ICommandHandler<BindBlogWithUserCommand>
+{
   constructor(
     private readonly blogsService: BlogsService,
     private readonly usersService: UsersService,

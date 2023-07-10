@@ -73,6 +73,19 @@ import { BloggerQueryRepository } from './feature/bloggers/db/blogger-query.repo
 import { CqrsModule } from '@nestjs/cqrs';
 import { UsersBlogsController } from './feature/users/users-blogs.controller';
 import { UsersBlogsQueryRepository } from './feature/users/db/users-blogs-query.repository';
+import { CreateBlogUseCase } from './feature/blogs/use-case/create-blog.usecase';
+import { DeletePostByIdUseCase } from './feature/bloggers/use-case/delete-post-by-id.usecase';
+import { UpdatePostByIdUseCase } from './feature/bloggers/use-case/update-post-by-id.usecase';
+import { CreatePostByBlogIdUseCase } from './feature/blogs/use-case/create-post-by-blog-id.usecase';
+import { DeleteBlogByIdUseCase } from './feature/blogs/use-case/delete-blog-by-id.usecase';
+import { SetBanUnbanBlogsUseCase } from './feature/blogs/use-case/set-ban-unbane-blogs.usecase';
+import { UpdateExistingBlogByIdUseCase } from './feature/blogs/use-case/update-existing-blog-by-id.usecase';
+import { CountLikesCommentsUseCase } from './feature/comments/use-case/count-likes-comments.usecase';
+import { SetBanUnbanCommentsUseCase } from './feature/comments/use-case/set-ban-unbane-comments.usecase';
+import { CountLikesPostsUseCase } from './feature/posts/use-case/count-likes-post.usecase';
+import { DeleteAllDevicesByUsersIdUseCase } from './feature/security-devices/use-case/delete-all-devices-by-user-id.usecase';
+import { BanUnbanUserUseCase } from './feature/users/use-case/ban-unban-user.usercase';
+import { BindBlogWithUserUseCase } from './feature/users/use-case/bind-blog-with-user.usecase';
 
 const apiCallsAdapters = [ApiCallsConfig, ApiCallsService, ApiCallsRepository];
 const authAdapters = [
@@ -118,6 +131,22 @@ const usersAdapters = [
   UsersRepository,
   UsersQueryRepository,
   UsersBlogsQueryRepository,
+];
+
+const useCases = [
+  CreateBlogUseCase,
+  DeletePostByIdUseCase,
+  UpdatePostByIdUseCase,
+  CreatePostByBlogIdUseCase,
+  DeleteBlogByIdUseCase,
+  SetBanUnbanBlogsUseCase,
+  UpdateExistingBlogByIdUseCase,
+  CountLikesCommentsUseCase,
+  SetBanUnbanCommentsUseCase,
+  CountLikesPostsUseCase,
+  DeleteAllDevicesByUsersIdUseCase,
+  BanUnbanUserUseCase,
+  BindBlogWithUserUseCase,
 ];
 
 @Module({
@@ -187,6 +216,7 @@ const usersAdapters = [
       provide: APP_GUARD,
       useClass: OptionalJwtTokenGuard,
     },
+    ...useCases,
   ],
   exports: [ApiCallsConfig],
 })

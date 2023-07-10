@@ -17,7 +17,9 @@ export class CreatePostByBlogIdCommand {
 }
 
 @CommandHandler(CreatePostByBlogIdCommand)
-export class CreatePostByBlogIdUseCase implements ICommandHandler {
+export class CreatePostByBlogIdUseCase
+  implements ICommandHandler<CreatePostByBlogIdCommand>
+{
   constructor(
     private readonly postsService: PostsService,
     private readonly blogsRepository: BlogsRepository,
