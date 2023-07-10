@@ -32,7 +32,7 @@ export class DeletePostByIdUseCase
       return result;
     }
     if (!blog.thisIsOwner(command.userId)) {
-      result.addError('Access is denied', ResultCodeError.NotFound);
+      result.addError('Access is denied', ResultCodeError.Forbidden);
       return result;
     }
 

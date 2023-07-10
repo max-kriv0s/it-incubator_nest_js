@@ -59,7 +59,7 @@ export class BlogsQueryRepository {
   async getBlogById(id: string): Promise<ViewBlogDto | null> {
     const blog = await this.BlogModel.findById(id).exec();
     if (!blog) return null;
-    if (!blog.blogOwner.isBanned) return null;
+    if (blog.blogOwner.isBanned) return null;
 
     return this.blogDBToBlogView(blog);
   }

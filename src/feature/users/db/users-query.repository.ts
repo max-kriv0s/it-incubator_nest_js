@@ -5,6 +5,8 @@ import { User, UserDocument, UserModelType } from '../user.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { ViewMeDto } from '../../auth/dto/view-me.dto';
 
+const emptyDate = new Date(0).getTime();
+
 @Injectable()
 export class UsersQueryRepository {
   constructor(@InjectModel(User.name) private UserModel: UserModelType) {}
@@ -71,9 +73,10 @@ export class UsersQueryRepository {
       createdAt: user.accountData.createdAt.toISOString(),
       banInfo: {
         isBanned: user.banInfo.isBanned,
-        banDate: user.banInfo.banDate
-          ? user.banInfo.banDate.toISOString()
-          : null,
+        banDate:
+          user.banInfo.banDate.getTime() === emptyDate
+            ? null
+            : user.banInfo.banDate.toISOString(),
         banReason: user.banInfo.banReason ? user.banInfo.banReason : null,
       },
     };
