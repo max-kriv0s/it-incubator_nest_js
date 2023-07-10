@@ -1,6 +1,6 @@
 import { IsEnum, IsOptional, IsString } from 'class-validator';
 
-enum sortDirection {
+enum SortDirection {
   asc = 'asc',
   desc = 'desc',
 }
@@ -31,8 +31,8 @@ export class QueryUserDto {
 
   @IsString()
   @IsOptional()
-  @IsEnum(sortDirection)
-  readonly sortDirection: sortDirection;
+  @IsEnum(SortDirection)
+  readonly sortDirection: SortDirection;
 
   @IsOptional()
   @IsString()
