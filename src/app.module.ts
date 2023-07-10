@@ -72,6 +72,7 @@ import { BloggersController } from './feature/bloggers/bloggers.controller';
 import { BloggerQueryRepository } from './feature/bloggers/db/blogger-query.repository';
 import { CqrsModule } from '@nestjs/cqrs';
 import { UsersBlogsController } from './feature/users/users-blogs.controller';
+import { UsersBlogsQueryRepository } from './feature/users/db/users-blogs-query.repository';
 
 const apiCallsAdapters = [ApiCallsConfig, ApiCallsService, ApiCallsRepository];
 const authAdapters = [

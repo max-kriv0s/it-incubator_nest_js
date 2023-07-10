@@ -1,9 +1,10 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { LikePostsDocument } from '../like-posts.schema';
+
 import { CountLikeDislikeDto } from '../../../feature/likes/dto/count-like-dislike.dto';
 import { LikeStatus } from 'src/feature/likes/dto/like-status';
 import { CommentsRepository } from '../comments.repository';
 import { LikeCommentsRepository } from '../like-comments.repository';
+import { LikeCommentsDocument } from '../like-comments.schema';
 
 export class CountLikesCommentsCommand {
   constructor(public userId: string, public ban: boolean) {}
@@ -32,12 +33,12 @@ export class CountLikesCommentsUseCase implements ICommandHandler {
     return true;
   }
 
-  private async updateBanLike(like: LikePostsDocument, ban: boolean) {
+  private async updateBanLike(like: LikeCommentsDocument, ban: boolean) {
     like.setUserIsBanned(ban);
     this.likeCommentsRepository.save(like);
   }
 
-  private async updateCountLikeDislike(like: LikePostsDocument) {
+  private async updateCountLikeDislike(like: LikeCommentsDocument) {
     const countDto: CountLikeDislikeDto = {
       countLike: like.status === LikeStatus.Like ? -1 : 0,
       countDislike: like.status === LikeStatus.Dislike ? -1 : 0,
