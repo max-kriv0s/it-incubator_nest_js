@@ -28,7 +28,7 @@ export class CountLikesCommentsUseCase
     await Promise.all(
       likes.map((like) => {
         this.updateBanLike(like, command.ban);
-        this.updateCountLikeDislike(like);
+        this.updateCountLikeDislike(like, command.ban);
       }),
     );
 
@@ -40,10 +40,15 @@ export class CountLikesCommentsUseCase
     this.likeCommentsRepository.save(like);
   }
 
-  private async updateCountLikeDislike(like: LikeCommentsDocument) {
+  private async updateCountLikeDislike(
+    like: LikeCommentsDocument,
+    ban: boolean,
+  ) {
+    const count = ban ? -1 : 1;
+
     const countDto: CountLikeDislikeDto = {
-      countLike: like.status === LikeStatus.Like ? -1 : 0,
-      countDislike: like.status === LikeStatus.Dislike ? -1 : 0,
+      countLike: like.status === LikeStatus.Like ? count : 0,
+      countDislike: like.status === LikeStatus.Dislike ? count : 0,
     };
     this.commentsRepository.updateCountLikeDislike(
       like.commentId.toString(),
