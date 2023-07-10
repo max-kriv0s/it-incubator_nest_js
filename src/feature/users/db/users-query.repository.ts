@@ -71,7 +71,9 @@ export class UsersQueryRepository {
       createdAt: user.accountData.createdAt.toISOString(),
       banInfo: {
         isBanned: user.banInfo.isBanned,
-        banDate: user.banInfo.banDate.toISOString(),
+        banDate: user.banInfo.banDate
+          ? user.banInfo.banDate.toISOString()
+          : user.banInfo.banDate,
         banReason: user.banInfo.banReason,
       },
     };
