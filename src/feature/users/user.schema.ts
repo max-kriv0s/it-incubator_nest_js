@@ -52,10 +52,10 @@ export class BanInfo {
   isBanned: boolean;
 
   @Prop({ default: null })
-  banDate: Date | null;
+  banDate: Date;
 
   @Prop({ default: null })
-  banReason: string | null;
+  banReason: string;
 }
 
 @Schema()
@@ -131,8 +131,8 @@ export class User {
       this.banInfo.banReason = banDto.banReason;
       this.banInfo.banDate = new Date();
     } else {
-      this.banInfo.banReason = null;
-      this.banInfo.banDate = null;
+      this.banInfo.banReason = '';
+      this.banInfo.banDate = new Date(0);
     }
   }
 }

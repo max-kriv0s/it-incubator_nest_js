@@ -73,8 +73,8 @@ export class UsersQueryRepository {
         isBanned: user.banInfo.isBanned,
         banDate: user.banInfo.banDate
           ? user.banInfo.banDate.toISOString()
-          : user.banInfo.banDate,
-        banReason: user.banInfo.banReason,
+          : null,
+        banReason: user.banInfo.banReason ? user.banInfo.banReason : null,
       },
     };
   }
