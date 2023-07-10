@@ -51,10 +51,10 @@ export class BanInfo {
   @Prop({ default: false })
   isBanned: boolean;
 
-  @Prop({ default: new Date(0) })
+  @Prop({ default: null })
   banDate: Date;
 
-  @Prop({ default: '' })
+  @Prop({ default: null })
   banReason: string;
 }
 
