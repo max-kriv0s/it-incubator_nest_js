@@ -120,7 +120,7 @@ export class PostsService {
       user.accountData.login,
       likeStatus,
     );
-
+    // записывать newestLikes при обновлении
     const isUpdated = await this.postsRepository.updateCountLikeDislike(
       postId,
       countLikeDislyke,

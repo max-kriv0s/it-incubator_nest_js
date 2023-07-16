@@ -47,6 +47,7 @@ export class BanUnbanUserUseCase
       isBanned: command.dto.isBanned,
     };
 
+    // убрать промисы
     await Promise.all([
       this.deleteAllDevicesByUsersId(banUserDto),
       this.commandBus.execute(
@@ -69,7 +70,7 @@ export class BanUnbanUserUseCase
     return result;
   }
 
-  async deleteAllDevicesByUsersId(banUserDto: BanUserDto) {
+  private async deleteAllDevicesByUsersId(banUserDto: BanUserDto) {
     if (banUserDto.isBanned) {
       await this.commandBus.execute(
         new DeleteAllDevicesByUsersIdCommand(banUserDto.userId),

@@ -17,6 +17,7 @@ export class SetBanUnbanBlogsUseCase
     );
     if (!blogs) return false;
 
+    // убрать промис
     await Promise.all(
       blogs.map((blog) => {
         blog.setBanUnbaneOwner(command.valueBan);
