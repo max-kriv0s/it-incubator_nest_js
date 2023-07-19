@@ -42,4 +42,8 @@ export class BloggersRepository {
   ): Promise<BloggerBannedUsersDocument> {
     return bannedUser.save();
   }
+
+  async deleteBloggerBannedUsers() {
+    this.BloggerBannedUsersModel.deleteMany({});
+  }
 }

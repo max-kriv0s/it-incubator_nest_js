@@ -7,6 +7,7 @@ import { SecurityDevicesRepository } from '../security-devices/security-devices.
 import { LikePostsRepository } from '../posts/like-posts.repository';
 import { ApiCallsRepository } from '../api-calls/api-calls.repository';
 import { LikeCommentsRepository } from '../comments/like-comments.repository';
+import { BloggersRepository } from '../bloggers/db/bloggers.repository';
 
 @Injectable()
 export class TestingService {
@@ -19,6 +20,7 @@ export class TestingService {
     private readonly likePostsRepository: LikePostsRepository,
     private readonly likeCommentsRepository: LikeCommentsRepository,
     private readonly apiCallsRepository: ApiCallsRepository,
+    private readonly bloggersRepository: BloggersRepository,
   ) {}
 
   async deleteAllData() {
@@ -31,6 +33,7 @@ export class TestingService {
       this.likePostsRepository.deleteLikesPosts(),
       this.likeCommentsRepository.deleteLikesComments(),
       this.apiCallsRepository.deleteCalls(),
+      this.bloggersRepository.deleteBloggerBannedUsers(),
     ]);
   }
 }

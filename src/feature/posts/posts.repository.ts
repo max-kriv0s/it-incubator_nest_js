@@ -5,6 +5,7 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { CreateBlogPostDto } from '../blogs/dto/create-blog-post.dto';
 import { CountLikeDislikeDto } from '../likes/dto/count-like-dislike.dto';
 import { castToObjectId } from '../../utils';
+import { Types } from 'mongoose';
 
 @Injectable()
 export class PostsRepository {
@@ -62,5 +63,20 @@ export class PostsRepository {
 
   async postExists(id: string): Promise<number> {
     return this.PostModel.countDocuments({ _id: castToObjectId(id) });
+  }
+
+  async findPostsByblogId(blogId: string): Promise<PostDocument[]> {
+    return this.PostModel.find({ blogId: castToObjectId(blogId) });
+  }
+
+  async updateBlockingFlagForPosts(
+    postsId: Types.ObjectId[],
+    isBanned: boolean,
+  ): Promise<boolean> {
+    const result = await this.PostModel.updateMany(
+      { _id: { $in: postsId } },
+      { isBanned },
+    );
+    return result.acknowledged;
   }
 }

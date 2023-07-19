@@ -113,6 +113,36 @@ window.onload = function() {
           }
         }
       },
+      "/sa/blogs/{id}/ban": {
+        "put": {
+          "operationId": "UsersBlogsController_banUnbanBlog",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserBanBlogInputDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "204": {
+              "description": ""
+            }
+          }
+        }
+      },
       "/sa/blogs/{id}/bind-with-user/{userId}": {
         "put": {
           "operationId": "UsersBlogsController_bindBlogWithUser",
@@ -845,6 +875,10 @@ window.onload = function() {
           "properties": {}
         },
         "BanUnbanUserDto": {
+          "type": "object",
+          "properties": {}
+        },
+        "UserBanBlogInputDto": {
           "type": "object",
           "properties": {}
         },

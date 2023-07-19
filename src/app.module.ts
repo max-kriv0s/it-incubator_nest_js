@@ -95,6 +95,7 @@ import {
   BloggerBannedUsers,
   BloggerBannedUsersSchema,
 } from './feature/bloggers/model/blogger-banned-users.schema';
+import { UserBanUnbanBlogUseCase } from './feature/users/use-case/user-ban-unban-blog.usecase';
 
 const apiCallsAdapters = [ApiCallsConfig, ApiCallsService, ApiCallsRepository];
 const authAdapters = [
@@ -157,6 +158,7 @@ const useCases = [
   BanUnbanUserUseCase,
   BindBlogWithUserUseCase,
   BloggerBanUnbanUserUseCase,
+  UserBanUnbanBlogUseCase,
 ];
 
 @Module({
