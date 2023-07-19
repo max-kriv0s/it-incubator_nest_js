@@ -762,6 +762,67 @@ window.onload = function() {
             }
           }
         }
+      },
+      "/blogger/blogs/comments": {
+        "get": {
+          "operationId": "BloggersController_allCommentsForAllPostsInsideBlogs",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": ""
+            }
+          }
+        }
+      },
+      "/blogger/users/{id}/ban": {
+        "put": {
+          "operationId": "BloggersUsersController_BanUnbanUser",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BloggerBanUserInputDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "204": {
+              "description": ""
+            }
+          }
+        }
+      },
+      "/blogger/users/blog/{id}": {
+        "get": {
+          "operationId": "BloggersUsersController_getAllBannedUsersForBlog",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": ""
+            }
+          }
+        }
       }
     },
     "info": {
@@ -828,6 +889,10 @@ window.onload = function() {
           "properties": {}
         },
         "BlogPostUpdateDto": {
+          "type": "object",
+          "properties": {}
+        },
+        "BloggerBanUserInputDto": {
           "type": "object",
           "properties": {}
         }
