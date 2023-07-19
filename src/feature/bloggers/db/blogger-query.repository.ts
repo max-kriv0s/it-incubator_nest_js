@@ -12,7 +12,7 @@ import {
   ViewBloggerBlogDto,
   ViewBloggerPostDto,
 } from '../dto/view-blogger-blogs.dto';
-import { castToObjectId } from 'src/utils';
+import { castToObjectId } from '../../../utils';
 import {
   NewestLikes,
   Post,
@@ -29,6 +29,23 @@ import {
   ResultCodeError,
   ResultNotification,
 } from '../../../modules/notification';
+import {
+  Comment,
+  CommentDocument,
+  CommentModelType,
+} from '../../../feature/comments/comment.schema';
+import {
+  PaginatorViewBloggerCommentsDto,
+  ViewBloggerCommentsDto,
+} from '../dto/view-blogger-comments.dto';
+import { LikeCommentsService } from '../../../feature/comments/like-comments.service';
+import { BloggerBannedUsersQueryParams } from '../dto/blogger-banned-users-query-param.dto';
+import { PaginatorViewBloggerBannedUsersDto } from '../dto/view-blogger-banned-users.dto';
+import {
+  BloggerBannedUsers,
+  BloggerBannedUsersDocument,
+  BloggerBannedUsersModelType,
+} from '../model/blogger-banned-users.schema';
 
 @Injectable()
 export class BloggerQueryRepository {
@@ -36,6 +53,10 @@ export class BloggerQueryRepository {
     @InjectModel(Blog.name) private BlogModel: BlogModelType,
     @InjectModel(Post.name) private PostModel: PostModelType,
     @InjectModel(LikePosts.name) private LikePostsModel: LikePostsModelType,
+    @InjectModel(Comment.name) private CommentModel: CommentModelType,
+    @InjectModel(BloggerBannedUsers.name)
+    private BloggerBannedUsersModel: BloggerBannedUsersModelType,
+    private readonly likeCommentsService: LikeCommentsService,
   ) {}
 
   async getBlogs(
@@ -186,6 +207,142 @@ export class BloggerQueryRepository {
       ),
     };
     result.addData(postsView);
+    return result;
+  }
+
+  async allCommentsForAllPostsInsideBlogs(
+    queryParams: BloggerQueryParams,
+    userId: string,
+  ): Promise<PaginatorViewBloggerCommentsDto> {
+    const pageNumber: number = +queryParams.pageNumber || 1;
+    const pageSize: number = +queryParams.pageSize || 10;
+    const sortBy: string = queryParams.sortBy || 'createdAt';
+    const sortDirection = queryParams.sortDirection || 'desc';
+
+    const blogs = await this.BlogModel.find(
+      { 'blogOwner.userId': castToObjectId(userId) },
+      '_id',
+    ).lean();
+    const blogsFilter = blogs.map((blog) => blog._id);
+
+    const posts = await this.PostModel.find(
+      { blogId: { $in: blogsFilter } },
+      '_id',
+    ).lean();
+    const postsFilter = posts.map((post) => post._id);
+
+    const filter = { postId: { $in: postsFilter } };
+    const totalCount: number = await this.CommentModel.countDocuments(filter);
+    const skip = (pageNumber - 1) * pageSize;
+    const comments = await this.CommentModel.find(filter, null, {
+      sort: { [sortBy]: sortDirection === 'asc' ? 1 : -1 },
+      skip: skip,
+      limit: pageSize,
+    }).populate('postId', '_id title blogId blogName', this.PostModel);
+
+    return {
+      pagesCount: Math.ceil(totalCount / pageSize),
+      page: pageNumber,
+      pageSize: pageSize,
+      totalCount: totalCount,
+      items: await Promise.all(
+        comments.map((comment) => this.commentToCommentView(comment, userId)),
+      ),
+    };
+  }
+
+  private async commentToCommentView(
+    comment: CommentDocument,
+    userId: string,
+  ): Promise<ViewBloggerCommentsDto> {
+    let statusMyLike = LikeStatus.None;
+
+    if (userId) {
+      const myLike =
+        await this.likeCommentsService.findLikeByCommentIdAndUserId(
+          comment.id,
+          userId,
+        );
+      if (myLike) statusMyLike = myLike.status;
+    }
+
+    return {
+      id: comment.id,
+      content: comment.content,
+      commentatorInfo: {
+        userId: comment.commentatorInfo.userId.toString(),
+        userLogin: comment.commentatorInfo.userLogin,
+      },
+      createdAt: comment.createdAt.toISOString(),
+      likesInfo: {
+        likesCount: comment.likesCount,
+        dislikesCount: comment.dislikesCount,
+        myStatus: statusMyLike,
+      },
+      postInfo: {
+        id: comment.postId._id.toString(),
+        title: comment.postId.title,
+        blogId: comment.postId.blogId.toString(),
+        blogName: comment.postId.blogName,
+      },
+    };
+  }
+
+  async getAllBannedUsersForBlog(
+    blogId: string,
+    userId: string,
+    queryParams: BloggerBannedUsersQueryParams,
+  ): Promise<PaginatorViewBloggerBannedUsersDto> {
+    const searchLoginTerm: string = queryParams.searchLoginTerm ?? '';
+    const pageNumber: number = queryParams.pageNumber
+      ? +queryParams.pageNumber
+      : 1;
+    const pageSize: number = queryParams.pageSize ? +queryParams.pageSize : 10;
+    const sortBy: string = queryParams.sortBy ?? 'createdAt';
+    const sortDirection: string = queryParams.sortDirection ?? 'desc';
+
+    const result: PaginatorViewBloggerBannedUsersDto = {
+      pagesCount: 0,
+      page: pageNumber,
+      pageSize: pageSize,
+      totalCount: 0,
+      items: [],
+    };
+
+    const blog = await this.BlogModel.findById({
+      _id: castToObjectId(blogId),
+      'blogOwner.userId': castToObjectId(userId),
+    });
+    if (!blog) return result;
+
+    const filter: any = { blogId: castToObjectId(blogId), isBanned: true };
+
+    if (searchLoginTerm) {
+      filter.bannedUserLogin = { $regex: searchLoginTerm, $options: 'i' };
+    }
+
+    result.totalCount = await this.BloggerBannedUsersModel.countDocuments(
+      filter,
+    );
+    result.pagesCount = Math.ceil(result.totalCount / pageSize);
+    const skip = (pageNumber - 1) * pageSize;
+
+    const bannedUsers: BloggerBannedUsersDocument[] =
+      await this.BloggerBannedUsersModel.find(filter, null, {
+        sort: { [sortBy]: sortDirection === 'asc' ? 1 : -1 },
+        skip: skip,
+        limit: pageSize,
+      });
+
+    result.items = bannedUsers.map((user) => ({
+      id: user.bannedUserId.toString(),
+      login: user.bannedUserLogin,
+      banInfo: {
+        isBanned: user.isBanned,
+        banDate: user.banDate ? user.banDate.toISOString() : user.banDate,
+        banReason: user.banReason,
+      },
+    }));
     return result;
   }
 }
