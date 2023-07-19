@@ -213,11 +213,10 @@ export class BloggersUsersController {
     @Query() queryParam: BloggerBannedUsersQueryParams,
     @CurrentUserId() userId: string,
   ) {
-    const result = await this.bloggerQueryRepository.getAllBannedUsersForBlog(
+    return await this.bloggerQueryRepository.getAllBannedUsersForBlog(
       id,
       userId,
       queryParam,
     );
-    if (!result) throw new ForbiddenException();
   }
 }
