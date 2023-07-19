@@ -14,6 +14,7 @@ import {
   ResultCodeError,
   ResultNotification,
 } from '../../modules/notification';
+import { BloggersRepository } from '../bloggers/db/bloggers.repository';
 
 @Injectable()
 export class PostsService {
@@ -23,6 +24,7 @@ export class PostsService {
     private readonly usersService: UsersService,
     private readonly commentsService: CommentsService,
     private readonly likePostsService: LikePostsService,
+    private readonly bloggersRepository: BloggersRepository,
   ) {}
 
   async createPost(postDto: CreatePostDto): Promise<string | null> {
@@ -94,6 +96,13 @@ export class PostsService {
 
     const user = await this.usersService.findUserById(userId);
     if (!user) return null;
+
+    const isBannedUser =
+      await this.bloggersRepository.findBannedUserByblogIdAndUserId(
+        post.blogId.toString(),
+        userId,
+      );
+    if (isBannedUser) return null;
 
     return this.commentsService.createCommentByPostId(
       postId,
