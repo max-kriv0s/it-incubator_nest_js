@@ -2,7 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Model, Types } from 'mongoose';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
-import { CountLikeDislikeDto } from '../likes/dto/count-like-dislike.dto';
+import { Post } from '../posts/post.schema';
 
 export type CommentDocument = HydratedDocument<Comment>;
 
@@ -31,8 +31,8 @@ export class Comment {
   @Prop({ required: true })
   createdAt: Date;
 
-  @Prop({ required: true })
-  postId: Types.ObjectId;
+  @Prop({ required: true, type: Types.ObjectId, ref: Post.name })
+  postId: Post;
 
   @Prop({ default: 0 })
   likesCount: number;
