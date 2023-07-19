@@ -2,7 +2,6 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Model, Types } from 'mongoose';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { CreatePostDto } from './dto/create-post.dto';
-import { CountLikeDislikeDto } from '../likes/dto/count-like-dislike.dto';
 
 export type PostDocument = HydratedDocument<Post>;
 
@@ -35,6 +34,9 @@ export class Post {
 
   @Prop({ required: true })
   blogName: string;
+
+  @Prop({ default: false })
+  isBanned: boolean;
 
   @Prop({ required: true })
   createdAt: Date;
@@ -83,7 +85,6 @@ export class Post {
 
     return new PostModel(data);
   }
-
 }
 
 export const PostSchema = SchemaFactory.createForClass(Post);
