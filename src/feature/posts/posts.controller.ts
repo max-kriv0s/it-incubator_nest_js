@@ -121,7 +121,7 @@ export class PostsController {
       userId,
       createCommentDto,
     );
-    if (!commentId) throw new NotFoundException('Comment not fount');
+    if (!commentId) throw new NotFoundException('Post not fount');
 
     const comment = await this.commentsQueryRepository.getCommentViewById(
       commentId,
