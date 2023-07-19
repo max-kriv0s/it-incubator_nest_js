@@ -3,6 +3,7 @@ import {
   Body,
   Controller,
   Delete,
+  ForbiddenException,
   Get,
   HttpCode,
   HttpStatus,
@@ -212,10 +213,11 @@ export class BloggersUsersController {
     @Query() queryParam: BloggerBannedUsersQueryParams,
     @CurrentUserId() userId: string,
   ) {
-    return await this.bloggerQueryRepository.getAllBannedUsersForBlog(
+    const result = await this.bloggerQueryRepository.getAllBannedUsersForBlog(
       id,
       userId,
       queryParam,
     );
+    if (!result) throw new ForbiddenException();
   }
 }

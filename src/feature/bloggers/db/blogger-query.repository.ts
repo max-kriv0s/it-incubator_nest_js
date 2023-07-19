@@ -292,7 +292,7 @@ export class BloggerQueryRepository {
     blogId: string,
     userId: string,
     queryParams: BloggerBannedUsersQueryParams,
-  ): Promise<PaginatorViewBloggerBannedUsersDto> {
+  ): Promise<PaginatorViewBloggerBannedUsersDto | null> {
     const searchLoginTerm: string = queryParams.searchLoginTerm ?? '';
     const pageNumber: number = queryParams.pageNumber
       ? +queryParams.pageNumber
@@ -301,6 +301,12 @@ export class BloggerQueryRepository {
     const sortBy: string = queryParams.sortBy ?? 'createdAt';
     const sortDirection: string = queryParams.sortDirection ?? 'desc';
 
+    const blog = await this.BlogModel.findById({
+      _id: castToObjectId(blogId),
+      'blogOwner.userId': castToObjectId(userId),
+    });
+    if (!blog) return null;
+
     const result: PaginatorViewBloggerBannedUsersDto = {
       pagesCount: 0,
       page: pageNumber,
@@ -308,12 +314,6 @@ export class BloggerQueryRepository {
       totalCount: 0,
       items: [],
     };
-
-    const blog = await this.BlogModel.findById({
-      _id: castToObjectId(blogId),
-      'blogOwner.userId': castToObjectId(userId),
-    });
-    if (!blog) return result;
 
     const filter: any = { blogId: castToObjectId(blogId), isBanned: true };
 
