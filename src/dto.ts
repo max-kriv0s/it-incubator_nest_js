@@ -29,10 +29,10 @@ export class QueryParams {
 }
 
 export class Paginator {
-  readonly pagesCount: number;
-  readonly page: number;
-  readonly pageSize: number;
-  readonly totalCount: number;
+  pagesCount: number;
+  page: number;
+  pageSize: number;
+  totalCount: number;
 }
 
 export type FieldError = {
