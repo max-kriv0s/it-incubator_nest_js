@@ -16,9 +16,6 @@ export class BlogOwner {
 
   @Prop({ required: true })
   userLogin: string;
-
-  @Prop({ default: false })
-  isBanned?: boolean;
 }
 
 @Schema()
@@ -42,6 +39,12 @@ export class Blog {
 
   @Prop({ required: true })
   blogOwner: BlogOwner;
+
+  @Prop({ default: false })
+  isBanned: boolean;
+
+  @Prop({ type: Date || null, default: null })
+  banDate: Date | null;
 
   static createBlog(
     createDto: CreateUserBlockDto,
@@ -68,8 +71,9 @@ export class Blog {
     return this.blogOwner.userId.toString() === userId;
   }
 
-  setBanUnbaneOwner(value: boolean) {
-    this.blogOwner.isBanned = value;
+  setBanUnbaneOwner(isBanned: boolean) {
+    this.isBanned = isBanned;
+    this.banDate = isBanned ? new Date() : null;
   }
 }
 

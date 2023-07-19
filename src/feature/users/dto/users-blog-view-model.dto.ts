@@ -5,6 +5,11 @@ export class UsersBlogOwnerInfoViewModel {
   readonly userLogin: string;
 }
 
+export class UsersBlogBanInfo {
+  readonly isBanned: boolean;
+  readonly banDate: string | null;
+}
+
 export class UsersBlogViewDto {
   readonly id: string;
   readonly name: string;
@@ -13,6 +18,7 @@ export class UsersBlogViewDto {
   readonly createdAt: string;
   readonly isMembership: boolean;
   readonly blogOwnerInfo: UsersBlogOwnerInfoViewModel;
+  readonly banInfo: UsersBlogBanInfo;
 }
 
 export class PaginatorUsersBlogView extends Paginator {
