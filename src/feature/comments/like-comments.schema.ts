@@ -2,6 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Model, Types } from 'mongoose';
 import { LikeStatus } from '../likes/dto/like-status';
 import { castToObjectId } from '../../utils';
+import { Comment } from './comment.schema';
 
 export type LikeCommentsDocument = HydratedDocument<LikeComments>;
 
@@ -15,8 +16,8 @@ type CreateLike = {
 export class LikeComments {
   _id: Types.ObjectId;
 
-  @Prop({ required: true })
-  commentId: Types.ObjectId;
+  @Prop({ required: true, type: Types.ObjectId, ref: Comment.name })
+  commentId: Comment;
 
   @Prop({ required: true })
   userId: Types.ObjectId;
