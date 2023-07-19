@@ -33,7 +33,7 @@ export class BlogsController {
   async findPostsByBlogId(
     @Param('blogId', IdValidationPipe) blogId: string,
     @Query() queryParams: QueryParams,
-    @CurrentUserId() userId: string,
+    @CurrentUserId(false) userId: string,
   ): Promise<PaginatorPostView> {
     const postsView = await this.blogsQueryRepository.findPostsByBlogId(
       blogId,
