@@ -23,6 +23,6 @@ export class BloggerBanUserInputDto {
   @IsNotEmpty()
   @IsString()
   @IsMongoId()
-  @BlogExists()
+  // @BlogExists()
   blogId: string;
 }
