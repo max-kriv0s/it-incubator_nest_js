@@ -26,7 +26,7 @@ export class PostsQueryRepository {
     const sortBy: string = queryParams.sortBy || 'createdAt';
     const sortDirection = queryParams.sortDirection || 'desc';
 
-    const filter = {};
+    const filter = { isBanned: { $ne: true } };
 
     const totalCount: number = await this.PostModel.countDocuments(filter);
     const skip = (pageNumber - 1) * pageSize;
@@ -82,7 +82,10 @@ export class PostsQueryRepository {
   }
 
   async getPostById(id: string, userId?: string): Promise<ViewPostDto | null> {
-    const post = await this.PostModel.findById(id).exec();
+    const post = await this.PostModel.findOne({
+      _id: castToObjectId(id),
+      isBanned: { $ne: true },
+    });
     if (!post) return null;
 
     return this.postDBToPostView(post, userId);
