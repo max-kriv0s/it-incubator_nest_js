@@ -68,7 +68,10 @@ import { ApiCallSchema, ApiCalls } from './feature/api-calls/api-calls.schema';
 import { ThrottlerConfigService } from './guard/throttler-api-calls.configuration';
 import { OptionalJwtTokenGuard } from './feature/auth/guard/optional-jwt-token.guard';
 import { BlogExistsRule } from './feature/posts/validators/blog-exists.validator';
-import { BloggersController } from './feature/bloggers/bloggers.controller';
+import {
+  BloggersController,
+  BloggersUsersController,
+} from './feature/bloggers/bloggers.controller';
 import { BloggerQueryRepository } from './feature/bloggers/db/blogger-query.repository';
 import { CqrsModule } from '@nestjs/cqrs';
 import { UsersBlogsController } from './feature/users/users-blogs.controller';
@@ -86,6 +89,12 @@ import { CountLikesPostsUseCase } from './feature/posts/use-case/count-likes-pos
 import { DeleteAllDevicesByUsersIdUseCase } from './feature/security-devices/use-case/delete-all-devices-by-user-id.usecase';
 import { BanUnbanUserUseCase } from './feature/users/use-case/ban-unban-user.usercase';
 import { BindBlogWithUserUseCase } from './feature/users/use-case/bind-blog-with-user.usecase';
+import { BloggerBanUnbanUserUseCase } from './feature/bloggers/use-case/blogger-ban-unban-user.usecase';
+import { BloggersRepository } from './feature/bloggers/db/bloggers.repository';
+import {
+  BloggerBannedUsers,
+  BloggerBannedUsersSchema,
+} from './feature/bloggers/model/blogger-banned-users.schema';
 
 const apiCallsAdapters = [ApiCallsConfig, ApiCallsService, ApiCallsRepository];
 const authAdapters = [
@@ -95,7 +104,7 @@ const authAdapters = [
   AccessJwtStrategy,
   RefreshJwtStrategy,
 ];
-const bloggersAdapters = [BloggerQueryRepository];
+const bloggersAdapters = [BloggerQueryRepository, BloggersRepository];
 const blogsAdapters = [
   BlogsService,
   BlogsRepository,
@@ -147,6 +156,7 @@ const useCases = [
   DeleteAllDevicesByUsersIdUseCase,
   BanUnbanUserUseCase,
   BindBlogWithUserUseCase,
+  BloggerBanUnbanUserUseCase,
 ];
 
 @Module({
@@ -171,6 +181,7 @@ const useCases = [
       { name: LikePosts.name, schema: LikePostsSchema },
       { name: LikeComments.name, schema: LikeCommentsSchema },
       { name: ApiCalls.name, schema: ApiCallSchema },
+      { name: BloggerBannedUsers.name, schema: BloggerBannedUsersSchema },
     ]),
     PassportModule,
     JwtModule.register({}),
@@ -192,6 +203,7 @@ const useCases = [
     AuthController,
     SecurityDevicesController,
     BloggersController,
+    BloggersUsersController,
   ],
   providers: [
     AppService,
@@ -221,4 +233,3 @@ const useCases = [
   exports: [ApiCallsConfig],
 })
 export class AppModule {}
- 
