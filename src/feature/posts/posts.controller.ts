@@ -26,6 +26,7 @@ import { CreateCommentDto } from '../comments/dto/create-comment.dto';
 import { ParamPostIdDto } from './dto/param-post-id.dto';
 import { LikeInputDto } from '../likes/dto/like-input.dto';
 import { IdValidationPipe } from '../../modules/pipes/id-validation.pipe';
+import { replyByNotification } from 'src/modules/notification';
 
 @Controller('posts')
 export class PostsController {
@@ -116,12 +117,12 @@ export class PostsController {
     @Body() createCommentDto: CreateCommentDto,
     @CurrentUserId() userId: string,
   ): Promise<ViewCommentDto> {
-    const commentId = await this.postsService.createCommentByPostID(
+    const result = await this.postsService.createCommentByPostID(
       params.postId,
       userId,
       createCommentDto,
     );
-    if (!commentId) throw new NotFoundException('Post not fount');
+    const commentId = replyByNotification(result);
 
     const comment = await this.commentsQueryRepository.getCommentViewById(
       commentId,

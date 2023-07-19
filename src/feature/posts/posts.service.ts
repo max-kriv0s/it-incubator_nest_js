@@ -90,26 +90,42 @@ export class PostsService {
     postId: string,
     userId: string,
     createCommentDto: CreateCommentDto,
-  ): Promise<string | null> {
+  ): Promise<ResultNotification<string>> {
+    const result = new ResultNotification<string>();
+
     const post = await this.findPostById(postId);
-    if (!post) return null;
+    if (!post) {
+      result.addError('Post not found', ResultCodeError.NotFound);
+      return result;
+    }
 
     const user = await this.usersService.findUserById(userId);
-    if (!user) return null;
+    if (!user) {
+      result.addError('user not found', ResultCodeError.NotFound);
+      return result;
+    }
 
     const isBannedUser =
       await this.bloggersRepository.findBannedUserByblogIdAndUserId(
         post.blogId.toString(),
         userId,
       );
-    if (isBannedUser) return null;
+    if (isBannedUser) {
+      {
+        result.addError('The user is blocked', ResultCodeError.Forbidden);
+        return result;
+      }
+    }
 
-    return this.commentsService.createCommentByPostId(
+    const commentId = await this.commentsService.createCommentByPostId(
       postId,
       userId,
       user.accountData.login,
       createCommentDto,
     );
+
+    result.addData(commentId);
+    return result;
   }
 
   async likeStatusByPostID(
