@@ -1,7 +1,10 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { BloggerBanUserInputDto } from '../dto/blogger-ban-user-input.dto';
 import { BlogsRepository } from '../../../feature/blogs/blogs.repository';
-import { ResultNotification } from '../../../modules/notification';
+import {
+  ResultCodeError,
+  ResultNotification,
+} from '../../../modules/notification';
 import { validateOrRejectModel } from '../../../modules/validation';
 import { UsersRepository } from '../../../feature/users/db/users.repository';
 import { BloggersRepository } from '../db/bloggers.repository';
@@ -38,11 +41,11 @@ export class BloggerBanUnbanUserUseCase
       command.banUserInputDto.blogId,
     );
     if (!blog) {
-      result.addError('Blog not found', null, 'blogId');
+      result.addError('Blog not found', ResultCodeError.NotFound, 'blogId');
       return result;
     }
     if (!blog.thisIsOwner(command.userId)) {
-      result.addError('Access is denied', null, 'blogId');
+      result.addError('Access is denied', ResultCodeError.Forbidden, 'blogId');
       return result;
     }
 

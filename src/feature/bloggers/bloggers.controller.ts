@@ -197,8 +197,11 @@ export class BloggersUsersController {
     );
 
     if (result.hasError()) {
-      const error = result.getError();
-      throw new BadRequestException(GetFieldError(error.message, error.field));
+      replyByNotification(result);
+      // const error = result.getError();
+      // throw new BadRequestException([
+      //   GetFieldError(error.message, error.field),
+      // ]);
     }
     return;
   }
