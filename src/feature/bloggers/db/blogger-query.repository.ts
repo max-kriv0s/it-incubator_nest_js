@@ -292,7 +292,7 @@ export class BloggerQueryRepository {
     blogId: string,
     userId: string,
     queryParams: BloggerBannedUsersQueryParams,
-  ): Promise<PaginatorViewBloggerBannedUsersDto | null> {
+  ): Promise<ResultNotification<PaginatorViewBloggerBannedUsersDto>> {
     const searchLoginTerm: string = queryParams.searchLoginTerm ?? '';
     const pageNumber: number = queryParams.pageNumber
       ? +queryParams.pageNumber
@@ -303,21 +303,21 @@ export class BloggerQueryRepository {
 
     if (sortBy.toLowerCase() === 'login') sortBy = 'bannedUserLogin';
 
-    const result: PaginatorViewBloggerBannedUsersDto = {
-      pagesCount: 0,
-      page: pageNumber,
-      pageSize: pageSize,
-      totalCount: 0,
-      items: [],
-    };
+    const result = new ResultNotification<PaginatorViewBloggerBannedUsersDto>();
 
     const blog = await this.BlogModel.findById({
       _id: castToObjectId(blogId),
       'blogOwner.userId': castToObjectId(userId),
     });
-    if (!blog) return result;
+    if (!blog) {
+      result.addError('Blog not found', ResultCodeError.NotFound);
+      return result;
+    }
 
-    if (blog.isBanned) return null;
+    if (blog.isBanned) {
+      result.addError('Access is denied', ResultCodeError.Forbidden);
+      return result;
+    }
 
     const filter: any = { blogId: castToObjectId(blogId), isBanned: true };
 
@@ -325,10 +325,9 @@ export class BloggerQueryRepository {
       filter.bannedUserLogin = { $regex: searchLoginTerm, $options: 'i' };
     }
 
-    result.totalCount = await this.BloggerBannedUsersModel.countDocuments(
+    const totalCount = await this.BloggerBannedUsersModel.countDocuments(
       filter,
     );
-    result.pagesCount = Math.ceil(result.totalCount / pageSize);
     const skip = (pageNumber - 1) * pageSize;
 
     const bannedUsers: BloggerBannedUsersDocument[] =
@@ -338,15 +337,23 @@ export class BloggerQueryRepository {
         limit: pageSize,
       });
 
-    result.items = bannedUsers.map((user) => ({
-      id: user.bannedUserId.toString(),
-      login: user.bannedUserLogin,
-      banInfo: {
-        isBanned: user.isBanned,
-        banDate: user.banDate ? user.banDate.toISOString() : user.banDate,
-        banReason: user.banReason,
-      },
-    }));
+    const paginationResult: PaginatorViewBloggerBannedUsersDto = {
+      pagesCount: Math.ceil(totalCount / pageSize),
+      page: pageNumber,
+      pageSize: pageSize,
+      totalCount: totalCount,
+      items: bannedUsers.map((user) => ({
+        id: user.bannedUserId.toString(),
+        login: user.bannedUserLogin,
+        banInfo: {
+          isBanned: user.isBanned,
+          banDate: user.banDate ? user.banDate.toISOString() : user.banDate,
+          banReason: user.banReason,
+        },
+      })),
+    };
+    result.addData(paginationResult);
+
     return result;
   }
 }

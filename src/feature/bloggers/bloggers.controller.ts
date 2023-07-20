@@ -43,6 +43,7 @@ import { PaginatorViewBloggerCommentsDto } from './dto/view-blogger-comments.dto
 import { BloggerBanUserInputDto } from './dto/blogger-ban-user-input.dto';
 import { BloggerBanUnbanUserCommand } from './use-case/blogger-ban-unban-user.usecase';
 import { BloggerBannedUsersQueryParams } from './dto/blogger-banned-users-query-param.dto';
+import { PaginatorViewBloggerBannedUsersDto } from './dto/view-blogger-banned-users.dto';
 
 @UseGuards(AccessJwtAuthGuard)
 @Controller('blogger/blogs')
@@ -210,13 +211,12 @@ export class BloggersUsersController {
     @Param('id', IdValidationPipe) id: string,
     @Query() queryParam: BloggerBannedUsersQueryParams,
     @CurrentUserId() userId: string,
-  ) {
+  ): Promise<PaginatorViewBloggerBannedUsersDto> {
     const result = await this.bloggerQueryRepository.getAllBannedUsersForBlog(
       id,
       userId,
       queryParam,
     );
-    if (!result) throw new ForbiddenException();
-    return result;
+    return replyByNotification<PaginatorViewBloggerBannedUsersDto>(result);
   }
 }
