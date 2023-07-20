@@ -1,9 +1,7 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Delete,
-  ForbiddenException,
   Get,
   HttpCode,
   HttpStatus,
@@ -43,7 +41,6 @@ import { DeletePostByIdCommand } from './use-case/delete-post-by-id.usecase';
 import { PaginatorViewBloggerCommentsDto } from './dto/view-blogger-comments.dto';
 import { BloggerBanUserInputDto } from './dto/blogger-ban-user-input.dto';
 import { BloggerBanUnbanUserCommand } from './use-case/blogger-ban-unban-user.usecase';
-import { GetFieldError } from '../../utils';
 import { BloggerBannedUsersQueryParams } from './dto/blogger-banned-users-query-param.dto';
 
 @UseGuards(AccessJwtAuthGuard)
