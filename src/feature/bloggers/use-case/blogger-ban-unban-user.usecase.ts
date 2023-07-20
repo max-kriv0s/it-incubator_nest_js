@@ -49,6 +49,14 @@ export class BloggerBanUnbanUserUseCase
       return result;
     }
 
+    const userForBan = await this.usersRepository.findUserById(
+      command.bannedUserId,
+    );
+    if (!userForBan) {
+      result.addError('User not found', ResultCodeError.NotFound, 'id');
+      return result;
+    }
+
     let bannedUser =
       await this.bloggersRepository.findBannedUserByblogIdAndUserId(
         command.banUserInputDto.blogId,
@@ -56,13 +64,13 @@ export class BloggerBanUnbanUserUseCase
       );
 
     if (!bannedUser) {
-      const userForBan = await this.usersRepository.findUserById(
-        command.bannedUserId,
-      );
-      const userLogin = userForBan ? userForBan.accountData.login : '';
+      // const userForBan = await this.usersRepository.findUserById(
+      //   command.bannedUserId,
+      // );
+      // const userLogin = userForBan ? userForBan.accountData.login : '';
       bannedUser = this.bloggersRepository.createBloggerBannedUsers(
         command.bannedUserId,
-        userLogin,
+        userForBan.accountData.login,
         blog.id,
       );
     }
