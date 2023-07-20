@@ -308,6 +308,7 @@ export class BloggerQueryRepository {
     const result = new ResultNotification<PaginatorViewBloggerBannedUsersDto>();
 
     const blog = await this.BlogModel.findById({
+      // const blog = await this.BlogModel.findOne({
       _id: castToObjectId(blogId),
       // 'blogOwner.userId': castToObjectId(userId),
     });
