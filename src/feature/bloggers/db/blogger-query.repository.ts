@@ -46,6 +46,7 @@ import {
   BloggerBannedUsersDocument,
   BloggerBannedUsersModelType,
 } from '../model/blogger-banned-users.schema';
+import { User, UserModelType } from '../../../feature/users/user.schema';
 
 @Injectable()
 export class BloggerQueryRepository {
@@ -57,6 +58,7 @@ export class BloggerQueryRepository {
     @InjectModel(BloggerBannedUsers.name)
     private BloggerBannedUsersModel: BloggerBannedUsersModelType,
     private readonly likeCommentsService: LikeCommentsService,
+    @InjectModel(User.name) private UserModel: UserModelType,
   ) {}
 
   async getBlogs(
@@ -315,6 +317,16 @@ export class BloggerQueryRepository {
     }
 
     if (blog.isBanned) {
+      result.addError('Access is denied', ResultCodeError.Forbidden);
+      return result;
+    }
+
+    const isBannedUser =
+      (await this.UserModel.countDocuments({
+        _id: castToObjectId(userId),
+        'banInfo.isBanned': true,
+      })) > 0;
+    if (isBannedUser) {
       result.addError('Access is denied', ResultCodeError.Forbidden);
       return result;
     }
