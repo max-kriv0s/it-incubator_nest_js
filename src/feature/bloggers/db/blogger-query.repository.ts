@@ -309,10 +309,14 @@ export class BloggerQueryRepository {
 
     const blog = await this.BlogModel.findById({
       _id: castToObjectId(blogId),
-      'blogOwner.userId': castToObjectId(userId),
+      // 'blogOwner.userId': castToObjectId(userId),
     });
     if (!blog) {
       result.addError('Blog not found', ResultCodeError.NotFound);
+      return result;
+    }
+    if (blog.blogOwner.userId.toString() !== userId) {
+      result.addError('Access is denied', ResultCodeError.Forbidden);
       return result;
     }
 
