@@ -68,10 +68,7 @@ import { ApiCallSchema, ApiCalls } from './feature/api-calls/api-calls.schema';
 import { ThrottlerConfigService } from './guard/throttler-api-calls.configuration';
 import { OptionalJwtTokenGuard } from './feature/auth/guard/optional-jwt-token.guard';
 import { BlogExistsRule } from './feature/posts/validators/blog-exists.validator';
-import {
-  BloggersController,
-  BloggersUsersController,
-} from './feature/bloggers/bloggers.controller';
+import { BloggersController } from './feature/bloggers/bloggers.controller';
 import { BloggerQueryRepository } from './feature/bloggers/db/blogger-query.repository';
 import { CqrsModule } from '@nestjs/cqrs';
 import { UsersBlogsController } from './feature/users/users-blogs.controller';
@@ -96,6 +93,7 @@ import {
   BloggerBannedUsersSchema,
 } from './feature/bloggers/model/blogger-banned-users.schema';
 import { UserBanUnbanBlogUseCase } from './feature/users/use-case/user-ban-unban-blog.usecase';
+import { BloggersUsersController } from './feature/bloggers/bloggers-users.controller';
 
 const apiCallsAdapters = [ApiCallsConfig, ApiCallsService, ApiCallsRepository];
 const authAdapters = [

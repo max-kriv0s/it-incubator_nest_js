@@ -2,7 +2,6 @@ import {
   Body,
   Controller,
   Delete,
-  ForbiddenException,
   Get,
   HttpCode,
   HttpStatus,
@@ -17,10 +16,7 @@ import { AccessJwtAuthGuard } from '../auth/guard/jwt.guard';
 import { UpdateBlogDto } from '../blogs/dto/update-blog.dto';
 import { CommandBus } from '@nestjs/cqrs';
 import { UpdateExistingBlogByIdCommand } from '../blogs/use-case/update-existing-blog-by-id.usecase';
-import {
-  ResultNotification,
-  replyByNotification,
-} from '../../modules/notification';
+import { replyByNotification } from '../../modules/notification';
 import { CurrentUserId } from '../auth/decorators/current-user-id.param.decorator';
 import { IdValidationPipe } from '../../modules/pipes/id-validation.pipe';
 import { DeleteBlogByIdCommand } from '../blogs/use-case/delete-blog-by-id.usecase';
@@ -40,10 +36,6 @@ import { BlogPostUpdateDto } from './dto/blog-post-update.dto';
 import { UpdatePostByIdCommand } from './use-case/update-post-by-id.usecase';
 import { DeletePostByIdCommand } from './use-case/delete-post-by-id.usecase';
 import { PaginatorViewBloggerCommentsDto } from './dto/view-blogger-comments.dto';
-import { BloggerBanUserInputDto } from './dto/blogger-ban-user-input.dto';
-import { BloggerBanUnbanUserCommand } from './use-case/blogger-ban-unban-user.usecase';
-import { BloggerBannedUsersQueryParams } from './dto/blogger-banned-users-query-param.dto';
-import { PaginatorViewBloggerBannedUsersDto } from './dto/view-blogger-banned-users.dto';
 
 @UseGuards(AccessJwtAuthGuard)
 @Controller('blogger/blogs')
@@ -174,49 +166,5 @@ export class BloggersController {
       queryParams,
       userId,
     );
-  }
-}
-
-@UseGuards(AccessJwtAuthGuard)
-@Controller('blogger/users')
-export class BloggersUsersController {
-  constructor(
-    private commandBus: CommandBus,
-    private readonly bloggerQueryRepository: BloggerQueryRepository,
-  ) {}
-
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @Put(':id/ban')
-  async BanUnbanUser(
-    @CurrentUserId() userId: string,
-    @Param('id', IdValidationPipe) bannedUserId: string,
-    @Body() banUserInputDto: BloggerBanUserInputDto,
-  ) {
-    const result: ResultNotification<null> = await this.commandBus.execute(
-      new BloggerBanUnbanUserCommand(userId, bannedUserId, banUserInputDto),
-    );
-
-    if (result.hasError()) {
-      replyByNotification(result);
-      // const error = result.getError();
-      // throw new BadRequestException([
-      //   GetFieldError(error.message, error.field),
-      // ]);
-    }
-    return;
-  }
-
-  @Get('blog/:id')
-  async getAllBannedUsersForBlog(
-    @Param('id', IdValidationPipe) id: string,
-    @Query() queryParam: BloggerBannedUsersQueryParams,
-    @CurrentUserId() userId: string,
-  ): Promise<PaginatorViewBloggerBannedUsersDto> {
-    const result = await this.bloggerQueryRepository.getAllBannedUsersForBlog(
-      id,
-      userId,
-      queryParam,
-    );
-    return replyByNotification<PaginatorViewBloggerBannedUsersDto>(result);
   }
 }
