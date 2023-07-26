@@ -94,6 +94,12 @@ import {
 } from './feature/bloggers/model/blogger-banned-users.schema';
 import { UserBanUnbanBlogUseCase } from './feature/users/use-case/user-ban-unban-blog.usecase';
 import { BloggersUsersController } from './feature/bloggers/bloggers-users.controller';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { TypeOrmServiceConfiguration } from './configuration/typeorm-service.configuration';
+import { UsersSqlRepository } from './feature/users/db/users.sql-repository';
+import { CreateUserUseCase } from './feature/users/use-case/create-user.usecase';
+import { UsersQuerySqlRepository } from './feature/users/db/users-query.sql-repository';
+import { DeleteUserUseCase } from './feature/users/use-case/delete-user.usecase';
 
 const apiCallsAdapters = [ApiCallsConfig, ApiCallsService, ApiCallsRepository];
 const authAdapters = [
@@ -136,9 +142,10 @@ const usersAdapters = [
   UsersService,
   UsersRepository,
   UsersQueryRepository,
-  UsersRepository,
-  UsersQueryRepository,
   UsersBlogsQueryRepository,
+  UsersRepository,
+  UsersSqlRepository,
+  UsersQuerySqlRepository,
 ];
 
 const useCases = [
@@ -157,6 +164,8 @@ const useCases = [
   BindBlogWithUserUseCase,
   BloggerBanUnbanUserUseCase,
   UserBanUnbanBlogUseCase,
+  CreateUserUseCase,
+  DeleteUserUseCase,
 ];
 
 @Module({
@@ -191,6 +200,9 @@ const useCases = [
       useClass: ThrottlerConfigService,
     }),
     CqrsModule,
+    TypeOrmModule.forRootAsync({
+      useClass: TypeOrmServiceConfiguration,
+    }),
   ],
   controllers: [
     AppController,

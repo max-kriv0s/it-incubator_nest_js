@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -22,6 +23,9 @@ import { IdValidationPipe } from '../../modules/pipes/id-validation.pipe';
 import { CommandBus } from '@nestjs/cqrs';
 import { BanUnbanUserDto } from './dto/ban-unban-user.dto';
 import { BanUnbanUserCommand } from './use-case/ban-unban-user.usercase';
+import { CreateUserCommand } from './use-case/create-user.usecase';
+import { UsersQuerySqlRepository } from './db/users-query.sql-repository';
+import { DeleteUserCommand } from './use-case/delete-user.usecase';
 
 @UseGuards(BasicAuthGuard)
 @Controller('sa/users')
@@ -30,6 +34,7 @@ export class UsersController {
     private readonly usersQueryRepository: UsersQueryRepository,
     private readonly usersService: UsersService,
     private commandBus: CommandBus,
+    private readonly usersQuerySqlRepository: UsersQuerySqlRepository,
   ) {}
 
   @Get()
@@ -41,9 +46,12 @@ export class UsersController {
 
   @Post()
   async createUser(@Body() userDto: CreateUserDto): Promise<ViewUserDto> {
-    const userId = await this.usersService.createUser(userDto);
+    const userId = await this.commandBus.execute(
+      new CreateUserCommand(userDto),
+    );
+    if (!userId) throw new BadRequestException();
 
-    const userView = await this.usersQueryRepository.getUserViewById(userId);
+    const userView = await this.usersQuerySqlRepository.getUserViewById(userId);
     if (!userView) throw new NotFoundException('User not found');
 
     return userView;
@@ -51,8 +59,8 @@ export class UsersController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteUser(@Param('id', IdValidationPipe) id: string) {
-    const isDeleted = await this.usersService.deleteUserById(id);
+  async deleteUser(@Param('id') id: string) {
+    const isDeleted = await this.commandBus.execute(new DeleteUserCommand(id));
     if (!isDeleted) throw new NotFoundException('User not found');
     return;
   }

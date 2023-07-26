@@ -10,8 +10,6 @@ import { UsersConfig } from './configuration/users.configuration';
 import { EmailManagerService } from '../email-managers/email-manager.service';
 import { FieldError } from '../../dto';
 import { GetFieldError } from '../../utils';
-import { ResultNotification } from 'src/modules/notification';
-import { BanUnbanUserDto } from './dto/ban-unban-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -20,17 +18,6 @@ export class UsersService {
     private readonly usersConfig: UsersConfig,
     private readonly emailManagerService: EmailManagerService,
   ) {}
-
-  async createUser(userDto: CreateUserDto): Promise<string> {
-    const hashPassword = await this._generatePasswordHash(userDto.password);
-
-    const newUser = this.usersRepository.createUser({
-      ...userDto,
-      password: hashPassword,
-    });
-    const createdUser = await this.usersRepository.save(newUser);
-    return createdUser._id.toString();
-  }
 
   async _generatePasswordHash(password: string): Promise<string> {
     const salt = await bcrypt.genSalt(10);

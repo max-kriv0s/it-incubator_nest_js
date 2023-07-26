@@ -2,18 +2,18 @@ import { Injectable } from '@nestjs/common';
 import { BlogsRepository } from '../blogs/blogs.repository';
 import { CommentsRepository } from '../comments/comments.repository';
 import { PostsRepository } from '../posts/posts.repository';
-import { UsersRepository } from '../users/db/users.repository';
 import { SecurityDevicesRepository } from '../security-devices/security-devices.repository';
 import { LikePostsRepository } from '../posts/like-posts.repository';
 import { ApiCallsRepository } from '../api-calls/api-calls.repository';
 import { LikeCommentsRepository } from '../comments/like-comments.repository';
 import { BloggersRepository } from '../bloggers/db/bloggers.repository';
+import { UsersSqlRepository } from '../users/db/users.sql-repository';
 
 @Injectable()
 export class TestingService {
   constructor(
     private readonly blogsRepository: BlogsRepository,
-    private readonly usersRepository: UsersRepository,
+    private readonly usersSqlRepository: UsersSqlRepository,
     private readonly commentsRepository: CommentsRepository,
     private readonly postsRepository: PostsRepository,
     private readonly securityDevicesRepository: SecurityDevicesRepository,
@@ -26,7 +26,7 @@ export class TestingService {
   async deleteAllData() {
     return Promise.all([
       this.blogsRepository.deleteBlogs(),
-      this.usersRepository.deleteUsers(),
+      this.usersSqlRepository.deleteUsers(),
       this.commentsRepository.deleteComments(),
       this.postsRepository.deletePosts(),
       this.securityDevicesRepository.deleteSecurityDevices(),
