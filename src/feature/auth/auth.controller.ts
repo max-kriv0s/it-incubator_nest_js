@@ -19,7 +19,6 @@ import { Response } from 'express';
 import { AuthService } from './auth.service';
 import { ViewMeDto } from './dto/view-me.dto';
 import { CurrentUserId } from './decorators/current-user-id.param.decorator';
-import { UsersQueryRepository } from '../users/db/users-query.repository';
 import { AccessJwtAuthGuard } from './guard/jwt.guard';
 import { RegistrationEmailResendingDto } from './dto/registration-email-resending.dto';
 import { UsersService } from '../users/users.service';
@@ -31,12 +30,13 @@ import { RegistrationConfirmationCodeDto } from './dto/registration-confirmation
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { ApiCallsThrottlerGuard } from '../../guard/throttler-api-calls.guard';
 import { GetFieldError } from 'src/utils';
+import { UsersQuerySqlRepository } from '../users/db/users-query.sql-repository';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
-    private readonly usersQueryRepository: UsersQueryRepository,
+    private readonly usersQuerySqlRepository: UsersQuerySqlRepository,
     private readonly usersService: UsersService,
   ) {}
 
@@ -69,7 +69,7 @@ export class AuthController {
   @UseGuards(AccessJwtAuthGuard)
   @Get('me')
   async getMeView(@CurrentUserId(false) userId: string): Promise<ViewMeDto> {
-    const user = await this.usersQueryRepository.getMeView(userId);
+    const user = await this.usersQuerySqlRepository.getMeView(userId);
     if (!user) throw new UnauthorizedException('User not found');
     return user;
   }

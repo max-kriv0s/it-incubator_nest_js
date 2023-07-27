@@ -35,19 +35,16 @@ export class UsersService {
     loginOrEmail: string,
     password: string,
   ): Promise<string | null> {
-    const user = await this.usersRepository.findByLoginOrEmail(loginOrEmail);
+    const user = await this.usersSqlRepository.findByLoginOrEmail(loginOrEmail);
     if (!user) return null;
-    if (user.isBanned()) return null;
+    if (user.isBanned) return null;
 
-    if (!user.emailConfirmation.isConfirmed) return null;
+    if (!user.isConfirmed) return null;
 
-    const validPassword = await bcrypt.compare(
-      password,
-      user.accountData.password,
-    );
+    const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) return null;
 
-    return user._id.toString();
+    return user.id;
   }
 
   async findUserById(userId: string): Promise<UserDocument | null> {
@@ -64,11 +61,17 @@ export class UsersService {
       expirationDate: add(new Date(), this.usersConfig.getCodeLifeTime()),
     };
 
-    const user = await this.usersRepository.findByLoginOrEmail(email);
-    if (!user) return false;
+    const isUpdated = await this.usersSqlRepository.updateRecoveryCode(
+      email,
+      passwordRecovery,
+    );
+    if (!isUpdated) return false;
 
-    user.updatePasswordRecovery(passwordRecovery);
-    this.usersRepository.save(user);
+    // const user = await this.usersRepository.findByLoginOrEmail(email);
+    // if (!user) return false;
+
+    // user.updatePasswordRecovery(passwordRecovery);
+    // this.usersRepository.save(user);
 
     this.emailManagerService.sendPasswordRecovery(
       email,
@@ -82,50 +85,47 @@ export class UsersService {
     newPassword: string,
     recoveryCode: string,
   ): Promise<boolean> {
-    const user = await this.usersRepository.findUserByRecoveryCode(
-      recoveryCode,
-    );
-    if (!user) return false;
-    if (user.passwordRecovery.expirationDate < new Date()) return false;
+    const userPasswordRecovery =
+      await this.usersSqlRepository.findUserByRecoveryCode(recoveryCode);
+    if (!userPasswordRecovery) return false;
+    if (userPasswordRecovery.expirationDate < new Date()) return false;
 
     const newPasswordHash = await this._generatePasswordHash(newPassword);
 
-    user.updateUserPassword(newPasswordHash);
-    this.usersRepository.save(user);
+    return this.usersSqlRepository.updateUserPassword(
+      userPasswordRecovery.id,
+      newPasswordHash,
+    );
 
-    return true;
+    // user.updateUserPassword(newPasswordHash);
+    // this.usersRepository.save(user);
+
+    // return true;
   }
 
   async confirmRegistration(code: string): Promise<boolean> {
-    const user = await this.usersRepository.findUserByCodeConfirmation(code);
-
-    if (!user) return false;
-    if (user.emailConfirmation.expirationDate <= new Date()) return false;
-    if (user.emailConfirmation.isConfirmed) return false;
-
-    user.isConfirmed();
-    this.usersRepository.save(user);
-    return true;
+    return this.usersSqlRepository.isConfirmedUser(code);
   }
 
   async createUserForEmailConfirmation(
     userDto: CreateUserDto,
   ): Promise<FieldError | null> {
-    const userByLogin = await this.usersRepository.findByLoginOrEmail(
+    const userByLogin = await this.usersSqlRepository.findByLoginOrEmail(
       userDto.login,
     );
     if (userByLogin) return GetFieldError('user already exists', 'login');
 
-    const userByEmail = await this.usersRepository.findByLoginOrEmail(
+    const userByEmail = await this.usersSqlRepository.findByLoginOrEmail(
       userDto.email,
     );
     if (userByEmail) return GetFieldError('user already exists', 'email');
 
     const passwordHash = await this._generatePasswordHash(userDto.password);
-    const newUser = this.usersRepository.createUser({
+    const newUserId = await this.usersSqlRepository.createUser({
       ...userDto,
       password: passwordHash,
     });
+    if (!newUserId) return GetFieldError('User creation error', '');
 
     const emailConfirmation: UserEmailConfirmation = {
       confirmationCode: uuidv4(),
@@ -133,11 +133,15 @@ export class UsersService {
       isConfirmed: false,
     };
 
-    newUser.updateEmailConfirmation(emailConfirmation);
-    this.usersRepository.save(newUser);
+    const isUpdated = this.usersSqlRepository.updateEmailConfirmation(
+      newUserId,
+      emailConfirmation,
+    );
+    if (!isUpdated)
+      return GetFieldError('User update email confirmation error', '');
 
     this.emailManagerService.sendEmailConfirmationMessage(
-      newUser.accountData.email,
+      userDto.email,
       emailConfirmation.confirmationCode,
     );
 
@@ -147,11 +151,10 @@ export class UsersService {
   async resendingConfirmationCodeToUser(
     email: string,
   ): Promise<FieldError | null> {
-    const user = await this.usersRepository.findByLoginOrEmail(email);
+    const user = await this.usersSqlRepository.findByLoginOrEmail(email);
     if (!user) return GetFieldError('User not found', 'email');
 
-    if (user.emailConfirmation.isConfirmed)
-      return GetFieldError('Email confirmed', 'email');
+    if (user.isConfirmed) return GetFieldError('Email confirmed', 'email');
 
     const emailConfirmation: UserEmailConfirmation = {
       confirmationCode: uuidv4(),
@@ -159,11 +162,15 @@ export class UsersService {
       isConfirmed: false,
     };
 
-    user.updateEmailConfirmation(emailConfirmation);
-    this.usersRepository.save(user);
+    const isUpdated = this.usersSqlRepository.updateEmailConfirmation(
+      user.id,
+      emailConfirmation,
+    );
+    if (!isUpdated)
+      return GetFieldError('User update email confirmation error', '');
 
     this.emailManagerService.sendPasswordRecoveryMessage(
-      user.accountData.email,
+      email,
       emailConfirmation.confirmationCode,
     );
     return null;

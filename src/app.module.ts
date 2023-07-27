@@ -101,6 +101,7 @@ import { CreateUserUseCase } from './feature/users/use-case/create-user.usecase'
 import { UsersQuerySqlRepository } from './feature/users/db/users-query.sql-repository';
 import { DeleteUserUseCase } from './feature/users/use-case/delete-user.usecase';
 import { SecurityDevicesSqlRepository } from './feature/security-devices/db/security-devices.sql-repository';
+import { SecurityDevicesQuerySqlRepository } from './feature/security-devices/db/security-devices -query.sql-repository';
 
 const apiCallsAdapters = [ApiCallsConfig, ApiCallsService, ApiCallsRepository];
 const authAdapters = [
@@ -136,7 +137,7 @@ const securityDevicesAdapters = [
   SecurityDevicesRepository,
   SecurityDevicesQueryRepository,
   SecurityDevicesSqlRepository,
-  SecurityDevicesQueryRepository,
+  SecurityDevicesQuerySqlRepository,
 ];
 const usersAdapters = [
   UsersConfig,

@@ -5,6 +5,8 @@ import {
   SecurityDevicesSql,
 } from '../dto/security-devices-sql.dto';
 import { InjectDataSource } from '@nestjs/typeorm';
+import { CreateSecurityDeviceDto } from '../dto/create-security-device.dto';
+import { UpdateSecurityDeviceSqlDto } from '../dto/update-security-device.dto';
 
 @Injectable()
 export class SecurityDevicesSqlRepository {
@@ -71,5 +73,46 @@ export class SecurityDevicesSqlRepository {
     );
 
     return true;
+  }
+
+  async createSecurityDevice(
+    securityDeviceDto: CreateSecurityDeviceDto,
+  ): Promise<string | null> {
+    const devices = await this.dataSource.query(
+      `INSERT INTO public."SecurityDevices"
+        ("Id", "Ip", "Title", "LastActiveDate", "ExpirationTime", "UserId")
+       VALUES ($1, $2, $3, $4, $5, $6) RETURNING "Id";`,
+      [
+        securityDeviceDto.id,
+        securityDeviceDto.ip,
+        securityDeviceDto.title,
+        securityDeviceDto.lastActiveDate,
+        securityDeviceDto.expirationTime,
+        securityDeviceDto.userId,
+      ],
+    );
+
+    if (!devices) return null;
+    return devices[0].Id;
+  }
+
+  async updateSecurityDeviceSession(
+    deviceId: string,
+    dataUpdate: UpdateSecurityDeviceSqlDto,
+  ): Promise<boolean> {
+    const result = await this.dataSource.query(
+      `UPDATE public."SecurityDevices"
+      SET "Ip" = $2, "Title" = $3, "LastActiveDate" = $4, "expirationTime" = $5, "UserId" = $6
+      WHERE "Id" = $1`,
+      [
+        deviceId,
+        dataUpdate.ip,
+        dataUpdate.title,
+        dataUpdate.lastActiveDate,
+        dataUpdate.expirationTime,
+        dataUpdate.userId,
+      ],
+    );
+    return result.length === 2 && result[1] === 1;
   }
 }

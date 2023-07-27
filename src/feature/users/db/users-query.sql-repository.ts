@@ -128,14 +128,20 @@ export class UsersQuerySqlRepository {
     };
   }
 
-  //   async getMeView(id: string): Promise<ViewMeDto | null> {
-  //     const userDB = await this.UserModel.findById(id);
-  //     if (!userDB) return null;
+  async getMeView(id: string): Promise<ViewMeDto | null> {
+    const users = await this.dataSource.query(
+      `SELECT "Id", "Login", "Email"
+        FROM public."Users"
+        WHERE "Id" = $1
+        `,
+      [id],
+    );
+    if (!users.length) return null;
 
-  //     return {
-  //       email: userDB.accountData.email,
-  //       login: userDB.accountData.login,
-  //       userId: id,
-  //     };
-  //   }
+    return {
+      email: users[0].Email,
+      login: users[0].Login,
+      userId: id,
+    };
+  }
 }

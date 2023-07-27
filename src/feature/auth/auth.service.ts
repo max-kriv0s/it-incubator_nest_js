@@ -101,7 +101,7 @@ export class AuthService {
     ip: string,
     userAgent: string,
   ): Promise<TokensDto | null> {
-    const user = await this.usersService.findUserById(userId);
+    const user = await this.usersService.findUserSqlById(userId);
     if (!user) return null;
 
     const tokens = await this.createTokens(userId, deviceId);

@@ -7,3 +7,11 @@ export class UpdateSecurityDeviceDto {
   readonly expirationTime: Date;
   readonly userId: Types.ObjectId;
 }
+
+export class UpdateSecurityDeviceSqlDto {
+  readonly ip: string;
+  readonly title: string;
+  readonly lastActiveDate: Date;
+  readonly expirationTime: Date;
+  readonly userId: string;
+}

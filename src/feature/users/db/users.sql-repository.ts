@@ -3,8 +3,10 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateBanUserDto } from '../dto/update-ban-user.dto';
-import { UserSqlDto } from '../dto/user-sql.dto';
+import { LoginUserSqlDto, UserSqlDto } from '../dto/user-sql.dto';
 import { UserRawSqlDto } from '../dto/user-raw-sql.dto';
+import { UserPasswordRecovery } from '../dto/user-password-recovery.dto';
+import { UserEmailConfirmation } from '../user.schema';
 
 @Injectable()
 export class UsersSqlRepository {
@@ -18,7 +20,7 @@ export class UsersSqlRepository {
       [userDto.login, userDto.password, userDto.email, new Date(), true],
     );
 
-    if (!users.length) return null;
+    if (!users) return null;
     return users[0].Id;
   }
 
@@ -72,5 +74,102 @@ export class UsersSqlRepository {
       id: user.Id,
       isBanned: user.IsBanned,
     };
+  }
+
+  async updateRecoveryCode(
+    loginOrEmail: string,
+    passwordRecovery: UserPasswordRecovery,
+  ): Promise<boolean> {
+    const result = await this.dataSource.query(
+      `UPDATE public."Users"
+        SET "RecoveryCode" = $1, "RecoveryExpirationDate" = $2
+      WHERE "Login" = $3 OR "Email" = $3
+      `,
+      [
+        passwordRecovery.recoveryCode,
+        passwordRecovery.expirationDate,
+        loginOrEmail,
+      ],
+    );
+    return result.length === 2 && result[1] === 1;
+  }
+
+  async findUserByRecoveryCode(
+    recoveryCode: string,
+  ): Promise<(UserPasswordRecovery & { id: string }) | null> {
+    const users = await this.dataSource.query(
+      `SELECT "Id", "RecoveryCode", "RecoveryExpirationDate"
+      FROM public."Users"
+      WHERE`,
+      [recoveryCode],
+    );
+    if (!users.length) return null;
+    return {
+      id: users[0].Id,
+      recoveryCode: users[0].RecoveryCode,
+      expirationDate: users[0].RecoveryExpirationDate,
+    };
+  }
+
+  async updateUserPassword(
+    userId: string,
+    newPassword: string,
+  ): Promise<boolean> {
+    const result = await this.dataSource.query(
+      `UPDATE public."Users"
+        SET "Password" = $2
+        WHERE "Id" = $1`,
+      [userId, newPassword],
+    );
+    return result.length === 2 && result[1] === 1;
+  }
+
+  async findByLoginOrEmail(
+    loginOrEmail: string,
+  ): Promise<LoginUserSqlDto | null> {
+    const users = await this.dataSource.query(
+      `SELECT "Id", "Password", "IsBanned", "IsConfirmed"
+      FROM public."Users"
+      WHERE "Login" = $3 OR "Email" = $3
+      `,
+      [loginOrEmail],
+    );
+    if (!users) return null;
+    return {
+      id: users[0].Id,
+      password: users[0].Password,
+      isBanned: users[0].IsBanned,
+      isConfirmed: users[0].IsConfirmed,
+    };
+  }
+
+  async isConfirmedUser(code: string): Promise<boolean> {
+    const result = await this.dataSource.query(
+      `UPDATE public."Users"
+      SET "IsConfirmed" = true
+      WHERE "ConfirmationCode" = $1 AND "EmailExpirationDate" <= $2 AND NOT "IsConfirmed"`,
+      [code, new Date()],
+    );
+
+    return result.length === 2 && result[1] === 1;
+  }
+
+  async updateEmailConfirmation(
+    userId: string,
+    emailConfirmation: UserEmailConfirmation,
+  ): Promise<boolean> {
+    const result = await this.dataSource.query(
+      `UPDATE public."Users"
+      SET "IsConfirmed" = $2, "ConfirmationCode" = $3, "EmailExpirationDate" = $4
+      WHERE "Id" = $1
+      `,
+      [
+        userId,
+        emailConfirmation.isConfirmed,
+        emailConfirmation.confirmationCode,
+        emailConfirmation.expirationDate,
+      ],
+    );
+    return result.length === 2 && result[1] === 1;
   }
 }
