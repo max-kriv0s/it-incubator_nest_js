@@ -4,9 +4,13 @@ import { CreateSecurityDeviceDto } from './dto/create-security-device.dto';
 import { Types } from 'mongoose';
 import { TokenDataDto } from '../auth/dto/token-data.dto';
 import { ResultDeleteDevice } from './dto/result-delete-device.dto';
-import { UpdateSecurityDeviceDto } from './dto/update-security-device.dto';
+import {
+  UpdateSecurityDeviceDto,
+  UpdateSecurityDeviceSqlDto,
+} from './dto/update-security-device.dto';
 import { castToObjectId } from '../../utils';
 import { SecurityDevicesSqlRepository } from './db/security-devices.sql-repository';
+import { uuid } from 'uuidv4';
 
 @Injectable()
 export class SecurityDevicesService {
@@ -19,24 +23,27 @@ export class SecurityDevicesService {
     dataRefreshTokenDto: TokenDataDto,
     ip: string,
     userAgent: string,
-  ): Promise<string> {
+  ): Promise<string | null> {
     const data: CreateSecurityDeviceDto = {
-      _id: castToObjectId(dataRefreshTokenDto.deviceId),
+      id: dataRefreshTokenDto.deviceId,
       ip: ip,
       title: this.getNameUserAgent(userAgent),
       lastActiveDate: dataRefreshTokenDto.issuedAd,
       expirationTime: dataRefreshTokenDto.expirationTime,
-      userId: castToObjectId(dataRefreshTokenDto.userId),
+      userId: dataRefreshTokenDto.userId,
     };
 
-    const newSecurityDevices =
-      this.securityDevicesRepository.CreateSecurityDevice(data);
-    await this.securityDevicesRepository.save(newSecurityDevices);
-    return newSecurityDevices.id;
+    // const newSecurityDevices =
+    //   this.securityDevicesRepository.CreateSecurityDevice(data);
+    // await this.securityDevicesRepository.save(newSecurityDevices);
+
+    // return newSecurityDevices.id;
+    return this.securityDevicesSqlRepository.createSecurityDevice(data);
   }
 
   getNewSecurityDeviceId(): string {
-    return new Types.ObjectId().toString();
+    // return new Types.ObjectId().toString();
+    return uuid();
   }
 
   getNameUserAgent(userAgent?: string): string {
@@ -84,30 +91,25 @@ export class SecurityDevicesService {
     ip: string,
     userAgent: string,
   ): Promise<boolean> {
-    const device = await this.securityDevicesRepository.findSessionByDeviceID(
-      dataRefreshTokenDto.deviceId,
-    );
-    if (!device) return false;
-
-    const dataUpdate: UpdateSecurityDeviceDto = {
+    const dataUpdate: UpdateSecurityDeviceSqlDto = {
       ip: ip,
       title: this.getNameUserAgent(userAgent),
       lastActiveDate: dataRefreshTokenDto.issuedAd,
       expirationTime: dataRefreshTokenDto.expirationTime,
-      userId: castToObjectId(dataRefreshTokenDto.userId),
+      userId: dataRefreshTokenDto.userId,
     };
 
-    device.updateSecurityDeviceSession(dataUpdate);
-    await this.securityDevicesRepository.save(device);
-
-    return true;
+    return this.securityDevicesSqlRepository.updateSecurityDeviceSession(
+      dataRefreshTokenDto.deviceId,
+      dataUpdate,
+    );
   }
 
   async logoutUserSessionByDeviceID(
     deviceID: string,
     userId: string,
   ): Promise<boolean> {
-    return this.securityDevicesRepository.deleteUserSessionByDeviceID(
+    return this.securityDevicesSqlRepository.deleteUserSessionByDeviceID(
       deviceID,
       userId,
     );
