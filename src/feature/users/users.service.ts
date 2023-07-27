@@ -10,6 +10,8 @@ import { UsersConfig } from './configuration/users.configuration';
 import { EmailManagerService } from '../email-managers/email-manager.service';
 import { FieldError } from '../../dto';
 import { GetFieldError } from '../../utils';
+import { UsersSqlRepository } from './db/users.sql-repository';
+import { UserSqlDto } from './dto/user-sql.dto';
 
 @Injectable()
 export class UsersService {
@@ -17,6 +19,7 @@ export class UsersService {
     private readonly usersRepository: UsersRepository,
     private readonly usersConfig: UsersConfig,
     private readonly emailManagerService: EmailManagerService,
+    private readonly usersSqlRepository: UsersSqlRepository,
   ) {}
 
   async _generatePasswordHash(password: string): Promise<string> {
@@ -49,6 +52,10 @@ export class UsersService {
 
   async findUserById(userId: string): Promise<UserDocument | null> {
     return this.usersRepository.findUserById(userId);
+  }
+
+  async findUserSqlById(userId: string): Promise<UserSqlDto | null> {
+    return this.usersSqlRepository.findUserById(userId);
   }
 
   async passwordRecovery(email: string): Promise<boolean> {

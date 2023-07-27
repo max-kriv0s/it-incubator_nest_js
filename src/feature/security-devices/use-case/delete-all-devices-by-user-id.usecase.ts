@@ -1,5 +1,5 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { SecurityDevicesRepository } from '../security-devices.repository';
+import { SecurityDevicesSqlRepository } from '../db/security-devices.sql-repository';
 
 export class DeleteAllDevicesByUsersIdCommand {
   constructor(public userId: string) {}
@@ -10,11 +10,11 @@ export class DeleteAllDevicesByUsersIdUseCase
   implements ICommandHandler<DeleteAllDevicesByUsersIdCommand>
 {
   constructor(
-    private readonly securityDevicesRepository: SecurityDevicesRepository,
+    private readonly securityDevicesSqlRepository: SecurityDevicesSqlRepository,
   ) {}
 
   async execute(command: DeleteAllDevicesByUsersIdCommand) {
-    await this.securityDevicesRepository.deleteAllDevicesByUserID(
+    await this.securityDevicesSqlRepository.deleteAllDevicesByUserID(
       command.userId,
     );
   }

@@ -3,6 +3,8 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateBanUserDto } from '../dto/update-ban-user.dto';
+import { UserSqlDto } from '../dto/user-sql.dto';
+import { UserRawSqlDto } from '../dto/user-raw-sql.dto';
 
 @Injectable()
 export class UsersSqlRepository {
@@ -49,5 +51,26 @@ export class UsersSqlRepository {
       [updateDto.isBanned, updateDto.banDate, updateDto.banReason, userId],
     );
     return result.length === 2 && result[1] === 1;
+  }
+
+  async findUserById(userId: string): Promise<UserSqlDto | null> {
+    const users = await this.dataSource.query(
+      `SELECT 
+        "Id", 
+        "IsBanned"
+      FROM public."Users"
+      WHERE "Id" = $1;`,
+      [userId],
+    );
+
+    if (!users.length) return null;
+    return this.convertUserRawSqlToUserSql(users[0]);
+  }
+
+  convertUserRawSqlToUserSql(user: UserRawSqlDto): UserSqlDto {
+    return {
+      id: user.Id,
+      isBanned: user.IsBanned,
+    };
   }
 }

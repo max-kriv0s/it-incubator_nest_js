@@ -13,16 +13,15 @@ import {
 import { ViewSecurityDeviceDto } from './dto/view-security-device.dto';
 import { CurrentUser } from '../auth/decorators/current-user-id-device.decorator';
 import { RefreshJwtAuthGuard } from '../auth/guard/jwt-refresh.guard';
-import { SecurityDevicesQueryRepository } from './security-devices -query.repository';
 import { refreshTokenDto } from '../auth/dto/refresh-token.dto';
 import { SecurityDevicesService } from './security-devices.service';
-import { IdValidationPipe } from '../../modules/pipes/id-validation.pipe';
+import { SecurityDevicesQuerySqlRepository } from './db/security-devices -query.sql-repository';
 
 @Controller('security/devices')
 export class SecurityDevicesController {
   constructor(
     private readonly securityDevicesService: SecurityDevicesService,
-    private readonly securityDevicesQueryRepository: SecurityDevicesQueryRepository,
+    private readonly securityDevicesQuerySqlRepository: SecurityDevicesQuerySqlRepository,
   ) {}
 
   @UseGuards(RefreshJwtAuthGuard)
@@ -31,7 +30,7 @@ export class SecurityDevicesController {
     @CurrentUser() tokenDto: refreshTokenDto,
   ): Promise<ViewSecurityDeviceDto[]> {
     const devices =
-      await this.securityDevicesQueryRepository.getAllDevicesSessionsByUserID(
+      await this.securityDevicesQuerySqlRepository.getAllDevicesSessionsByUserID(
         tokenDto.userId,
       );
     if (!devices) throw new UnauthorizedException('User not found');
@@ -56,7 +55,7 @@ export class SecurityDevicesController {
   @Delete(':deviceId')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteSecurityDeviceByID(
-    @Param('deviceId', IdValidationPipe) deviceId: string,
+    @Param('deviceId') deviceId: string,
     @CurrentUser() tokenDto: refreshTokenDto,
   ) {
     const result =

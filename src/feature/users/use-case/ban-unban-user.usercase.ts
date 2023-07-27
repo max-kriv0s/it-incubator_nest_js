@@ -51,18 +51,12 @@ export class BanUnbanUserUseCase
       return result;
     }
 
-    // const user = await this.usersSqlRepository.findUserById(command.userId);
-    // if (!user) {
-    //   result.addError('User not found', ResultCodeError.NotFound);
-    //   return result;
-    // }
-    // user.setBanUnbane(command.dto);
-    // await this.usersRepository.save(user);
+    const banUserDto: BanUserDto = {
+      userId: command.userId,
+      isBanned: command.dto.isBanned,
+    };
 
-    // const banUserDto: BanUserDto = {
-    //   userId: command.userId,
-    //   isBanned: command.dto.isBanned,
-    // };
+    await this.deleteAllDevicesByUsersId(banUserDto);
 
     // // убрать промисы
     // await Promise.all([

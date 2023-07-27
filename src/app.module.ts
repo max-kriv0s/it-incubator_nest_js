@@ -32,7 +32,7 @@ import { BasicStategy } from './feature/auth/strategies/basic.strategy';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { SecurityDevicesService } from './feature/security-devices/security-devices.service';
-import { SecurityDevicesRepository } from './feature/security-devices/security-devices.repository';
+import { SecurityDevicesRepository } from './feature/security-devices/db/security-devices.repository';
 import {
   SecurityDevices,
   SecurityDevicesSchema,
@@ -42,7 +42,7 @@ import { AuthService } from './feature/auth/auth.service';
 import { AccessJwtStrategy } from './feature/auth/strategies/jwt.strategy';
 import { RefreshJwtStrategy } from './feature/auth/strategies/jwt-refresh.strategy';
 import { SecurityDevicesController } from './feature/security-devices/security-device.controller';
-import { SecurityDevicesQueryRepository } from './feature/security-devices/security-devices -query.repository';
+import { SecurityDevicesQueryRepository } from './feature/security-devices/db/security-devices -query.repository';
 import { LikePostsRepository } from './feature/posts/like-posts.repository';
 import { LikePosts, LikePostsSchema } from './feature/posts/like-posts.schema';
 import {
@@ -100,6 +100,7 @@ import { UsersSqlRepository } from './feature/users/db/users.sql-repository';
 import { CreateUserUseCase } from './feature/users/use-case/create-user.usecase';
 import { UsersQuerySqlRepository } from './feature/users/db/users-query.sql-repository';
 import { DeleteUserUseCase } from './feature/users/use-case/delete-user.usecase';
+import { SecurityDevicesSqlRepository } from './feature/security-devices/db/security-devices.sql-repository';
 
 const apiCallsAdapters = [ApiCallsConfig, ApiCallsService, ApiCallsRepository];
 const authAdapters = [
@@ -133,6 +134,8 @@ const postsAdapters = [
 const securityDevicesAdapters = [
   SecurityDevicesService,
   SecurityDevicesRepository,
+  SecurityDevicesQueryRepository,
+  SecurityDevicesSqlRepository,
   SecurityDevicesQueryRepository,
 ];
 const usersAdapters = [

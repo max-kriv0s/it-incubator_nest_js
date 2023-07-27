@@ -10,6 +10,7 @@ import { capitalizeFirstWord } from '../../../utils';
 @Injectable()
 export class UsersQuerySqlRepository {
   constructor(@InjectDataSource() protected dataSource: DataSource) {}
+
   async getAllUsersView(
     queryParams: QueryUserDto,
   ): Promise<PaginatorUserSqlView> {

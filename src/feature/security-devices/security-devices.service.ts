@@ -1,16 +1,18 @@
 import { Injectable } from '@nestjs/common';
-import { SecurityDevicesRepository } from './security-devices.repository';
+import { SecurityDevicesRepository } from './db/security-devices.repository';
 import { CreateSecurityDeviceDto } from './dto/create-security-device.dto';
 import { Types } from 'mongoose';
 import { TokenDataDto } from '../auth/dto/token-data.dto';
 import { ResultDeleteDevice } from './dto/result-delete-device.dto';
 import { UpdateSecurityDeviceDto } from './dto/update-security-device.dto';
 import { castToObjectId } from '../../utils';
+import { SecurityDevicesSqlRepository } from './db/security-devices.sql-repository';
 
 @Injectable()
 export class SecurityDevicesService {
   constructor(
     private readonly securityDevicesRepository: SecurityDevicesRepository,
+    private readonly securityDevicesSqlRepository: SecurityDevicesSqlRepository,
   ) {}
 
   async CreateSecurityDevice(
@@ -45,7 +47,7 @@ export class SecurityDevicesService {
     userId: string,
     deviceId: string,
   ): Promise<boolean> {
-    return this.securityDevicesRepository.deleteAllDevicesSessionsByUserID(
+    return this.securityDevicesSqlRepository.deleteAllDevicesSessionsByUserID(
       userId,
       deviceId,
     );
@@ -62,15 +64,15 @@ export class SecurityDevicesService {
     };
 
     const securitySession =
-      await this.securityDevicesRepository.findSessionByDeviceID(deviceID);
+      await this.securityDevicesSqlRepository.findSessionByDeviceID(deviceID);
     if (!securitySession) return result;
     result.securityDeviceExists = true;
 
-    if (securitySession.userId.toString() !== userId) return result;
+    if (securitySession.userId !== userId) return result;
     result.isUserSecurityDevice = true;
 
     result.securityDeviceDeleted =
-      await this.securityDevicesRepository.deleteUserSessionByDeviceID(
+      await this.securityDevicesSqlRepository.deleteUserSessionByDeviceID(
         deviceID,
         userId,
       );

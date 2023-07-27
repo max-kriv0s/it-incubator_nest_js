@@ -4,9 +4,9 @@ import {
   SecurityDevices,
   SecurityDevicesDocument,
   SecurityDevicesModelType,
-} from './security-devices.schema';
-import { CreateSecurityDeviceDto } from './dto/create-security-device.dto';
-import { castToObjectId } from '../../utils';
+} from '../security-devices.schema';
+import { CreateSecurityDeviceDto } from '../dto/create-security-device.dto';
+import { castToObjectId } from '../../../utils';
 
 @Injectable()
 export class SecurityDevicesRepository {
