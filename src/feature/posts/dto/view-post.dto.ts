@@ -1,4 +1,4 @@
-import { Paginator } from '../../../dto';
+import { OldPaginator, Paginator } from '../../../dto';
 import { LikeStatus } from '../../likes/dto/like-status';
 import { ViewLikeDetailsDto } from '../../likes/dto/view-like.dto';
 
@@ -20,6 +20,4 @@ export class ViewPostDto {
   readonly extendedLikesInfo: ExtendedLikesInfoViewDto;
 }
 
-export class PaginatorPostView extends Paginator {
-  readonly items: ViewPostDto[];
-}
+export class PaginatorPostView extends OldPaginator<ViewPostDto> {}

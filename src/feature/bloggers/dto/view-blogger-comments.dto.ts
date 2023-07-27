@@ -1,5 +1,5 @@
 import { LikeStatus } from '../../../feature/likes/dto/like-status';
-import { Paginator } from '../../../dto';
+import { OldPaginator } from '../../../dto';
 
 export class ViewBloggerCommentsDto {
   id: string;
@@ -22,6 +22,4 @@ export class ViewBloggerCommentsDto {
   };
 }
 
-export class PaginatorViewBloggerCommentsDto extends Paginator {
-  readonly items: ViewBloggerCommentsDto[];
-}
+export class PaginatorViewBloggerCommentsDto extends OldPaginator<ViewBloggerCommentsDto> {}

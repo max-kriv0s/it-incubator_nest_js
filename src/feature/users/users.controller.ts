@@ -19,13 +19,13 @@ import { UsersQueryRepository } from './db/users-query.repository';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { BasicAuthGuard } from '../../feature/auth/guard/basic-auth.guard';
-import { IdValidationPipe } from '../../modules/pipes/id-validation.pipe';
 import { CommandBus } from '@nestjs/cqrs';
 import { BanUnbanUserDto } from './dto/ban-unban-user.dto';
 import { BanUnbanUserCommand } from './use-case/ban-unban-user.usercase';
 import { CreateUserCommand } from './use-case/create-user.usecase';
 import { UsersQuerySqlRepository } from './db/users-query.sql-repository';
 import { DeleteUserCommand } from './use-case/delete-user.usecase';
+import { replyByNotification } from 'src/modules/notification';
 
 @UseGuards(BasicAuthGuard)
 @Controller('sa/users')
@@ -41,7 +41,7 @@ export class UsersController {
   async getUsers(
     @Query() queryParams: QueryUserDto,
   ): Promise<PaginatorUserView> {
-    return this.usersQueryRepository.getAllUsersView(queryParams);
+    return this.usersQuerySqlRepository.getAllUsersView(queryParams);
   }
 
   @Post()
@@ -67,10 +67,10 @@ export class UsersController {
 
   @HttpCode(HttpStatus.NO_CONTENT)
   @Put(':id/ban')
-  async banUnbanUser(
-    @Param('id', IdValidationPipe) id: string,
-    @Body() dto: BanUnbanUserDto,
-  ) {
-    await this.commandBus.execute(new BanUnbanUserCommand(id, dto));
+  async banUnbanUser(@Param('id') id: string, @Body() dto: BanUnbanUserDto) {
+    const result = await this.commandBus.execute(
+      new BanUnbanUserCommand(id, dto),
+    );
+    return replyByNotification(result);
   }
 }

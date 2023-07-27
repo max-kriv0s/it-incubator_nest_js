@@ -1,4 +1,4 @@
-import { Paginator } from '../../../dto';
+import { OldPaginator } from '../../../dto';
 
 class BanUserInfoViewDto {
   isBanned: boolean;
@@ -12,6 +12,4 @@ export class ViewBloggerBannedUsersDto {
   banInfo: BanUserInfoViewDto;
 }
 
-export class PaginatorViewBloggerBannedUsersDto extends Paginator {
-  items: ViewBloggerBannedUsersDto[];
-}
+export class PaginatorViewBloggerBannedUsersDto extends OldPaginator<ViewBloggerBannedUsersDto> {}

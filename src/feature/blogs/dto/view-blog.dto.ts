@@ -1,4 +1,4 @@
-import { Paginator } from '../../../dto';
+import { OldPaginator } from '../../../dto';
 
 export class ViewBlogDto {
   readonly id: string;
@@ -9,6 +9,4 @@ export class ViewBlogDto {
   readonly isMembership: boolean;
 }
 
-export class PaginatorBlogView extends Paginator {
-  readonly items: ViewBlogDto[];
-}
+export class PaginatorBlogView extends OldPaginator<ViewBlogDto> {}

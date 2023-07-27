@@ -1,5 +1,5 @@
 import { LikeStatus } from '../../../feature/likes/dto/like-status';
-import { Paginator } from '../../../dto';
+import { OldPaginator } from '../../../dto';
 import { ViewLikeDetailsDto } from '../../../feature/likes/dto/view-like.dto';
 
 export class ViewBloggerBlogDto {
@@ -11,9 +11,7 @@ export class ViewBloggerBlogDto {
   readonly isMembership: boolean;
 }
 
-export class PaginatorBloggerBlogView extends Paginator {
-  readonly items: ViewBloggerBlogDto[];
-}
+export class PaginatorBloggerBlogView extends OldPaginator<ViewBloggerBlogDto> {}
 
 export class ExtendedLikesInfoViewDto {
   readonly likesCount: number;
@@ -33,6 +31,4 @@ export class ViewBloggerPostDto {
   readonly extendedLikesInfo: ExtendedLikesInfoViewDto;
 }
 
-export class PaginatorBloggerPostView extends Paginator {
-  readonly items: ViewBloggerPostDto[];
-}
+export class PaginatorBloggerPostView extends OldPaginator<ViewBloggerPostDto> {}

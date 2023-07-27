@@ -1,60 +1,98 @@
 import { Injectable } from '@nestjs/common';
 import { BanStatus, QueryUserDto } from '../dto/query-user.dto';
-import { PaginatorUserView, ViewUserDto } from '../dto/view-user.dto';
+import { PaginatorUserSqlView, ViewUserDto } from '../dto/view-user.dto';
 import { ViewMeDto } from '../../auth/dto/view-me.dto';
 import { DataSource } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { UserRawSqlDto } from '../dto/user-raw-sql.dto';
+import { capitalizeFirstWord } from '../../../utils';
 
 @Injectable()
 export class UsersQuerySqlRepository {
   constructor(@InjectDataSource() protected dataSource: DataSource) {}
-  //   async getAllUsersView(queryParams: QueryUserDto): Promise<PaginatorUserView> {
-  //     const banStatus = queryParams.banStatus ?? BanStatus.all;
-  //     const pageNumber = +queryParams.pageNumber || 1;
-  //     const pageSize = +queryParams.pageSize || 10;
-  //     const sortBy = queryParams.sortBy || 'createdAt';
-  //     const sortDirection = queryParams.sortDirection || 'desc';
-  //     const searchLoginTerm = queryParams.searchLoginTerm;
-  //     const searchEmailTerm = queryParams.searchEmailTerm;
+  async getAllUsersView(
+    queryParams: QueryUserDto,
+  ): Promise<PaginatorUserSqlView> {
+    const banStatus = queryParams.banStatus ?? BanStatus.all;
+    // const pageNumber = +queryParams.pageNumber || 1;
+    // const pageSize = +queryParams.pageSize || 10;
+    const sortBy = capitalizeFirstWord(
+      queryParams.sortBy ? `${queryParams.sortBy}` : 'createdAt',
+    );
+    const sortDirection = queryParams.sortDirection || 'desc';
+    const searchLoginTerm = queryParams.searchLoginTerm;
+    const searchEmailTerm = queryParams.searchEmailTerm;
 
-  //     const filterOr: any[] = [];
-  //     if (searchLoginTerm) {
-  //       filterOr.push({
-  //         'accountData.login': { $regex: searchLoginTerm, $options: 'i' },
-  //       });
-  //     }
+    const params: any[] = [];
+    const filterOr: any[] = [];
+    if (searchLoginTerm) {
+      filterOr.push(`"Login" ILIKE $${params.length + 1}`);
+      params.push(`%${searchLoginTerm}%`);
+    }
 
-  //     if (searchEmailTerm) {
-  //       filterOr.push({
-  //         'accountData.email': { $regex: searchEmailTerm, $options: 'i' },
-  //       });
-  //     }
+    if (searchEmailTerm) {
+      filterOr.push(`"Email" ILIKE $${params.length + 1}`);
+      params.push(`%${searchEmailTerm}%`);
+    }
 
-  //     let filter: any = {};
-  //     if (filterOr.length > 0) filter = { $or: filterOr };
+    const isBanFilter = banStatus !== BanStatus.all;
 
-  //     if (banStatus !== BanStatus.all) {
-  //       filter['banInfo.isBanned'] = banStatus === BanStatus.banned;
-  //     }
+    let queryFilter = '';
+    if (filterOr.length > 0 && isBanFilter) {
+      queryFilter = `WHERE (${filterOr.join(' OR ')}) AND "IsBanned" = $${
+        params.length + 1
+      }`;
+      params.push(banStatus === BanStatus.banned);
+    }
+    if (filterOr.length > 0 && !isBanFilter) {
+      queryFilter = `WHERE ${filterOr.join(' OR ')}`;
+    }
+    if (!filterOr.length && isBanFilter) {
+      queryFilter = `WHERE "IsBanned" = $${params.length + 1}`;
+      params.push(banStatus === BanStatus.banned);
+    }
 
-  //     const totalCount: number = await this.UserModel.countDocuments(filter);
-  //     const skip = (pageNumber - 1) * pageSize;
+    const queryCount = `
+    SELECT COUNT(*) 
+    FROM public."Users"
+    ${queryFilter}`;
 
-  //     const users: UserDocument[] = await this.UserModel.find(filter, null, {
-  //       sort: { ['accountData.' + sortBy]: sortDirection === 'asc' ? 1 : -1 },
-  //       skip: skip,
-  //       limit: pageSize,
-  //     }).exec();
+    const usersCount: { count: number }[] = await this.dataSource.query(
+      queryCount,
+      params,
+    );
+    const totalCount = +usersCount[0].count;
+    const result = new PaginatorUserSqlView(
+      +queryParams.pageNumber,
+      +queryParams.pageSize,
+      totalCount,
+    );
+    const skip = (result.page - 1) * result.pageSize;
 
-  //     return {
-  //       pagesCount: Math.ceil(totalCount / pageSize),
-  //       page: pageNumber,
-  //       pageSize: pageSize,
-  //       totalCount: totalCount,
-  //       items: await Promise.all(users.map((i) => this.userDBToUserView(i))),
-  //     };
-  //   }
+    const query = `
+    SELECT 
+      "Id", 
+      "Login", 
+      "Email", 
+      "CreatedAt", 
+      "IsBanned", 
+      "BanDate", 
+      "BanReason"
+    FROM public."Users"
+    ${queryFilter}
+    ORDER BY "${sortBy}" ${sortDirection}
+    LIMIT ${result.pageSize} OFFSET ${skip}
+    `;
+    // ORDER BY $${params.length + 1} ${sortDirection}
+    // ORDER BY $${params.length + 1} $${params.length + 2}
+    // params.push(sortBy);
+    // params.push(sortDirection);
+
+    const users: UserRawSqlDto[] = await this.dataSource.query(query, params);
+    result.items = users.map((user) => this.userDBToUserView(user));
+
+    return result;
+  }
 
   async getUserViewById(id: string): Promise<ViewUserDto | null> {
     const users: UserRawSqlDto[] = await this.dataSource.query(

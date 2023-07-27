@@ -28,11 +28,25 @@ export class QueryParams {
   readonly sortDirection: sortDirection;
 }
 
-export class Paginator {
+export class OldPaginator<T> {
   pagesCount: number;
   page: number;
   pageSize: number;
   totalCount: number;
+  items: T[];
+}
+
+export class Paginator<T> {
+  pagesCount: number;
+  page: number;
+  pageSize: number;
+  totalCount: number;
+  items: T[];
+
+  constructor(page: number, pageSize: number) {
+    this.page = page || 1;
+    this.pageSize = pageSize || 10;
+  }
 }
 
 export type FieldError = {

@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { CreateUserDto } from '../dto/create-user.dto';
+import { UpdateBanUserDto } from '../dto/update-ban-user.dto';
 
 @Injectable()
 export class UsersSqlRepository {
@@ -24,7 +25,8 @@ export class UsersSqlRepository {
     DELETE FROM public."Users"`);
   }
 
-  async deleteUserById(id: string) {
+  // TODO подумать, возможно лучше устанавливать метку удаления, чем удалять записи из базы
+  async deleteUserById(id: string): Promise<boolean> {
     const result = await this.dataSource.query(
       `
     DELETE FROM public."Users"
@@ -32,6 +34,20 @@ export class UsersSqlRepository {
     `,
       [id],
     );
-    return result;
+    return result.length === 2 && result[1] === 1;
+  }
+
+  async updateBanUnban(
+    userId: string,
+    updateDto: UpdateBanUserDto,
+  ): Promise<boolean> {
+    const result = await this.dataSource.query(
+      `
+      UPDATE public."Users"
+        SET "IsBanned" = $1, "BanDate" = $2, "BanReason" = $3
+      WHERE "Id" = $4;`,
+      [updateDto.isBanned, updateDto.banDate, updateDto.banReason, userId],
+    );
+    return result.length === 2 && result[1] === 1;
   }
 }

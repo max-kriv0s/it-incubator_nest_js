@@ -1,4 +1,4 @@
-import { Paginator } from '../../../dto';
+import { OldPaginator, Paginator } from '../../../dto';
 
 export class ViewUserDto {
   readonly id: string;
@@ -12,6 +12,12 @@ export class ViewUserDto {
   };
 }
 
-export class PaginatorUserView extends Paginator {
-  readonly items: ViewUserDto[];
+export class PaginatorUserView extends OldPaginator<ViewUserDto> {}
+
+export class PaginatorUserSqlView extends Paginator<ViewUserDto> {
+  constructor(page: number, pageSize: number, totalCount: number) {
+    super(page, pageSize);
+    this.totalCount = totalCount;
+    this.pagesCount = Math.ceil(totalCount / this.pageSize);
+  }
 }
