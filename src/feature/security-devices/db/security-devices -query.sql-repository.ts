@@ -14,7 +14,7 @@ export class SecurityDevicesQuerySqlRepository {
     const devices = await this.dataSource.query(
       `SELECT "Id", "Ip", "Title", "LastActiveDate"
       FROM public."SecurityDevices"
-      WHERE "userId" = $1
+      WHERE "UserId" = $1
         `,
       [userId],
     );
