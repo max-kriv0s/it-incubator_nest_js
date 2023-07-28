@@ -104,7 +104,12 @@ export class UsersService {
   }
 
   async confirmRegistration(code: string): Promise<boolean> {
-    return this.usersSqlRepository.isConfirmedUser(code);
+    const user = await this.usersSqlRepository.findUserByCodeConfirmation(code);
+    if (!user) return false;
+    if (user.isConfirmed) return false;
+    if (user.expirationDate <= new Date()) return false;
+
+    return this.usersSqlRepository.isConfirmedUser(user.id);
   }
 
   async createUserForEmailConfirmation(
@@ -133,7 +138,7 @@ export class UsersService {
       isConfirmed: false,
     };
 
-    const isUpdated = this.usersSqlRepository.updateEmailConfirmation(
+    const isUpdated = await this.usersSqlRepository.updateEmailConfirmation(
       newUserId,
       emailConfirmation,
     );

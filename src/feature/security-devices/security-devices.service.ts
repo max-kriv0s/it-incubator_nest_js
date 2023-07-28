@@ -117,7 +117,7 @@ export class SecurityDevicesService {
 
   async verifySecurityDeviceByToken(dataToken: TokenDataDto): Promise<boolean> {
     const securitySession =
-      await this.securityDevicesRepository.findUserSessionByDeviceID(
+      await this.securityDevicesSqlRepository.findUserSessionByDeviceID(
         dataToken.userId,
         dataToken.deviceId,
       );
@@ -126,8 +126,8 @@ export class SecurityDevicesService {
     return (
       securitySession.lastActiveDate.getTime() ===
         dataToken.issuedAd.getTime() &&
-      securitySession._id.toString() === dataToken.deviceId &&
-      securitySession.userId.toString() === dataToken.userId
+      securitySession.id === dataToken.deviceId &&
+      securitySession.userId === dataToken.userId
     );
   }
 }

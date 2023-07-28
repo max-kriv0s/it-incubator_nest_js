@@ -1,12 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import {
+  SecurityDeviceByToken,
   SecurityDevicesRawSql,
   SecurityDevicesSql,
 } from '../dto/security-devices-sql.dto';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { CreateSecurityDeviceDto } from '../dto/create-security-device.dto';
 import { UpdateSecurityDeviceSqlDto } from '../dto/update-security-device.dto';
+import { FORMERR } from 'dns';
 
 @Injectable()
 export class SecurityDevicesSqlRepository {
@@ -102,7 +104,7 @@ export class SecurityDevicesSqlRepository {
   ): Promise<boolean> {
     const result = await this.dataSource.query(
       `UPDATE public."SecurityDevices"
-      SET "Ip" = $2, "Title" = $3, "LastActiveDate" = $4, "expirationTime" = $5, "UserId" = $6
+      SET "Ip" = $2, "Title" = $3, "LastActiveDate" = $4, "ExpirationTime" = $5, "UserId" = $6
       WHERE "Id" = $1`,
       [
         deviceId,
@@ -114,5 +116,25 @@ export class SecurityDevicesSqlRepository {
       ],
     );
     return result.length === 2 && result[1] === 1;
+  }
+
+  async findUserSessionByDeviceID(
+    userId: string,
+    deviceId: string,
+  ): Promise<SecurityDeviceByToken | null> {
+    const devices = await this.dataSource.query(
+      `SELECT "Id", "UserId", "LastActiveDate"
+      FROM public."SecurityDevices"
+      WHERE "Id" = $1 AND "UserId" = $2
+      `,
+      [deviceId, userId],
+    );
+
+    if (!devices.length) return null;
+    return {
+      id: devices[0].Id,
+      userId: devices[0].UserId,
+      lastActiveDate: devices[0].LastActiveDate,
+    };
   }
 }

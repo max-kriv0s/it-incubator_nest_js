@@ -9,3 +9,9 @@ export class SecurityDevicesRawSql {
   LastActiveDate: Date;
   UserId: string;
 }
+
+export class SecurityDeviceByToken {
+  lastActiveDate: Date;
+  id: string;
+  userId: string;
+}

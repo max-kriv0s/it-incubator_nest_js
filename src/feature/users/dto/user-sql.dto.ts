@@ -9,3 +9,9 @@ export class LoginUserSqlDto {
   isBanned: boolean;
   isConfirmed: boolean;
 }
+
+export class UserConfirmationCode {
+  id: string;
+  isConfirmed: boolean;
+  expirationDate: Date;
+}
