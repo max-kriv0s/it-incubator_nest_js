@@ -1,6 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { BanStatus, QueryUserDto } from '../dto/query-user.dto';
-import { PaginatorUserSqlView, ViewUserDto } from '../dto/view-user.dto';
+import {
+  PaginatorUserSqlView,
+  PaginatorUserSqlViewType,
+  ViewUserDto,
+} from '../dto/view-user.dto';
 import { ViewMeDto } from '../../auth/dto/view-me.dto';
 import { DataSource } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
@@ -13,7 +17,7 @@ export class UsersQuerySqlRepository {
 
   async getAllUsersView(
     queryParams: QueryUserDto,
-  ): Promise<PaginatorUserSqlView> {
+  ): Promise<PaginatorUserSqlViewType> {
     const banStatus = queryParams.banStatus ?? BanStatus.all;
     // const pageNumber = +queryParams.pageNumber || 1;
     // const pageSize = +queryParams.pageSize || 10;
@@ -90,9 +94,9 @@ export class UsersQuerySqlRepository {
     // params.push(sortDirection);
 
     const users: UserRawSqlDto[] = await this.dataSource.query(query, params);
-    result.items = users.map((user) => this.userDBToUserView(user));
+    result.addItems(users.map((user) => this.userDBToUserView(user)));
 
-    return result;
+    return result.getView();
   }
 
   async getUserViewById(id: string): Promise<ViewUserDto | null> {

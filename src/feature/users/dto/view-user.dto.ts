@@ -14,10 +14,28 @@ export class ViewUserDto {
 
 export class PaginatorUserView extends OldPaginator<ViewUserDto> {}
 
+export type PaginatorUserSqlViewType = Omit<
+  PaginatorUserSqlView,
+  'addItems' | 'getView'
+>;
 export class PaginatorUserSqlView extends Paginator<ViewUserDto> {
   constructor(page: number, pageSize: number, totalCount: number) {
     super(page, pageSize);
     this.totalCount = totalCount;
     this.pagesCount = Math.ceil(totalCount / this.pageSize);
+  }
+
+  addItems(data: ViewUserDto[]) {
+    this.items = data;
+  }
+
+  getView(): PaginatorUserSqlViewType {
+    return {
+      pagesCount: this.pagesCount,
+      page: this.page,
+      pageSize: this.pageSize,
+      totalCount: this.totalCount,
+      items: this.items,
+    };
   }
 }
