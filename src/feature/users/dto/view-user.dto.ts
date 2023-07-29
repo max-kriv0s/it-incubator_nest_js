@@ -25,10 +25,12 @@ export class PaginatorUserSqlView extends Paginator<ViewUserDto> {
     this.pagesCount = Math.ceil(totalCount / this.pageSize);
   }
 
+  // TODO перенести передачу данных и расчет количесва страниц в getView. Пагинатор создает контроллер и передает в репозиторий
   addItems(data: ViewUserDto[]) {
     this.items = data;
   }
 
+  // TODO переименовать в paginate
   getView(): PaginatorUserSqlViewType {
     return {
       pagesCount: this.pagesCount,

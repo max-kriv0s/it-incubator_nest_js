@@ -32,6 +32,7 @@ export class SecurityDevicesSqlRepository {
     return true;
   }
 
+  // TODO убрать возврат значения, так как негативного сценария нет в обработке
   async deleteAllDevicesByUserID(userId: string): Promise<boolean> {
     await this.dataSource.query(
       `DELETE FROM public."SecurityDevices"
