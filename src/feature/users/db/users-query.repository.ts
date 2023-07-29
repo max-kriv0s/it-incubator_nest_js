@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { BanStatus, QueryUserDto } from '../dto/query-user.dto';
 import { PaginatorUserView, ViewUserDto } from '../dto/view-user.dto';
-import { User, UserDocument, UserModelType } from '../user.schema';
+import { User, UserDocument, UserModelType } from '../model/user.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { ViewMeDto } from '../../auth/dto/view-me.dto';
 

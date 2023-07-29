@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Model, Types } from 'mongoose';
-import { CreateSecurityDeviceDto } from './dto/create-security-device.dto';
-import { UpdateSecurityDeviceDto } from './dto/update-security-device.dto';
+import { CreateSecurityDeviceDto } from '../dto/create-security-device.dto';
+import { UpdateSecurityDeviceDto } from '../dto/update-security-device.dto';
 
 export type SecurityDevicesDocument = HydratedDocument<SecurityDevices>;
 

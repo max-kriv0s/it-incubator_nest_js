@@ -46,7 +46,7 @@ import {
   BloggerBannedUsersDocument,
   BloggerBannedUsersModelType,
 } from '../model/blogger-banned-users.schema';
-import { User, UserModelType } from '../../../feature/users/user.schema';
+import { User, UserModelType } from '../../users/model/user.schema';
 
 @Injectable()
 export class BloggerQueryRepository {

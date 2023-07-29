@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { UsersRepository } from './db/users.repository';
 import { CreateUserDto } from './dto/create-user.dto';
 import bcrypt from 'bcrypt';
-import { UserDocument, UserEmailConfirmation } from './user.schema';
+import { UserDocument, UserEmailConfirmation } from './model/user.schema';
 import { UserPasswordRecovery } from './dto/user-password-recovery.dto';
 import add from 'date-fns/add';
 import { v4 as uuidv4 } from 'uuid';

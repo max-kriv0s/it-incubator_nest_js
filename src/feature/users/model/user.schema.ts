@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Model, Types } from 'mongoose';
-import { CreateUserDto } from './dto/create-user.dto';
-import { BanUnbanUserDto } from './dto/ban-unban-user.dto';
+import { CreateUserDto } from '../dto/create-user.dto';
+import { BanUnbanUserDto } from '../dto/ban-unban-user.dto';
 
 export type UserDocument = HydratedDocument<User>;
 

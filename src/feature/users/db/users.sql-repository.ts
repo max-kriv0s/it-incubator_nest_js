@@ -10,7 +10,7 @@ import {
 } from '../dto/user-sql.dto';
 import { UserRawSqlDto } from '../dto/user-raw-sql.dto';
 import { UserPasswordRecovery } from '../dto/user-password-recovery.dto';
-import { UserEmailConfirmation } from '../user.schema';
+import { UserEmailConfirmation } from '../model/user.schema';
 
 @Injectable()
 export class UsersSqlRepository {

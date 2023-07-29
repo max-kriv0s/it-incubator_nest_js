@@ -4,7 +4,7 @@ import {
   SecurityDevices,
   SecurityDevicesDocument,
   SecurityDevicesModelType,
-} from '../security-devices.schema';
+} from '../model/security-devices.schema';
 import { CreateSecurityDeviceDto } from '../dto/create-security-device.dto';
 import { castToObjectId } from '../../../utils';
 

@@ -4,7 +4,7 @@ import {
   SecurityDevices,
   SecurityDevicesDocument,
   SecurityDevicesModelType,
-} from '../security-devices.schema';
+} from '../model/security-devices.schema';
 import { ViewSecurityDeviceDto } from '../dto/view-security-device.dto';
 import { Types } from 'mongoose';
 
