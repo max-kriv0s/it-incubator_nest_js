@@ -1,18 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { SecurityDevicesRawSql } from '../dto/security-devices-sql.dto';
 import { ViewSecurityDeviceDto } from '../dto/view-security-device.dto';
+import { SecurityDevicesSqlDocument } from '../model/security-devices-sql.model';
 
 @Injectable()
 export class SecurityDevicesQuerySqlRepository {
   constructor(@InjectDataSource() protected dataSource: DataSource) {}
 
   async getAllDevicesSessionsByUserID(
-    userId: string,
+    userId: number,
   ): Promise<ViewSecurityDeviceDto[] | null> {
     const devices = await this.dataSource.query(
-      `SELECT "Id", "Ip", "Title", "LastActiveDate"
+      `SELECT *
       FROM public."SecurityDevices"
       WHERE "UserId" = $1
         `,
@@ -26,13 +26,13 @@ export class SecurityDevicesQuerySqlRepository {
   }
 
   securityDevicesDBTosecurityDevicesView(
-    device: SecurityDevicesRawSql,
+    device: SecurityDevicesSqlDocument,
   ): ViewSecurityDeviceDto {
     return {
-      ip: device.Ip,
-      title: device.Title,
-      lastActiveDate: device.LastActiveDate.toISOString(),
-      deviceId: device.Id,
+      ip: device.ip,
+      title: device.title,
+      lastActiveDate: device.lastActiveDate.toISOString(),
+      deviceId: device.id.toString(),
     };
   }
 }

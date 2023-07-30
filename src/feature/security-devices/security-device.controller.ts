@@ -1,11 +1,9 @@
 import {
   Controller,
   Delete,
-  ForbiddenException,
   Get,
   HttpCode,
   HttpStatus,
-  NotFoundException,
   Param,
   UnauthorizedException,
   UseGuards,
@@ -16,6 +14,8 @@ import { RefreshJwtAuthGuard } from '../auth/guard/jwt-refresh.guard';
 import { refreshTokenDto } from '../auth/dto/refresh-token.dto';
 import { SecurityDevicesService } from './security-devices.service';
 import { SecurityDevicesQuerySqlRepository } from './db/security-devices -query.sql-repository';
+import { IdIntegerValidationPipe } from '../../modules/pipes/id-integer-validation.pipe';
+import { ResultNotification } from '../../modules/notification';
 
 @Controller('security/devices')
 export class SecurityDevicesController {
@@ -41,34 +41,26 @@ export class SecurityDevicesController {
   @Delete()
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteSecurityDevices(@CurrentUser() tokenDto: refreshTokenDto) {
-    const isDeleted =
-      await this.securityDevicesService.deleteAllDevicesSessionsByUserID(
-        tokenDto.userId,
-        tokenDto.deviceId,
-      );
-    if (!isDeleted) throw new UnauthorizedException();
-
-    return;
+    await this.securityDevicesService.deleteAllDevicesSessionsByUserID(
+      tokenDto.userId,
+      tokenDto.deviceId,
+    );
   }
 
   @UseGuards(RefreshJwtAuthGuard)
   @Delete(':deviceId')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteSecurityDeviceByID(
-    @Param('deviceId') deviceId: string,
+    @Param('deviceId', IdIntegerValidationPipe) deviceId: string,
     @CurrentUser() tokenDto: refreshTokenDto,
   ) {
-    const result =
-      await this.securityDevicesService.deleteUserSessionByDeviceID(
-        deviceId,
-        tokenDto.userId,
-      );
+    const deleteResult = new ResultNotification<null>();
+    await this.securityDevicesService.deleteUserSessionByDeviceID(
+      +deviceId,
+      tokenDto.userId,
+      deleteResult,
+    );
 
-    if (result.securityDeviceExists && !result.isUserSecurityDevice)
-      throw new ForbiddenException();
-    if (!result.securityDeviceExists || !result.securityDeviceDeleted)
-      throw new NotFoundException();
-
-    return;
+    return deleteResult.getResult();
   }
 }

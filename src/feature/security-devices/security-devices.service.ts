@@ -1,21 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import { SecurityDevicesRepository } from './db/security-devices.repository';
 import { CreateSecurityDeviceDto } from './dto/create-security-device.dto';
-import { Types } from 'mongoose';
 import { TokenDataDto } from '../auth/dto/token-data.dto';
-import { ResultDeleteDevice } from './dto/result-delete-device.dto';
-import {
-  UpdateSecurityDeviceDto,
-  UpdateSecurityDeviceSqlDto,
-} from './dto/update-security-device.dto';
-import { castToObjectId } from '../../utils';
+import { UpdateSecurityDeviceSqlDto } from './dto/update-security-device.dto';
 import { SecurityDevicesSqlRepository } from './db/security-devices.sql-repository';
-import { uuid } from 'uuidv4';
+import {
+  ResultCodeError,
+  ResultNotification,
+} from '../../modules/notification';
 
 @Injectable()
 export class SecurityDevicesService {
   constructor(
-    private readonly securityDevicesRepository: SecurityDevicesRepository,
     private readonly securityDevicesSqlRepository: SecurityDevicesSqlRepository,
   ) {}
 
@@ -23,7 +18,7 @@ export class SecurityDevicesService {
     dataRefreshTokenDto: TokenDataDto,
     ip: string,
     userAgent: string,
-  ): Promise<string | null> {
+  ): Promise<number | null> {
     const data: CreateSecurityDeviceDto = {
       id: dataRefreshTokenDto.deviceId,
       ip: ip,
@@ -41,49 +36,38 @@ export class SecurityDevicesService {
     return this.securityDevicesSqlRepository.createSecurityDevice(data);
   }
 
-  getNewSecurityDeviceId(): string {
-    // return new Types.ObjectId().toString();
-    return uuid();
-  }
-
   getNameUserAgent(userAgent?: string): string {
     return userAgent ? userAgent : 'Chrome';
   }
 
-  async deleteAllDevicesSessionsByUserID(
-    userId: string,
-    deviceId: string,
-  ): Promise<boolean> {
-    return this.securityDevicesSqlRepository.deleteAllDevicesSessionsByUserID(
+  async deleteAllDevicesSessionsByUserID(userId: number, deviceId: number) {
+    await this.securityDevicesSqlRepository.deleteAllDevicesSessionsByUserID(
       userId,
       deviceId,
     );
   }
 
   async deleteUserSessionByDeviceID(
-    deviceID: string,
-    userId: string,
-  ): Promise<ResultDeleteDevice> {
-    const result: ResultDeleteDevice = {
-      securityDeviceExists: false,
-      isUserSecurityDevice: false,
-      securityDeviceDeleted: false,
-    };
-
+    deviceID: number,
+    userId: number,
+    deleteResult: ResultNotification<null>,
+  ) {
     const securitySession =
       await this.securityDevicesSqlRepository.findSessionByDeviceID(deviceID);
-    if (!securitySession) return result;
-    result.securityDeviceExists = true;
+    if (!securitySession) {
+      deleteResult.addError('Device not found', ResultCodeError.NotFound);
+      return;
+    }
 
-    if (securitySession.userId !== userId) return result;
-    result.isUserSecurityDevice = true;
+    if (securitySession.userId !== userId) {
+      deleteResult.addError('Access is denied', ResultCodeError.Forbidden);
+      return;
+    }
 
-    result.securityDeviceDeleted =
-      await this.securityDevicesSqlRepository.deleteUserSessionByDeviceID(
-        deviceID,
-        userId,
-      );
-    return result;
+    await this.securityDevicesSqlRepository.deleteUserSessionByDeviceID(
+      deviceID,
+      userId,
+    );
   }
 
   async updateSecurityDeviceSession(
@@ -105,11 +89,8 @@ export class SecurityDevicesService {
     );
   }
 
-  async logoutUserSessionByDeviceID(
-    deviceID: string,
-    userId: string,
-  ): Promise<boolean> {
-    return this.securityDevicesSqlRepository.deleteUserSessionByDeviceID(
+  async logoutUserSessionByDeviceID(deviceID: number, userId: number) {
+    await this.securityDevicesSqlRepository.deleteUserSessionByDeviceID(
       deviceID,
       userId,
     );
@@ -129,5 +110,9 @@ export class SecurityDevicesService {
       securitySession.id === dataToken.deviceId &&
       securitySession.userId === dataToken.userId
     );
+  }
+
+  async deleteAllDevicesByUserID(userId: number) {
+    await this.securityDevicesSqlRepository.deleteAllDevicesByUserID(userId);
   }
 }

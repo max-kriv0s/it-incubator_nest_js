@@ -16,10 +16,6 @@ export type ResultNotificationErrorType = {
   field: string;
 };
 
-// export class NotificationExtension {
-//   constructor(public message: string, public key: string | null) {}
-// }
-
 export class ResultNotification<T = null> {
   constructor(data: T | null = null) {
     this.data = data;
@@ -46,6 +42,22 @@ export class ResultNotification<T = null> {
 
   addData(data: T) {
     this.data = data;
+  }
+
+  getResult() {
+    if (!this.hasError()) return this.data;
+
+    switch (this.code) {
+      case ResultCodeError.Forbidden:
+        throw new ForbiddenException(this.message);
+        break;
+      case ResultCodeError.NotFound:
+        throw new NotFoundException(this.message);
+        break;
+      default:
+        throw new BadRequestException();
+        break;
+    }
   }
 }
 

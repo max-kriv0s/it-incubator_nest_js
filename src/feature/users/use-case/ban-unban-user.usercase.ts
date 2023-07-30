@@ -1,6 +1,5 @@
-import { CommandBus, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { BanUnbanUserDto } from '../dto/ban-unban-user.dto';
-import { DeleteAllDevicesByUsersIdCommand } from '../../../feature/security-devices/use-case/delete-all-devices-by-user-id.usecase';
 import {
   ResultCodeError,
   ResultNotification,
@@ -11,14 +10,14 @@ import { CountLikesPostsCommand } from '../../../feature/posts/use-case/count-li
 import { CountLikesCommentsCommand } from '../../../feature/comments/use-case/count-likes-comments.usecase';
 import { UsersSqlRepository } from '../db/users.sql-repository';
 import { UpdateBanUserDto } from '../dto/update-ban-user.dto';
-
-type BanUserDto = {
-  userId: string;
-  isBanned: boolean;
-};
+import { SecurityDevicesService } from '../../../feature/security-devices/security-devices.service';
 
 export class BanUnbanUserCommand {
-  constructor(public userId: string, public dto: BanUnbanUserDto) {}
+  constructor(
+    public userId: number,
+    public dto: BanUnbanUserDto,
+    public updateResult: ResultNotification<boolean>,
+  ) {}
 }
 
 @CommandHandler(BanUnbanUserCommand)
@@ -26,14 +25,15 @@ export class BanUnbanUserUseCase
   implements ICommandHandler<BanUnbanUserCommand>
 {
   constructor(
-    private commandBus: CommandBus,
     private readonly usersSqlRepository: UsersSqlRepository,
+    private readonly securityDevicesService: SecurityDevicesService,
   ) {}
 
-  async execute(
-    command: BanUnbanUserCommand,
-  ): Promise<ResultNotification<boolean>> {
-    const result = new ResultNotification<boolean>();
+  async execute(command: BanUnbanUserCommand) {
+    const userId = this.usersSqlRepository.findUserById(command.userId);
+    if (!userId) {
+      command.updateResult.addError('User not found', ResultCodeError.NotFound);
+    }
 
     const updateDto: UpdateBanUserDto = {
       isBanned: command.dto.isBanned,
@@ -41,26 +41,11 @@ export class BanUnbanUserUseCase
       banReason: command.dto.isBanned ? command.dto.banReason : null,
     };
 
-    const isUpdated = await this.usersSqlRepository.updateBanUnban(
-      command.userId,
-      updateDto,
-    );
-
-    if (!isUpdated) {
-      result.addError('User not found', ResultCodeError.NotFound);
-      return result;
-    }
-
-    const banUserDto: BanUserDto = {
-      userId: command.userId,
-      isBanned: command.dto.isBanned,
-    };
-
-    await this.deleteAllDevicesByUsersId(banUserDto);
+    await this.usersSqlRepository.updateBanUnban(command.userId, updateDto);
+    await this.deleteAllDevicesByUsersId(command.userId, command.dto.isBanned);
 
     // // убрать промисы
     // await Promise.all([
-    //   this.deleteAllDevicesByUsersId(banUserDto),
     //   this.commandBus.execute(
     //     new SetBanUnbanBlogsCommand(banUserDto.userId, banUserDto.isBanned),
     //   ),
@@ -77,15 +62,10 @@ export class BanUnbanUserUseCase
     //     new CountLikesCommentsCommand(command.userId, command.dto.isBanned),
     //   ),
     // ]);
-
-    return result;
   }
 
-  private async deleteAllDevicesByUsersId(banUserDto: BanUserDto) {
-    if (banUserDto.isBanned) {
-      await this.commandBus.execute(
-        new DeleteAllDevicesByUsersIdCommand(banUserDto.userId),
-      );
-    }
+  private async deleteAllDevicesByUsersId(userId: number, isBanned: boolean) {
+    if (isBanned)
+      await this.securityDevicesService.deleteAllDevicesByUserID(userId);
   }
 }

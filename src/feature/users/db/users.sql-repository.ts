@@ -3,21 +3,16 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateBanUserDto } from '../dto/update-ban-user.dto';
-import {
-  LoginUserSqlDto,
-  UserConfirmationCode,
-  UserSqlDto,
-} from '../dto/user-sql.dto';
-import { UserRawSqlDto } from '../dto/user-raw-sql.dto';
 import { UserPasswordRecovery } from '../dto/user-password-recovery.dto';
 import { UserEmailConfirmation } from '../model/user.schema';
+import { UserSqlDocument } from '../model/user-sql.model';
 
 @Injectable()
 export class UsersSqlRepository {
   constructor(@InjectDataSource() protected dataSource: DataSource) {}
 
-  async createUser(userDto: CreateUserDto): Promise<string | null> {
-    const users = await this.dataSource.query(
+  async createUser(userDto: CreateUserDto): Promise<number | null> {
+    const users: UserSqlDocument[] = await this.dataSource.query(
       `INSERT INTO public."Users"
         ("Login", "Password", "Email", "CreatedAt", "IsConfirmed")
        VALUES ($1, $2, $3, $4, $5) RETURNING "Id";`,
@@ -25,98 +20,79 @@ export class UsersSqlRepository {
     );
 
     if (!users.length) return null;
-    return users[0].Id;
+    return users[0].id;
   }
 
   async deleteUsers() {
-    await this.dataSource.query(`
-    DELETE FROM public."Users"`);
+    await this.dataSource.query(
+      `
+      DELETE FROM public."Users"
+    `,
+    );
   }
 
-  // TODO подумать, возможно лучше устанавливать метку удаления, чем удалять записи из базы
-  async deleteUserById(id: string): Promise<boolean> {
+  async deleteUserById(id: number): Promise<boolean> {
     const result = await this.dataSource.query(
       `
-    DELETE FROM public."Users"
-    WHERE "Id" = $1
-    `,
+      DELETE FROM public."Users"
+      WHERE "Id" = $1
+      `,
       [id],
     );
     return result.length === 2 && result[1] === 1;
   }
 
-  async updateBanUnban(
-    userId: string,
-    updateDto: UpdateBanUserDto,
-  ): Promise<boolean> {
-    const result = await this.dataSource.query(
+  async updateBanUnban(userId: number, updateDto: UpdateBanUserDto) {
+    await this.dataSource.query(
       `
       UPDATE public."Users"
         SET "IsBanned" = $1, "BanDate" = $2, "BanReason" = $3
       WHERE "Id" = $4;`,
       [updateDto.isBanned, updateDto.banDate, updateDto.banReason, userId],
     );
-    return result.length === 2 && result[1] === 1;
   }
 
-  async findUserById(userId: string): Promise<UserSqlDto | null> {
+  async findUserById(userId: number): Promise<UserSqlDocument | null> {
     const users = await this.dataSource.query(
-      `SELECT 
-        "Id", 
-        "IsBanned"
+      `SELECT *
       FROM public."Users"
       WHERE "Id" = $1;`,
       [userId],
     );
 
     if (!users.length) return null;
-    return this.convertUserRawSqlToUserSql(users[0]);
-  }
-
-  convertUserRawSqlToUserSql(user: UserRawSqlDto): UserSqlDto {
-    return {
-      id: user.Id,
-      isBanned: user.IsBanned,
-    };
+    return users[0];
   }
 
   async updateRecoveryCode(
-    loginOrEmail: string,
+    userId: number,
     passwordRecovery: UserPasswordRecovery,
   ): Promise<boolean> {
     const result = await this.dataSource.query(
       `UPDATE public."Users"
         SET "RecoveryCode" = $1, "RecoveryExpirationDate" = $2
-      WHERE "Login" = $3 OR "Email" = $3
+      WHERE "id" = $3
       `,
-      [
-        passwordRecovery.recoveryCode,
-        passwordRecovery.expirationDate,
-        loginOrEmail,
-      ],
+      [passwordRecovery.recoveryCode, passwordRecovery.expirationDate, userId],
     );
     return result.length === 2 && result[1] === 1;
   }
 
   async findUserByRecoveryCode(
     recoveryCode: string,
-  ): Promise<(UserPasswordRecovery & { id: string }) | null> {
-    const users = await this.dataSource.query(
-      `SELECT "Id", "RecoveryCode", "RecoveryExpirationDate"
+  ): Promise<UserSqlDocument | null> {
+    const users: UserSqlDocument[] = await this.dataSource.query(
+      `SELECT *
       FROM public."Users"
       WHERE "RecoveryCode" = $1`,
       [recoveryCode],
     );
     if (!users.length) return null;
-    return {
-      id: users[0].Id,
-      recoveryCode: users[0].RecoveryCode,
-      expirationDate: users[0].RecoveryExpirationDate,
-    };
+    return users[0];
   }
 
   async updateUserPassword(
-    userId: string,
+    userId: number,
     newPassword: string,
   ): Promise<boolean> {
     const result = await this.dataSource.query(
@@ -130,41 +106,32 @@ export class UsersSqlRepository {
 
   async findByLoginOrEmail(
     loginOrEmail: string,
-  ): Promise<LoginUserSqlDto | null> {
-    const users = await this.dataSource.query(
-      `SELECT "Id", "Password", "IsBanned", "IsConfirmed"
+  ): Promise<UserSqlDocument | null> {
+    const users: UserSqlDocument[] = await this.dataSource.query(
+      `SELECT *
       FROM public."Users"
       WHERE "Login" = $1 OR "Email" = $1
       `,
       [loginOrEmail],
     );
     if (!users.length) return null;
-    return {
-      id: users[0].Id,
-      password: users[0].Password,
-      isBanned: users[0].IsBanned,
-      isConfirmed: users[0].IsConfirmed,
-    };
+    return users[0];
   }
 
   async findUserByCodeConfirmation(
     code: string,
-  ): Promise<UserConfirmationCode | null> {
-    const users = await this.dataSource.query(
-      `SELECT "Id", "EmailExpirationDate", "IsConfirmed"
+  ): Promise<UserSqlDocument | null> {
+    const users: UserSqlDocument[] = await this.dataSource.query(
+      `SELECT *
       FROM public."Users"
       WHERE "ConfirmationCode" = $1`,
       [code],
     );
     if (!users.length) return null;
-    return {
-      id: users[0].Id,
-      isConfirmed: users[0].IsConfirmed,
-      expirationDate: users[0].EmailExpirationDate,
-    };
+    return users[0];
   }
 
-  async isConfirmedUser(userId: string): Promise<boolean> {
+  async UpdateUserConfirmed(userId: number): Promise<boolean> {
     const result = await this.dataSource.query(
       `UPDATE public."Users"
       SET "IsConfirmed" = true
@@ -176,7 +143,7 @@ export class UsersSqlRepository {
   }
 
   async updateEmailConfirmation(
-    userId: string,
+    userId: number,
     emailConfirmation: UserEmailConfirmation,
   ): Promise<boolean> {
     const result = await this.dataSource.query(

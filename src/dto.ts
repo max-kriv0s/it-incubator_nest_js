@@ -36,20 +36,36 @@ export class OldPaginator<T> {
   items: T[];
 }
 
-export class Paginator<T> {
+export type FieldError = {
+  message: string;
+  field: string;
+};
+
+export type PaginatorType<T> = {
   pagesCount: number;
   page: number;
   pageSize: number;
   totalCount: number;
   items: T[];
+};
+export class Paginator<T> {
+  DEFAULT_PAGE = 1;
+  DEFAULT_PAGE_SIZE = 10;
+  skip: number;
 
-  constructor(page: number, pageSize: number) {
-    this.page = page || 1;
-    this.pageSize = pageSize || 10;
+  constructor(public page: number, public pageSize: number) {
+    this.page = page || this.DEFAULT_PAGE;
+    this.pageSize = pageSize || this.DEFAULT_PAGE_SIZE;
+    this.skip = (page - 1) * pageSize;
+  }
+
+  paginate(totalCount: number, data: T[]): PaginatorType<T> {
+    return {
+      pagesCount: Math.ceil(totalCount / this.pageSize),
+      page: this.page,
+      pageSize: this.pageSize,
+      totalCount: totalCount,
+      items: data,
+    };
   }
 }
-
-export type FieldError = {
-  message: string;
-  field: string;
-};

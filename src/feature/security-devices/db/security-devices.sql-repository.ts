@@ -1,14 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import {
-  SecurityDeviceByToken,
-  SecurityDevicesRawSql,
-  SecurityDevicesSql,
-} from '../dto/security-devices-sql.dto';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { CreateSecurityDeviceDto } from '../dto/create-security-device.dto';
 import { UpdateSecurityDeviceSqlDto } from '../dto/update-security-device.dto';
-import { FORMERR } from 'dns';
+import { SecurityDevicesSqlDocument } from '../model/security-devices-sql.model';
 
 @Injectable()
 export class SecurityDevicesSqlRepository {
@@ -16,75 +11,53 @@ export class SecurityDevicesSqlRepository {
 
   async deleteSecurityDevices() {
     await this.dataSource.query(`
-    DELETE FROM public."Users"`);
+    DELETE FROM public."SecurityDevices"`);
   }
 
-  async deleteAllDevicesSessionsByUserID(
-    userId: string,
-    deviceId: string,
-  ): Promise<boolean> {
+  async deleteAllDevicesSessionsByUserID(userId: number, deviceId: number) {
     await this.dataSource.query(
       `DELETE FROM public."SecurityDevices"
-	    WHERE "Id" != $1 AND "UserId" = $2;`,
+	    WHERE "id" != $1 AND "userId" = $2;`,
       [deviceId, userId],
     );
-
-    return true;
   }
 
-  // TODO убрать возврат значения, так как негативного сценария нет в обработке
-  async deleteAllDevicesByUserID(userId: string): Promise<boolean> {
+  async deleteAllDevicesByUserID(userId: number) {
     await this.dataSource.query(
       `DELETE FROM public."SecurityDevices"
-	    WHERE "UserId" = $1;`,
+	    WHERE "userId" = $1;`,
       [userId],
     );
+  }
 
-    return true;
+  async deleteUserSessionByDeviceID(deviceID: number, userId: number) {
+    await this.dataSource.query(
+      `DELETE FROM public."SecurityDevices"
+	    WHERE "id" = $1 AND "userId" = $2;`,
+      [deviceID, userId],
+    );
   }
 
   async findSessionByDeviceID(
-    deviceId: string,
-  ): Promise<SecurityDevicesSql | null> {
+    deviceId: number,
+  ): Promise<SecurityDevicesSqlDocument | null> {
     const devices = await this.dataSource.query(
-      `SELECT "Id", "UserId"
+      `SELECT *
       FROM public."SecurityDevices"
-      WHERE "Id" = $1`,
+      WHERE "id" = $1`,
       [deviceId],
     );
     if (!devices.length) return null;
-    return this.convertSecurityDeviceRawSqlToSql(devices[0]);
-  }
-
-  convertSecurityDeviceRawSqlToSql(
-    device: SecurityDevicesRawSql,
-  ): SecurityDevicesSql {
-    return {
-      id: device.Id,
-      userId: device.UserId,
-    };
-  }
-
-  async deleteUserSessionByDeviceID(
-    deviceID: string,
-    userId: string,
-  ): Promise<boolean> {
-    await this.dataSource.query(
-      `DELETE FROM public."SecurityDevices"
-	    WHERE "Id" = $1 AND "UserId" = $2;`,
-      [deviceID, userId],
-    );
-
-    return true;
+    return devices[0];
   }
 
   async createSecurityDevice(
     securityDeviceDto: CreateSecurityDeviceDto,
-  ): Promise<string | null> {
+  ): Promise<number | null> {
     const devices = await this.dataSource.query(
       `INSERT INTO public."SecurityDevices"
-        ("Id", "Ip", "Title", "LastActiveDate", "ExpirationTime", "UserId")
-       VALUES ($1, $2, $3, $4, $5, $6) RETURNING "Id";`,
+        ("id", "ip", "title", "lastActiveDate", "expirationTime", "userId")
+       VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id";`,
       [
         securityDeviceDto.id,
         securityDeviceDto.ip,
@@ -96,16 +69,16 @@ export class SecurityDevicesSqlRepository {
     );
 
     if (!devices) return null;
-    return devices[0].Id;
+    return devices[0].id;
   }
 
   async updateSecurityDeviceSession(
-    deviceId: string,
+    deviceId: number,
     dataUpdate: UpdateSecurityDeviceSqlDto,
   ): Promise<boolean> {
     const result = await this.dataSource.query(
       `UPDATE public."SecurityDevices"
-      SET "Ip" = $2, "Title" = $3, "LastActiveDate" = $4, "ExpirationTime" = $5, "UserId" = $6
+      SET "ip" = $2, "title" = $3, "lastActiveDate" = $4, "expirationTime" = $5, "userId" = $6
       WHERE "Id" = $1`,
       [
         deviceId,
@@ -120,22 +93,18 @@ export class SecurityDevicesSqlRepository {
   }
 
   async findUserSessionByDeviceID(
-    userId: string,
-    deviceId: string,
-  ): Promise<SecurityDeviceByToken | null> {
+    userId: number,
+    deviceId: number,
+  ): Promise<SecurityDevicesSqlDocument | null> {
     const devices = await this.dataSource.query(
-      `SELECT "Id", "UserId", "LastActiveDate"
+      `SELECT *
       FROM public."SecurityDevices"
-      WHERE "Id" = $1 AND "UserId" = $2
+      WHERE "id" = $1 AND "userId" = $2
       `,
       [deviceId, userId],
     );
 
     if (!devices.length) return null;
-    return {
-      id: devices[0].Id,
-      userId: devices[0].UserId,
-      lastActiveDate: devices[0].LastActiveDate,
-    };
+    return devices[0];
   }
 }

@@ -14,9 +14,11 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { QueryUserDto } from './dto/query-user.dto';
-import { PaginatorUserView, ViewUserDto } from './dto/view-user.dto';
-import { UsersQueryRepository } from './db/users-query.repository';
-import { UsersService } from './users.service';
+import {
+  PaginatorUserSql,
+  PaginatorUserView,
+  ViewUserDto,
+} from './dto/view-user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { BasicAuthGuard } from '../../feature/auth/guard/basic-auth.guard';
 import { CommandBus } from '@nestjs/cqrs';
@@ -25,14 +27,13 @@ import { BanUnbanUserCommand } from './use-case/ban-unban-user.usercase';
 import { CreateUserCommand } from './use-case/create-user.usecase';
 import { UsersQuerySqlRepository } from './db/users-query.sql-repository';
 import { DeleteUserCommand } from './use-case/delete-user.usecase';
-import { replyByNotification } from 'src/modules/notification';
+import { ResultNotification } from '../../modules/notification';
+import { IdIntegerValidationPipe } from '../../modules/pipes/id-integer-validation.pipe';
 
 @UseGuards(BasicAuthGuard)
 @Controller('sa/users')
 export class UsersController {
   constructor(
-    private readonly usersQueryRepository: UsersQueryRepository,
-    private readonly usersService: UsersService,
     private commandBus: CommandBus,
     private readonly usersQuerySqlRepository: UsersQuerySqlRepository,
   ) {}
@@ -41,7 +42,11 @@ export class UsersController {
   async getUsers(
     @Query() queryParams: QueryUserDto,
   ): Promise<PaginatorUserView> {
-    return this.usersQuerySqlRepository.getAllUsersView(queryParams);
+    const paginator = new PaginatorUserSql(
+      +queryParams.pageNumber,
+      +queryParams.pageSize,
+    );
+    return this.usersQuerySqlRepository.getAllUsersView(queryParams, paginator);
   }
 
   @Post()
@@ -59,7 +64,7 @@ export class UsersController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteUser(@Param('id') id: string) {
+  async deleteUser(@Param('id', IdIntegerValidationPipe) id: string) {
     const isDeleted = await this.commandBus.execute(new DeleteUserCommand(id));
     if (!isDeleted) throw new NotFoundException('User not found');
     return;
@@ -67,10 +72,14 @@ export class UsersController {
 
   @HttpCode(HttpStatus.NO_CONTENT)
   @Put(':id/ban')
-  async banUnbanUser(@Param('id') id: string, @Body() dto: BanUnbanUserDto) {
-    const result = await this.commandBus.execute(
-      new BanUnbanUserCommand(id, dto),
+  async banUnbanUser(
+    @Param('id', IdIntegerValidationPipe) id: string,
+    @Body() dto: BanUnbanUserDto,
+  ) {
+    const updateResult = new ResultNotification<boolean>();
+    await this.commandBus.execute(
+      new BanUnbanUserCommand(+id, dto, updateResult),
     );
-    return replyByNotification(result);
+    return updateResult.getResult();
   }
 }
