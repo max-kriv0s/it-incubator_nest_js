@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { BlogsRepository } from '../blogs/blogs.repository';
 import { CommentsRepository } from '../comments/comments.repository';
 import { PostsRepository } from '../posts/posts.repository';
 import { LikePostsRepository } from '../posts/like-posts.repository';
@@ -8,11 +7,12 @@ import { LikeCommentsRepository } from '../comments/like-comments.repository';
 import { BloggersRepository } from '../bloggers/db/bloggers.repository';
 import { UsersSqlRepository } from '../users/db/users.sql-repository';
 import { SecurityDevicesSqlRepository } from '../security-devices/db/security-devices.sql-repository';
+import { BlogsSqlRepository } from '../blogs/db/blogs.sql-repository';
 
 @Injectable()
 export class TestingService {
   constructor(
-    private readonly blogsRepository: BlogsRepository,
+    private readonly blogsSqlRepository: BlogsSqlRepository,
     private readonly usersSqlRepository: UsersSqlRepository,
     private readonly commentsRepository: CommentsRepository,
     private readonly postsRepository: PostsRepository,
@@ -25,7 +25,7 @@ export class TestingService {
 
   async deleteAllData() {
     return Promise.all([
-      this.blogsRepository.deleteBlogs(),
+      this.blogsSqlRepository.deleteBlogs(),
       this.usersSqlRepository.deleteUsers(),
       this.commentsRepository.deleteComments(),
       this.postsRepository.deletePosts(),

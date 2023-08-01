@@ -24,8 +24,8 @@ import { CommentsRepository } from './feature/comments/comments.repository';
 import { CommentsQueryRepository } from './feature/comments/comments-query.repository';
 import { BlogsController } from './feature/blogs/blogs.controller';
 import { BlogsService } from './feature/blogs/blogs.service';
-import { BlogsRepository } from './feature/blogs/blogs.repository';
-import { BlogsQueryRepository } from './feature/blogs/blogs-query.repository';
+import { BlogsRepository } from './feature/blogs/db/blogs.repository';
+import { BlogsQueryRepository } from './feature/blogs/db/blogs-query.repository';
 import { Comment, CommentSchema } from './feature/comments/comment.schema';
 import { AuthConfig } from './feature/auth/configuration/auth.configuration';
 import { BasicStategy } from './feature/auth/strategies/basic.strategy';
@@ -102,6 +102,8 @@ import { UsersQuerySqlRepository } from './feature/users/db/users-query.sql-repo
 import { DeleteUserUseCase } from './feature/users/use-case/delete-user.usecase';
 import { SecurityDevicesSqlRepository } from './feature/security-devices/db/security-devices.sql-repository';
 import { SecurityDevicesQuerySqlRepository } from './feature/security-devices/db/security-devices -query.sql-repository';
+import { BlogsSqlRepository } from './feature/blogs/db/blogs.sql-repository';
+import { BloggerQuerySqlRepository } from './feature/bloggers/db/blogger-query.sql-repository';
 
 const apiCallsAdapters = [ApiCallsConfig, ApiCallsService, ApiCallsRepository];
 const authAdapters = [
@@ -111,12 +113,17 @@ const authAdapters = [
   AccessJwtStrategy,
   RefreshJwtStrategy,
 ];
-const bloggersAdapters = [BloggerQueryRepository, BloggersRepository];
+const bloggersAdapters = [
+  BloggerQueryRepository,
+  BloggersRepository,
+  BloggerQuerySqlRepository,
+];
 const blogsAdapters = [
   BlogsService,
   BlogsRepository,
   BlogsQueryRepository,
   BlogExistsRule,
+  BlogsSqlRepository,
 ];
 const commentsAdapters = [
   CommentsService,

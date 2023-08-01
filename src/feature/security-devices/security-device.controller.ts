@@ -15,7 +15,6 @@ import { refreshTokenDto } from '../auth/dto/refresh-token.dto';
 import { SecurityDevicesService } from './security-devices.service';
 import { SecurityDevicesQuerySqlRepository } from './db/security-devices -query.sql-repository';
 import { IdIntegerValidationPipe } from '../../modules/pipes/id-integer-validation.pipe';
-import { ResultNotification } from '../../modules/notification';
 
 @Controller('security/devices')
 export class SecurityDevicesController {

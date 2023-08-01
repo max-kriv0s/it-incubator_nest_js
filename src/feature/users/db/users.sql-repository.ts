@@ -7,7 +7,6 @@ import { UserPasswordRecovery } from '../dto/user-password-recovery.dto';
 import { UserEmailConfirmation } from '../model/user.schema';
 import { UserSqlDocument } from '../model/user-sql.model';
 
-
 @Injectable()
 export class UsersSqlRepository {
   constructor(@InjectDataSource() protected dataSource: DataSource) {}
@@ -42,7 +41,7 @@ export class UsersSqlRepository {
       `UPDATE public."Users"
        SET "isBanned" = $1, "banDate" = $2, "banReason" = $3
       WHERE "id" = $4;`,
-      [updateDto.isBanned, updateDtoemailConfirmationExpirationDate.banDate, updateDto.banReason, userId],
+      [updateDto.isBanned, updateDto.banDate, updateDto.banReason, userId],
     );
   }
 
@@ -74,7 +73,7 @@ export class UsersSqlRepository {
 
   async findUserByRecoveryCode(
     recoveryCode: string,
-  ): Promise<UserSqlDocument | null>emailConfirmationExpirationDate {
+  ): Promise<UserSqlDocument | null> {
     const users: UserSqlDocument[] = await this.dataSource.query(
       `SELECT *
       FROM public."Users"
@@ -89,7 +88,7 @@ export class UsersSqlRepository {
     userId: number,
     newPassword: string,
   ): Promise<boolean> {
-    const result = await this.dataSoemailConfirmationExpirationDateurce.query(
+    const result = await this.dataSource.query(
       `UPDATE public."Users"
         SET "password" = $2
         WHERE "id" = $1`,
@@ -129,7 +128,7 @@ export class UsersSqlRepository {
       `UPDATE public."Users"
       SET "isConfirmed" = true
       WHERE "id" = $1`,
-      [userId],emailConfirmationExpirationDate
+      [userId],
     );
 
     return result.length === 2 && result[1] === 1;

@@ -4,9 +4,9 @@ import {
   BlogDocument,
   BlogModelType,
   CreateUserBlockDto,
-} from './model/blog.schema';
+} from '../model/blog.schema';
 import { InjectModel } from '@nestjs/mongoose';
-import { castToObjectId } from '../../utils';
+import { castToObjectId } from '../../../utils';
 
 @Injectable()
 export class BlogsRepository {

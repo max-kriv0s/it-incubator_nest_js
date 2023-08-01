@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -16,7 +17,10 @@ import { AccessJwtAuthGuard } from '../auth/guard/jwt.guard';
 import { UpdateBlogDto } from '../blogs/dto/update-blog.dto';
 import { CommandBus } from '@nestjs/cqrs';
 import { UpdateExistingBlogByIdCommand } from '../blogs/use-case/update-existing-blog-by-id.usecase';
-import { replyByNotification } from '../../modules/notification';
+import {
+  ResultNotification,
+  replyByNotification,
+} from '../../modules/notification';
 import { CurrentUserId } from '../auth/decorators/current-user-id.param.decorator';
 import { IdValidationPipe } from '../../modules/pipes/id-validation.pipe';
 import { DeleteBlogByIdCommand } from '../blogs/use-case/delete-blog-by-id.usecase';
@@ -24,11 +28,11 @@ import { CreateBlogDto } from '../blogs/dto/create-blog.dto';
 import { CreateBlogCommand } from '../blogs/use-case/create-blog.usecase';
 import { BloggerQueryParams } from './dto/blogger-query-params.dto';
 import {
-  PaginatorBloggerBlogView,
+  PaginatorBloggerBlogSql,
+  PaginatorBloggerBlogSqlViewType,
   PaginatorBloggerPostView,
   ViewBloggerBlogDto,
 } from './dto/view-blogger-blogs.dto';
-import { BloggerQueryRepository } from './db/blogger-query.repository';
 import { CreateBlogPostDto } from '../blogs/dto/create-blog-post.dto';
 import { ViewPostDto } from '../posts/dto/view-post.dto';
 import { CreatePostByBlogIdCommand } from '../blogs/use-case/create-post-by-blog-id.usecase';
@@ -36,52 +40,53 @@ import { BlogPostUpdateDto } from './dto/blog-post-update.dto';
 import { UpdatePostByIdCommand } from './use-case/update-post-by-id.usecase';
 import { DeletePostByIdCommand } from './use-case/delete-post-by-id.usecase';
 import { PaginatorViewBloggerCommentsDto } from './dto/view-blogger-comments.dto';
+import { IdIntegerValidationPipe } from 'src/modules/pipes/id-integer-validation.pipe';
+import { BloggerQuerySqlRepository } from './db/blogger-query.sql-repository';
 
 @UseGuards(AccessJwtAuthGuard)
 @Controller('blogger/blogs')
 export class BloggersController {
   constructor(
     private commandBus: CommandBus,
-    private readonly bloggerQueryRepository: BloggerQueryRepository,
+    private readonly bloggerQuerySqlRepository: BloggerQuerySqlRepository,
   ) {}
 
   @HttpCode(HttpStatus.NO_CONTENT)
   @Put(':id')
   async updateExistingBlogById(
-    @Param('id', IdValidationPipe) id: string,
+    @Param('id', IdIntegerValidationPipe) id: string,
     @Body() updateDto: UpdateBlogDto,
-    @CurrentUserId() userId: string,
+    @CurrentUserId() userId: number,
   ) {
-    const result = await this.commandBus.execute(
-      new UpdateExistingBlogByIdCommand(id, updateDto, userId),
+    const updateResult: ResultNotification = await this.commandBus.execute(
+      new UpdateExistingBlogByIdCommand(+id, updateDto, userId),
     );
-    return replyByNotification(result);
+    if (updateResult.hasError()) updateResult.getResult();
   }
 
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
   async deleteBlog(
-    @Param('id', IdValidationPipe) id: string,
-    @CurrentUserId() userId: string,
+    @Param('id', IdIntegerValidationPipe) id: string,
+    @CurrentUserId() userId: number,
   ) {
-    const result = await this.commandBus.execute(
-      new DeleteBlogByIdCommand(id, userId),
+    const deletionResult: ResultNotification = await this.commandBus.execute(
+      new DeleteBlogByIdCommand(+id, userId),
     );
-
-    return replyByNotification(result);
+    if (deletionResult.hasError()) deletionResult.getResult();
   }
 
   @Post()
   async createBlog(
     @Body() createDto: CreateBlogDto,
-    @CurrentUserId() userId: string,
+    @CurrentUserId() userId: number,
   ): Promise<ViewBloggerBlogDto> {
-    const result = await this.commandBus.execute(
-      new CreateBlogCommand(createDto, userId),
-    );
-    const blogId = replyByNotification(result);
+    const creationResult: ResultNotification<number> =
+      await this.commandBus.execute(new CreateBlogCommand(createDto, userId));
+    const blogId = creationResult.getResult();
+    if (!blogId) throw new BadRequestException();
 
-    const blogView = await this.bloggerQueryRepository.getBlogById(blogId);
+    const blogView = await this.bloggerQuerySqlRepository.getBlogById(blogId);
     if (!blogView) throw new NotFoundException('Blog not found');
     return blogView;
   }
@@ -89,9 +94,18 @@ export class BloggersController {
   @Get()
   async getBlogs(
     @Query() queryParams: BloggerQueryParams,
-    @CurrentUserId() userId: string,
-  ): Promise<PaginatorBloggerBlogView> {
-    return this.bloggerQueryRepository.getBlogs(queryParams, userId);
+    @CurrentUserId() userId: number,
+  ): Promise<PaginatorBloggerBlogSqlViewType> {
+    const paginator = new PaginatorBloggerBlogSql(
+      +queryParams.pageNumber,
+      +queryParams.pageSize,
+    );
+
+    return this.bloggerQuerySqlRepository.getBlogs(
+      queryParams,
+      userId,
+      paginator,
+    );
   }
 
   @Post(':blogId/posts')
@@ -104,7 +118,7 @@ export class BloggersController {
       new CreatePostByBlogIdCommand(blogId, createPostDto, userId),
     );
     const postId = replyByNotification(result);
-    const postView = await this.bloggerQueryRepository.getPostById(
+    const postView = await this.bloggerSqlQueryRepository.getPostById(
       postId,
       userId,
     );

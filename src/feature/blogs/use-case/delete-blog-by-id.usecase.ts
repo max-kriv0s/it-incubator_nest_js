@@ -1,43 +1,35 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { BlogsRepository } from '../blogs.repository';
 import {
   ResultCodeError,
   ResultNotification,
 } from '../../../modules/notification';
-import { BlogsService } from '../blogs.service';
+import { BlogsSqlRepository } from '../db/blogs.sql-repository';
 
 export class DeleteBlogByIdCommand {
-  constructor(public id: string, public userId: string) {}
+  constructor(public id: number, public userId: number) {}
 }
 
 @CommandHandler(DeleteBlogByIdCommand)
 export class DeleteBlogByIdUseCase
   implements ICommandHandler<DeleteBlogByIdCommand>
 {
-  constructor(
-    private readonly blogsRepository: BlogsRepository,
-    private readonly blogsService: BlogsService,
-  ) {}
+  constructor(private readonly blogsSqlRepository: BlogsSqlRepository) {}
 
   async execute(command: DeleteBlogByIdCommand): Promise<ResultNotification> {
-    const result = new ResultNotification();
+    const deletionResult = new ResultNotification();
 
-    const blog = await this.blogsRepository.findBlogById(command.id);
+    const blog = await this.blogsSqlRepository.findBlogById(command.id);
     if (!blog) {
-      result.addError('Blog not found', ResultCodeError.NotFound);
-      return result;
+      deletionResult.addError('Blog not found', ResultCodeError.NotFound);
+      return deletionResult;
     }
 
-    if (!blog.thisIsOwner(command.userId)) {
-      result.addError('Access is denied', ResultCodeError.Forbidden);
-      return result;
+    if (blog.ownerId !== command.userId) {
+      deletionResult.addError('Access is denied', ResultCodeError.Forbidden);
+      return deletionResult;
     }
 
-    const isDeleted = await this.blogsService.deleteBlogById(command.id);
-    if (!isDeleted) {
-      result.addError('Blog not found', ResultCodeError.NotFound);
-    }
-
-    return result;
+    await this.blogsSqlRepository.deleteBlogById(command.id);
+    return deletionResult;
   }
 }

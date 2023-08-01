@@ -1,3 +1,5 @@
+import { CreateBlogDto } from '../dto/create-blog.dto';
+
 export class BlogSqlDocument {
   id: number;
   name: string;
@@ -9,3 +11,5 @@ export class BlogSqlDocument {
   isBanned: boolean;
   banDate: Date | null;
 }
+
+export type CreateBlogSqlType = CreateBlogDto & { ownerId: number };

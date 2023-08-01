@@ -6,47 +6,46 @@ import {
   ResultCodeError,
   ResultNotification,
 } from '../../../modules/notification';
-import { BlogsRepository } from '../blogs.repository';
-import { CreateUserBlockDto } from '../model/blog.schema';
+import { CreateBlogSqlType } from '../model/blog-sql.model';
+import { BlogsSqlRepository } from '../db/blogs.sql-repository';
 
 export class CreateBlogCommand {
-  constructor(public createDto: CreateBlogDto, public userId: string) {}
+  constructor(public createDto: CreateBlogDto, public userId: number) {}
 }
 
 @CommandHandler(CreateBlogCommand)
 export class CreateBlogUseCase implements ICommandHandler<CreateBlogCommand> {
   constructor(
     private readonly usersService: UsersService,
-    private readonly blogsRepository: BlogsRepository,
+    private readonly blogsSqlRepository: BlogsSqlRepository,
   ) {}
 
   async execute(
     command: CreateBlogCommand,
-  ): Promise<ResultNotification<string>> {
+  ): Promise<ResultNotification<number>> {
     await validateOrRejectModel(command.createDto, CreateBlogDto);
 
-    const result = new ResultNotification<string>();
+    const creationResult = new ResultNotification<number>();
 
-    const user = await this.usersService.findUserById(command.userId);
+    const user = await this.usersService.findUserSqlById(command.userId);
     if (!user) {
-      result.addError('User not found', ResultCodeError.NotFound);
-      return result;
+      creationResult.addError('User not found', ResultCodeError.NotFound);
+      return creationResult;
     }
 
-    const data: CreateUserBlockDto = {
+    const data: CreateBlogSqlType = {
       name: command.createDto.name,
       description: command.createDto.description,
       websiteUrl: command.createDto.websiteUrl,
-      blogOwner: {
-        userId: user._id,
-        userLogin: user.accountData.login,
-      },
+      ownerId: user.id,
     };
 
-    const newBlog = this.blogsRepository.createBlog(data);
-    await this.blogsRepository.save(newBlog);
-
-    result.addData(newBlog.id);
-    return result;
+    const newBlogId = await this.blogsSqlRepository.createBlog(data);
+    if (!newBlogId) {
+      creationResult.addError('The blog is not created');
+    } else {
+      creationResult.addData(newBlogId);
+    }
+    return creationResult;
   }
 }

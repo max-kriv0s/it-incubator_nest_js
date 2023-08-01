@@ -1,19 +1,19 @@
 import { Injectable } from '@nestjs/common';
-import { Blog, BlogDocument, BlogModelType } from './model/blog.schema';
+import { Blog, BlogDocument, BlogModelType } from '../model/blog.schema';
 import { InjectModel } from '@nestjs/mongoose';
-import { PaginatorBlogView, ViewBlogDto } from './dto/view-blog.dto';
-import { QueryParams } from '../../dto';
-import { PaginatorPostView, ViewPostDto } from '../posts/dto/view-post.dto';
+import { PaginatorBlogView, ViewBlogDto } from '../dto/view-blog.dto';
+import { QueryParams } from '../../../dto';
+import { PaginatorPostView, ViewPostDto } from '../../posts/dto/view-post.dto';
 import {
   NewestLikes,
   Post,
   PostDocument,
   PostModelType,
-} from '../posts/post.schema';
-import { LikeStatus } from '../likes/dto/like-status';
-import { castToObjectId } from '../../utils';
-import { ViewLikeDetailsDto } from '../likes/dto/view-like.dto';
-import { LikePosts, LikePostsModelType } from '../posts/like-posts.schema';
+} from '../../posts/post.schema';
+import { LikeStatus } from '../../likes/dto/like-status';
+import { castToObjectId } from '../../../utils';
+import { ViewLikeDetailsDto } from '../../likes/dto/view-like.dto';
+import { LikePosts, LikePostsModelType } from '../../posts/like-posts.schema';
 
 @Injectable()
 export class BlogsQueryRepository {

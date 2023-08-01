@@ -1,17 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { CreateBlogDto } from './dto/create-blog.dto';
-import { BlogsRepository } from './blogs.repository';
-import { UpdateBlogDto } from './dto/update-blog.dto';
-import { CreateBlogPostDto } from './dto/create-blog-post.dto';
-import { PostsService } from '../posts/posts.service';
+import { BlogsRepository } from './db/blogs.repository';
 import { BlogDocument } from './model/blog.schema';
 
 @Injectable()
 export class BlogsService {
-  constructor(
-    private readonly blogsRepository: BlogsRepository,
-    private readonly postsService: PostsService,
-  ) {}
+  constructor(private readonly blogsRepository: BlogsRepository) {}
 
   async deleteBlogById(id: string) {
     return this.blogsRepository.deleteBlogById(id);

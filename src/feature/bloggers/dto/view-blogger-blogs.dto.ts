@@ -1,5 +1,5 @@
 import { LikeStatus } from '../../../feature/likes/dto/like-status';
-import { OldPaginator } from '../../../dto';
+import { OldPaginator, Paginator, PaginatorType } from '../../../dto';
 import { ViewLikeDetailsDto } from '../../../feature/likes/dto/view-like.dto';
 
 export class ViewBloggerBlogDto {
@@ -12,6 +12,13 @@ export class ViewBloggerBlogDto {
 }
 
 export class PaginatorBloggerBlogView extends OldPaginator<ViewBloggerBlogDto> {}
+
+export type PaginatorBloggerBlogSqlViewType = PaginatorType<ViewBloggerBlogDto>;
+export class PaginatorBloggerBlogSql extends Paginator<ViewBloggerBlogDto> {
+  constructor(public page: number, public pageSize: number) {
+    super(page, pageSize);
+  }
+}
 
 export class ExtendedLikesInfoViewDto {
   readonly likesCount: number;

@@ -5,7 +5,7 @@ import {
   Param,
   Query,
 } from '@nestjs/common';
-import { BlogsQueryRepository } from './blogs-query.repository';
+import { BlogsQueryRepository } from './db/blogs-query.repository';
 import { QueryParams } from '../../dto';
 import { PaginatorBlogView, ViewBlogDto } from './dto/view-blog.dto';
 import { BlogsService } from './blogs.service';

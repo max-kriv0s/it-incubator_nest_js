@@ -1,6 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { BloggerBanUserInputDto } from '../dto/blogger-ban-user-input.dto';
-import { BlogsRepository } from '../../../feature/blogs/blogs.repository';
+import { BlogsRepository } from '../../blogs/db/blogs.repository';
 import {
   ResultCodeError,
   ResultNotification,

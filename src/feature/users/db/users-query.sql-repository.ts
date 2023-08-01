@@ -26,37 +26,34 @@ export class UsersQuerySqlRepository {
     const banStatus = queryParams.banStatus ?? BanStatus.all;
     const isBanFilter = banStatus !== BanStatus.all;
 
-    const query = `
-    SELECT *
-    FROM public."Users"
-    WHERE ("login" ILIKE $1 AND "email" ILIKE $2)
-      AND 
-      (CASE WHEN $3 THEN "isBanned" = $4
-        ELSE true
-      END)`;
-
     const params = [
       `%${searchLoginTerm}%`,
       `%${searchEmailTerm}%`,
       isBanFilter,
       banStatus === BanStatus.banned,
     ];
-
     const usersCount: { count: number }[] = await this.dataSource.query(
-      query,
+      `SELECT count(*)
+      FROM public."Users"
+      WHERE ("login" ILIKE $1 AND "email" ILIKE $2)
+        AND 
+        (CASE WHEN $3 THEN "isBanned" = $4
+          ELSE true
+        END)`,
       params,
     );
 
     const totalCount = +usersCount[0].count;
-    const queryOrderLimit =
-      query +
-      `
-      ORDER BY "${sortBy}" ${sortDirection}
-      LIMIT ${paginator.pageSize} OFFSET ${paginator.skip}
-      `;
-
     const users: UserSqlDocument[] = await this.dataSource.query(
-      queryOrderLimit,
+      `SELECT *
+      FROM public."Users"
+      WHERE ("login" ILIKE $1 AND "email" ILIKE $2)
+        AND 
+        (CASE WHEN $3 THEN "isBanned" = $4
+          ELSE true
+        END)
+      ORDER BY "${sortBy}" ${sortDirection}
+      LIMIT ${paginator.pageSize} OFFSET ${paginator.skip}`,
       params,
     );
     const usersView = users.map((user) => this.userDBToUserView(user));

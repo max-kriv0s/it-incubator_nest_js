@@ -16,7 +16,7 @@ import {
 import { QueryUserDto } from './dto/query-user.dto';
 import {
   PaginatorUserSql,
-  PaginatorUserView,
+  PaginatorUserSqlType,
   ViewUserDto,
 } from './dto/view-user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -27,7 +27,6 @@ import { BanUnbanUserCommand } from './use-case/ban-unban-user.usercase';
 import { CreateUserCommand } from './use-case/create-user.usecase';
 import { UsersQuerySqlRepository } from './db/users-query.sql-repository';
 import { DeleteUserCommand } from './use-case/delete-user.usecase';
-import { ResultNotification } from '../../modules/notification';
 import { IdIntegerValidationPipe } from '../../modules/pipes/id-integer-validation.pipe';
 
 @UseGuards(BasicAuthGuard)
@@ -41,7 +40,7 @@ export class UsersController {
   @Get()
   async getUsers(
     @Query() queryParams: QueryUserDto,
-  ): Promise<PaginatorUserView> {
+  ): Promise<PaginatorUserSqlType> {
     const paginator = new PaginatorUserSql(
       +queryParams.pageNumber,
       +queryParams.pageSize,
@@ -65,7 +64,7 @@ export class UsersController {
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteUser(@Param('id', IdIntegerValidationPipe) id: string) {
-    const isDeleted = await this.commandBus.execute(new DeleteUserCommand(id));
+    const isDeleted = await this.commandBus.execute(new DeleteUserCommand(+id));
     if (!isDeleted) throw new NotFoundException('User not found');
     return;
   }

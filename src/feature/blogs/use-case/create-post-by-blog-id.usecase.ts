@@ -5,7 +5,7 @@ import {
   ResultNotification,
 } from '../../../modules/notification';
 import { validateOrRejectModel } from '../../../modules/validation';
-import { BlogsRepository } from '../blogs.repository';
+import { BlogsRepository } from '../db/blogs.repository';
 import { PostsService } from '../../../feature/posts/posts.service';
 
 export class CreatePostByBlogIdCommand {

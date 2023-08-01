@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PostsRepository } from './posts.repository';
 import { UpdatePostDto } from './dto/update-post.dto';
-import { BlogsRepository } from '../blogs/blogs.repository';
+import { BlogsRepository } from '../blogs/db/blogs.repository';
 import { CreatePostDto } from './dto/create-post.dto';
 import { PostDocument } from './post.schema';
 import { CreateBlogPostDto } from '../blogs/dto/create-blog-post.dto';
