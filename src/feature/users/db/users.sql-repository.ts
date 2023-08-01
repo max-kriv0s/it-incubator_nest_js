@@ -14,8 +14,8 @@ export class UsersSqlRepository {
   async createUser(userDto: CreateUserDto): Promise<number | null> {
     const users: UserSqlDocument[] = await this.dataSource.query(
       `INSERT INTO public."Users"
-        ("Login", "Password", "Email", "CreatedAt", "IsConfirmed")
-       VALUES ($1, $2, $3, $4, $5) RETURNING "Id";`,
+        ("login", "password", "email", "createdAt", "isConfirmed")
+       VALUES ($1, $2, $3, $4, $5) RETURNING "id";`,
       [userDto.login, userDto.password, userDto.email, new Date(), true],
     );
 
@@ -24,19 +24,13 @@ export class UsersSqlRepository {
   }
 
   async deleteUsers() {
-    await this.dataSource.query(
-      `
-      DELETE FROM public."Users"
-    `,
-    );
+    await this.dataSource.query(`DELETE FROM public."Users"`);
   }
 
   async deleteUserById(id: number): Promise<boolean> {
     const result = await this.dataSource.query(
-      `
-      DELETE FROM public."Users"
-      WHERE "Id" = $1
-      `,
+      `DELETE FROM public."Users"
+      WHERE "id" = $1`,
       [id],
     );
     return result.length === 2 && result[1] === 1;
@@ -44,10 +38,9 @@ export class UsersSqlRepository {
 
   async updateBanUnban(userId: number, updateDto: UpdateBanUserDto) {
     await this.dataSource.query(
-      `
-      UPDATE public."Users"
-        SET "IsBanned" = $1, "BanDate" = $2, "BanReason" = $3
-      WHERE "Id" = $4;`,
+      `UPDATE public."Users"
+       SET "isBanned" = $1, "banDate" = $2, "banReason" = $3
+      WHERE "id" = $4;`,
       [updateDto.isBanned, updateDto.banDate, updateDto.banReason, userId],
     );
   }
@@ -56,7 +49,7 @@ export class UsersSqlRepository {
     const users = await this.dataSource.query(
       `SELECT *
       FROM public."Users"
-      WHERE "Id" = $1;`,
+      WHERE "id" = $1;`,
       [userId],
     );
 
@@ -70,7 +63,7 @@ export class UsersSqlRepository {
   ): Promise<boolean> {
     const result = await this.dataSource.query(
       `UPDATE public."Users"
-        SET "RecoveryCode" = $1, "RecoveryExpirationDate" = $2
+        SET "passwordRecoveryCode" = $1, "passwordRecoveryExpirationDate" = $2
       WHERE "id" = $3
       `,
       [passwordRecovery.recoveryCode, passwordRecovery.expirationDate, userId],
@@ -84,7 +77,7 @@ export class UsersSqlRepository {
     const users: UserSqlDocument[] = await this.dataSource.query(
       `SELECT *
       FROM public."Users"
-      WHERE "RecoveryCode" = $1`,
+      WHERE "passwordRecoveryCode" = $1`,
       [recoveryCode],
     );
     if (!users.length) return null;
@@ -97,8 +90,8 @@ export class UsersSqlRepository {
   ): Promise<boolean> {
     const result = await this.dataSource.query(
       `UPDATE public."Users"
-        SET "Password" = $2
-        WHERE "Id" = $1`,
+        SET "password" = $2
+        WHERE "id" = $1`,
       [userId, newPassword],
     );
     return result.length === 2 && result[1] === 1;
@@ -110,8 +103,7 @@ export class UsersSqlRepository {
     const users: UserSqlDocument[] = await this.dataSource.query(
       `SELECT *
       FROM public."Users"
-      WHERE "Login" = $1 OR "Email" = $1
-      `,
+      WHERE "login" = $1 OR "email" = $1`,
       [loginOrEmail],
     );
     if (!users.length) return null;
@@ -124,7 +116,7 @@ export class UsersSqlRepository {
     const users: UserSqlDocument[] = await this.dataSource.query(
       `SELECT *
       FROM public."Users"
-      WHERE "ConfirmationCode" = $1`,
+      WHERE "confirmationCode" = $1`,
       [code],
     );
     if (!users.length) return null;
@@ -134,8 +126,8 @@ export class UsersSqlRepository {
   async UpdateUserConfirmed(userId: number): Promise<boolean> {
     const result = await this.dataSource.query(
       `UPDATE public."Users"
-      SET "IsConfirmed" = true
-      WHERE "Id" = $1`,
+      SET "isConfirmed" = true
+      WHERE "id" = $1`,
       [userId],
     );
 
@@ -148,8 +140,8 @@ export class UsersSqlRepository {
   ): Promise<boolean> {
     const result = await this.dataSource.query(
       `UPDATE public."Users"
-      SET "IsConfirmed" = $2, "ConfirmationCode" = $3, "EmailExpirationDate" = $4
-      WHERE "Id" = $1
+      SET "isConfirmed" = $2, "confirmationCode" = $3, "emailConfirmationExpirationDate" = $4
+      WHERE "id" = $1
       `,
       [
         userId,

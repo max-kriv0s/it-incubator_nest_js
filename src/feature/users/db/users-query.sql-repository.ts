@@ -67,7 +67,7 @@ export class UsersQuerySqlRepository {
     const users: UserSqlDocument[] = await this.dataSource.query(
       `SELECT *
       FROM public."Users"
-      WHERE "Id" = $1;`,
+      WHERE "id" = $1;`,
       [id],
     );
     if (!users.length) return null;
@@ -90,9 +90,9 @@ export class UsersQuerySqlRepository {
 
   async getMeView(id: string): Promise<ViewMeDto | null> {
     const users = await this.dataSource.query(
-      `SELECT "Id", "Login", "Email"
+      `SELECT "id", "login", "email"
         FROM public."Users"
-        WHERE "Id" = $1
+        WHERE "id" = $1
         `,
       [id],
     );
