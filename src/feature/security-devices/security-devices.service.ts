@@ -50,24 +50,25 @@ export class SecurityDevicesService {
   async deleteUserSessionByDeviceID(
     deviceID: number,
     userId: number,
-    deleteResult: ResultNotification<null>,
-  ) {
+  ): Promise<ResultNotification<null>> {
+    const deleteResult = new ResultNotification<null>();
     const securitySession =
       await this.securityDevicesSqlRepository.findSessionByDeviceID(deviceID);
     if (!securitySession) {
       deleteResult.addError('Device not found', ResultCodeError.NotFound);
-      return;
+      return deleteResult;
     }
 
     if (securitySession.userId !== userId) {
       deleteResult.addError('Access is denied', ResultCodeError.Forbidden);
-      return;
+      return deleteResult;
     }
 
     await this.securityDevicesSqlRepository.deleteUserSessionByDeviceID(
       deviceID,
       userId,
     );
+    return deleteResult;
   }
 
   async updateSecurityDeviceSession(

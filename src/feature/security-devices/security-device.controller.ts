@@ -54,12 +54,11 @@ export class SecurityDevicesController {
     @Param('deviceId', IdIntegerValidationPipe) deviceId: string,
     @CurrentUser() tokenDto: refreshTokenDto,
   ) {
-    const deleteResult = new ResultNotification<null>();
-    await this.securityDevicesService.deleteUserSessionByDeviceID(
-      +deviceId,
-      tokenDto.userId,
-      deleteResult,
-    );
+    const deleteResult =
+      await this.securityDevicesService.deleteUserSessionByDeviceID(
+        +deviceId,
+        tokenDto.userId,
+      );
 
     return deleteResult.getResult();
   }

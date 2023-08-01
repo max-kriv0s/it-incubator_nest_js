@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Blog, BlogDocument, BlogModelType } from './blog.schema';
+import { Blog, BlogDocument, BlogModelType } from './model/blog.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { PaginatorBlogView, ViewBlogDto } from './dto/view-blog.dto';
 import { QueryParams } from '../../dto';

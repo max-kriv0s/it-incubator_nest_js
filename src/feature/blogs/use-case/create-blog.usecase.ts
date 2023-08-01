@@ -7,7 +7,7 @@ import {
   ResultNotification,
 } from '../../../modules/notification';
 import { BlogsRepository } from '../blogs.repository';
-import { CreateUserBlockDto } from '../blog.schema';
+import { CreateUserBlockDto } from '../model/blog.schema';
 
 export class CreateBlogCommand {
   constructor(public createDto: CreateBlogDto, public userId: string) {}

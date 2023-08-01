@@ -4,7 +4,7 @@ import { BlogsRepository } from './blogs.repository';
 import { UpdateBlogDto } from './dto/update-blog.dto';
 import { CreateBlogPostDto } from './dto/create-blog-post.dto';
 import { PostsService } from '../posts/posts.service';
-import { BlogDocument } from './blog.schema';
+import { BlogDocument } from './model/blog.schema';
 
 @Injectable()
 export class BlogsService {

@@ -8,7 +8,7 @@ import {
   Blog,
   BlogDocument,
   BlogModelType,
-} from '../../../feature/blogs/blog.schema';
+} from '../../blogs/model/blog.schema';
 import { InjectModel } from '@nestjs/mongoose';
 
 @Injectable()

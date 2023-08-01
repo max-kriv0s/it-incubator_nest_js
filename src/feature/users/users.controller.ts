@@ -76,9 +76,8 @@ export class UsersController {
     @Param('id', IdIntegerValidationPipe) id: string,
     @Body() dto: BanUnbanUserDto,
   ) {
-    const updateResult = new ResultNotification<boolean>();
-    await this.commandBus.execute(
-      new BanUnbanUserCommand(+id, dto, updateResult),
+    const updateResult = await this.commandBus.execute(
+      new BanUnbanUserCommand(+id, dto),
     );
     return updateResult.getResult();
   }

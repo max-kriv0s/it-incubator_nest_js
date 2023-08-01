@@ -4,7 +4,7 @@ import {
   BlogDocument,
   BlogModelType,
   CreateUserBlockDto,
-} from './blog.schema';
+} from './model/blog.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { castToObjectId } from '../../utils';
 
