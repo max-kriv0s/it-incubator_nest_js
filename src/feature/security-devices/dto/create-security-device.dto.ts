@@ -1,8 +1,8 @@
 export class CreateSecurityDeviceDto {
-  readonly id: number;
+  // readonly id: string;
   readonly ip: string;
   readonly title: string;
-  readonly lastActiveDate: Date;
-  readonly expirationTime: Date;
-  readonly userId: number;
+  // readonly lastActiveDate: Date;
+  // readonly expirationTime: Date;
+  readonly userId: string;
 }

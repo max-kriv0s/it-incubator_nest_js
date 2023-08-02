@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { NewestLikes, PostDocument } from './post.schema';
+import { NewestLikes, PostDocument } from './model/post.schema';
 import { LikePostsRepository } from './like-posts.repository';
 import { LikeStatus } from '../likes/dto/like-status';
 import { LikePostsDocument } from './like-posts.schema';

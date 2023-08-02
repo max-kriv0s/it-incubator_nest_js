@@ -1,51 +1,56 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { BlogSqlDocument, CreateBlogSqlType } from '../model/blog-sql.model';
+import {
+  BlogRawSqlDocument,
+  BlogSqlDocument,
+  CreateBlogSqlType,
+  convertBlogRawSqlToSqlDocument,
+} from '../model/blog-sql.model';
 import { UpdateBlogDto } from '../dto/update-blog.dto';
 
 @Injectable()
 export class BlogsSqlRepository {
   constructor(@InjectDataSource() protected dataSource: DataSource) {}
 
-  async createBlog(dto: CreateBlogSqlType): Promise<number | null> {
-    const blogs: BlogSqlDocument[] = await this.dataSource.query(
+  async createBlog(dto: CreateBlogSqlType): Promise<BlogSqlDocument | null> {
+    const blogs: BlogRawSqlDocument[] = await this.dataSource.query(
       `INSERT INTO public."Blogs"
       ("name", "description", "websiteUrl", "ownerId")
       VALUES
       ($1, $2, $3, $4)
       RETURNING "id"`,
-      [dto.name, dto.description, dto.websiteUrl, dto.ownerId],
+      [dto.name, dto.description, dto.websiteUrl, +dto.ownerId],
     );
     if (!blogs.length) return null;
-    return blogs[0].id;
+    return convertBlogRawSqlToSqlDocument(blogs[0]);
   }
 
-  async findBlogById(id: number): Promise<BlogSqlDocument | null> {
-    const blogs: BlogSqlDocument[] = await this.dataSource.query(
+  async findBlogById(id: string): Promise<BlogSqlDocument | null> {
+    const blogs: BlogRawSqlDocument[] = await this.dataSource.query(
       `SELECT *
         FROM public."Blogs"
         WHERE id = $1`,
-      [id],
+      [+id],
     );
     if (!blogs.length) return null;
-    return blogs[0];
+    return convertBlogRawSqlToSqlDocument(blogs[0]);
   }
 
-  async updateBlog(id: number, dto: UpdateBlogDto) {
+  async updateBlog(id: string, dto: UpdateBlogDto) {
     await this.dataSource.query(
       `UPDATE public."Blogs"
       SET 
       WHERE "id"`,
-      [id, dto.name, dto.description, dto.websiteUrl],
+      [+id, dto.name, dto.description, dto.websiteUrl],
     );
   }
 
-  async deleteBlogById(id: number) {
+  async deleteBlogById(id: string) {
     await this.dataSource.query(
       `DELETE FROM public."Blogs"
       WHERE "id" = $1`,
-      [id],
+      [+id],
     );
   }
   async deleteBlogs() {

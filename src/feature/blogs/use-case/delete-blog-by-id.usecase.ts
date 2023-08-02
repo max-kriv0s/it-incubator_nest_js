@@ -6,7 +6,7 @@ import {
 import { BlogsSqlRepository } from '../db/blogs.sql-repository';
 
 export class DeleteBlogByIdCommand {
-  constructor(public id: number, public userId: number) {}
+  constructor(public id: string, public userId: string) {}
 }
 
 @CommandHandler(DeleteBlogByIdCommand)

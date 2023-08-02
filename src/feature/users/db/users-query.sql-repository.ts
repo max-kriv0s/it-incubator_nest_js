@@ -8,7 +8,11 @@ import {
 import { ViewMeDto } from '../../auth/dto/view-me.dto';
 import { DataSource } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { UserSqlDocument } from '../model/user-sql.model';
+import {
+  UserRawSqlDocument,
+  UserSqlDocument,
+  convertUserRawSqlToSqlDocument,
+} from '../model/user-sql.model';
 
 @Injectable()
 export class UsersQuerySqlRepository {
@@ -44,7 +48,7 @@ export class UsersQuerySqlRepository {
     );
 
     const totalCount = +usersCount[0].count;
-    const users: UserSqlDocument[] = await this.dataSource.query(
+    const usersRaw: UserRawSqlDocument[] = await this.dataSource.query(
       `SELECT *
       FROM public."Users"
       WHERE ("login" ILIKE $1 AND "email" ILIKE $2)
@@ -56,24 +60,25 @@ export class UsersQuerySqlRepository {
       LIMIT ${paginator.pageSize} OFFSET ${paginator.skip}`,
       params,
     );
+    const users = usersRaw.map((user) => convertUserRawSqlToSqlDocument(user));
     const usersView = users.map((user) => this.userDBToUserView(user));
     return paginator.paginate(totalCount, usersView);
   }
 
   async getUserViewById(id: string): Promise<ViewUserDto | null> {
-    const users: UserSqlDocument[] = await this.dataSource.query(
+    const usersRaw: UserRawSqlDocument[] = await this.dataSource.query(
       `SELECT *
       FROM public."Users"
       WHERE "id" = $1;`,
-      [id],
+      [+id],
     );
-    if (!users.length) return null;
-    return this.userDBToUserView(users[0]);
+    if (!usersRaw.length) return null;
+    return this.userDBToUserView(convertUserRawSqlToSqlDocument(usersRaw[0]));
   }
 
   userDBToUserView(user: UserSqlDocument): ViewUserDto {
     return {
-      id: user.id.toString(),
+      id: user.id,
       login: user.login,
       email: user.email,
       createdAt: user.createdAt.toISOString(),
@@ -91,14 +96,14 @@ export class UsersQuerySqlRepository {
         FROM public."Users"
         WHERE "id" = $1
         `,
-      [id],
+      [+id],
     );
     if (!users.length) return null;
 
     return {
       email: users[0].Email,
       login: users[0].Login,
-      userId: id,
+      userId: id.toString(),
     };
   }
 }

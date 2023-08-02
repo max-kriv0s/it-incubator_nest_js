@@ -5,7 +5,7 @@ import { Types } from 'mongoose';
 import { PaginatorCommentView, ViewCommentDto } from './dto/view-comment.dto';
 import { QueryParams } from '../../dto';
 import { LikeStatus } from '../likes/dto/like-status';
-import { Post, PostModelType } from '../posts/post.schema';
+import { Post, PostModelType } from '../posts/model/post.schema';
 import { LikeCommentsService } from './like-comments.service';
 
 @Injectable()

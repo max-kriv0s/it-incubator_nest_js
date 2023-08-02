@@ -27,22 +27,24 @@ export class AuthService {
     );
     if (!userId) return null;
 
-    const newSecurityDevicesId =
-      this.securityDevicesService.getNewSecurityDeviceId();
-
-    const tokens = await this.createTokens(userId, newSecurityDevicesId);
-
-    const dataRefreshTokenDto = await this.getDataRefreshTokenDto(
-      tokens.refreshToken,
-    );
-
     const securityDevicesId =
       await this.securityDevicesService.CreateSecurityDevice(
-        dataRefreshTokenDto,
+        userId,
         ip,
         userAgent,
       );
     if (!securityDevicesId) return null;
+
+    const tokens = await this.createTokens(userId, securityDevicesId);
+    const dataRefreshTokenDto = await this.getDataRefreshTokenDto(
+      tokens.refreshToken,
+    );
+
+    await this.securityDevicesService.updateSecurityDeviceSession(
+      dataRefreshTokenDto,
+      ip,
+      userAgent,
+    );
 
     return tokens;
   }

@@ -27,14 +27,14 @@ export class UsersService {
     return bcrypt.hash(password, salt);
   }
 
-  async deleteUserById(id: number) {
+  async deleteUserById(id: string) {
     return this.usersSqlRepository.deleteUserById(id);
   }
 
   async checkCredentials(
     loginOrEmail: string,
     password: string,
-  ): Promise<number | null> {
+  ): Promise<string | null> {
     const user = await this.usersSqlRepository.findByLoginOrEmail(loginOrEmail);
     if (!user) return null;
     if (user.isBanned) return null;
@@ -51,7 +51,7 @@ export class UsersService {
     return this.usersRepository.findUserById(userId);
   }
 
-  async findUserSqlById(userId: number): Promise<UserSqlDocument | null> {
+  async findUserSqlById(userId: string): Promise<UserSqlDocument | null> {
     return this.usersSqlRepository.findUserById(userId);
   }
 

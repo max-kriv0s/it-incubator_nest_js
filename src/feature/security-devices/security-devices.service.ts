@@ -15,32 +15,26 @@ export class SecurityDevicesService {
   ) {}
 
   async CreateSecurityDevice(
-    dataRefreshTokenDto: TokenDataDto,
+    userId: string,
     ip: string,
     userAgent: string,
-  ): Promise<number | null> {
+  ): Promise<string | null> {
     const data: CreateSecurityDeviceDto = {
-      id: dataRefreshTokenDto.deviceId,
       ip: ip,
       title: this.getNameUserAgent(userAgent),
-      lastActiveDate: dataRefreshTokenDto.issuedAd,
-      expirationTime: dataRefreshTokenDto.expirationTime,
-      userId: dataRefreshTokenDto.userId,
+      userId: userId,
     };
-
-    // const newSecurityDevices =
-    //   this.securityDevicesRepository.CreateSecurityDevice(data);
-    // await this.securityDevicesRepository.save(newSecurityDevices);
-
-    // return newSecurityDevices.id;
-    return this.securityDevicesSqlRepository.createSecurityDevice(data);
+    const device = await this.securityDevicesSqlRepository.createSecurityDevice(
+      data,
+    );
+    return device ? device.id : null;
   }
 
   getNameUserAgent(userAgent?: string): string {
     return userAgent ? userAgent : 'Chrome';
   }
 
-  async deleteAllDevicesSessionsByUserID(userId: number, deviceId: number) {
+  async deleteAllDevicesSessionsByUserID(userId: string, deviceId: string) {
     await this.securityDevicesSqlRepository.deleteAllDevicesSessionsByUserID(
       userId,
       deviceId,
@@ -48,8 +42,8 @@ export class SecurityDevicesService {
   }
 
   async deleteUserSessionByDeviceID(
-    deviceID: number,
-    userId: number,
+    deviceID: string,
+    userId: string,
   ): Promise<ResultNotification<null>> {
     const deleteResult = new ResultNotification<null>();
     const securitySession =
@@ -90,7 +84,7 @@ export class SecurityDevicesService {
     );
   }
 
-  async logoutUserSessionByDeviceID(deviceID: number, userId: number) {
+  async logoutUserSessionByDeviceID(deviceID: string, userId: string) {
     await this.securityDevicesSqlRepository.deleteUserSessionByDeviceID(
       deviceID,
       userId,
@@ -113,7 +107,7 @@ export class SecurityDevicesService {
     );
   }
 
-  async deleteAllDevicesByUserID(userId: number) {
+  async deleteAllDevicesByUserID(userId: string) {
     await this.securityDevicesSqlRepository.deleteAllDevicesByUserID(userId);
   }
 }

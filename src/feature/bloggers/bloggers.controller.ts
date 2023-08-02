@@ -56,7 +56,7 @@ export class BloggersController {
   async updateExistingBlogById(
     @Param('id', IdIntegerValidationPipe) id: string,
     @Body() updateDto: UpdateBlogDto,
-    @CurrentUserId() userId: number,
+    @CurrentUserId() userId: string,
   ) {
     const updateResult: ResultNotification = await this.commandBus.execute(
       new UpdateExistingBlogByIdCommand(+id, updateDto, userId),
@@ -68,10 +68,10 @@ export class BloggersController {
   @Delete(':id')
   async deleteBlog(
     @Param('id', IdIntegerValidationPipe) id: string,
-    @CurrentUserId() userId: number,
+    @CurrentUserId() userId: string,
   ) {
     const deletionResult: ResultNotification = await this.commandBus.execute(
-      new DeleteBlogByIdCommand(+id, userId),
+      new DeleteBlogByIdCommand(id, userId),
     );
     if (deletionResult.hasError()) deletionResult.getResult();
   }
@@ -79,9 +79,9 @@ export class BloggersController {
   @Post()
   async createBlog(
     @Body() createDto: CreateBlogDto,
-    @CurrentUserId() userId: number,
+    @CurrentUserId() userId: string,
   ): Promise<ViewBloggerBlogDto> {
-    const creationResult: ResultNotification<number> =
+    const creationResult: ResultNotification<string> =
       await this.commandBus.execute(new CreateBlogCommand(createDto, userId));
     const blogId = creationResult.getResult();
     if (!blogId) throw new BadRequestException();
@@ -94,7 +94,7 @@ export class BloggersController {
   @Get()
   async getBlogs(
     @Query() queryParams: BloggerQueryParams,
-    @CurrentUserId() userId: number,
+    @CurrentUserId() userId: string,
   ): Promise<PaginatorBloggerBlogSqlViewType> {
     const paginator = new PaginatorBloggerBlogSql(
       +queryParams.pageNumber,
@@ -110,7 +110,7 @@ export class BloggersController {
 
   @Post(':blogId/posts')
   async createPostByBlogId(
-    @Param('blogId', IdValidationPipe) blogId: string,
+    @Param('blogId', IdIntegerValidationPipe) blogId: string,
     @Body() createPostDto: CreateBlogPostDto,
     @CurrentUserId(false) userId: string,
   ): Promise<ViewPostDto> {

@@ -12,7 +12,7 @@ import { UsersRepository } from './feature/users/db/users.repository';
 import { UsersService } from './feature/users/users.service';
 import { UsersController } from './feature/users/users.controller';
 import { User, UserSchema } from './feature/users/model/user.schema';
-import { Post, PostSchema } from './feature/posts/post.schema';
+import { Post, PostSchema } from './feature/posts/model/post.schema';
 import { Blog, BlogSchema } from './feature/blogs/model/blog.schema';
 import { PostsController } from './feature/posts/posts.controller';
 import { PostsService } from './feature/posts/posts.service';

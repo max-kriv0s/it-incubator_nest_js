@@ -1,6 +1,6 @@
 export class TokenDataDto {
-  userId: number;
-  deviceId: number;
+  userId: string;
+  deviceId: string;
   issuedAd: Date;
   expirationTime: Date;
 }

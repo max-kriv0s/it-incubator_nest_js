@@ -7,7 +7,7 @@ import {
 import { castToObjectId } from '../../utils';
 import { InjectModel } from '@nestjs/mongoose';
 import { LikeStatus } from '../likes/dto/like-status';
-import { NewestLikes } from './post.schema';
+import { NewestLikes } from './model/post.schema';
 
 @Injectable()
 export class LikePostsRepository {

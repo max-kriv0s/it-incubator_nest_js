@@ -3,7 +3,7 @@ import { PostsRepository } from './posts.repository';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { BlogsRepository } from '../blogs/db/blogs.repository';
 import { CreatePostDto } from './dto/create-post.dto';
-import { PostDocument } from './post.schema';
+import { PostDocument } from './model/post.schema';
 import { CreateBlogPostDto } from '../blogs/dto/create-blog-post.dto';
 import { CreateCommentDto } from '../comments/dto/create-comment.dto';
 import { UsersService } from '../users/users.service';

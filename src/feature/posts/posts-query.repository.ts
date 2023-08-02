@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { NewestLikes, Post, PostDocument, PostModelType } from './post.schema';
+import { NewestLikes, Post, PostDocument, PostModelType } from './model/post.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { QueryParams } from '../../dto';
 import { PaginatorPostView, ViewPostDto } from './dto/view-post.dto';

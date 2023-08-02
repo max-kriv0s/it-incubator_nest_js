@@ -9,7 +9,7 @@ import {
   Post,
   PostDocument,
   PostModelType,
-} from '../../posts/post.schema';
+} from '../../posts/model/post.schema';
 import { LikeStatus } from '../../likes/dto/like-status';
 import { castToObjectId } from '../../../utils';
 import { ViewLikeDetailsDto } from '../../likes/dto/view-like.dto';

@@ -13,7 +13,7 @@ import { UpdateBanUserDto } from '../dto/update-ban-user.dto';
 import { SecurityDevicesService } from '../../../feature/security-devices/security-devices.service';
 
 export class BanUnbanUserCommand {
-  constructor(public userId: number, public dto: BanUnbanUserDto) {}
+  constructor(public userId: string, public dto: BanUnbanUserDto) {}
 }
 
 @CommandHandler(BanUnbanUserCommand)
@@ -29,8 +29,8 @@ export class BanUnbanUserUseCase
     command: BanUnbanUserCommand,
   ): Promise<ResultNotification<boolean>> {
     const updateResult = new ResultNotification<boolean>();
-    const userId = this.usersSqlRepository.findUserById(command.userId);
-    if (!userId) {
+    const user = this.usersSqlRepository.findUserById(command.userId);
+    if (!user) {
       updateResult.addError('User not found', ResultCodeError.NotFound);
     }
 
@@ -65,7 +65,7 @@ export class BanUnbanUserUseCase
     // ]);
   }
 
-  private async deleteAllDevicesByUsersId(userId: number, isBanned: boolean) {
+  private async deleteAllDevicesByUsersId(userId: string, isBanned: boolean) {
     if (isBanned)
       await this.securityDevicesService.deleteAllDevicesByUserID(userId);
   }

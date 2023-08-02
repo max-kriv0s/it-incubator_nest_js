@@ -13,5 +13,5 @@ export class UpdateSecurityDeviceSqlDto {
   readonly title: string;
   readonly lastActiveDate: Date;
   readonly expirationTime: Date;
-  readonly userId: number;
+  readonly userId: string;
 }

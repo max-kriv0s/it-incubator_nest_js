@@ -18,7 +18,7 @@ import {
   Post,
   PostDocument,
   PostModelType,
-} from '../../../feature/posts/post.schema';
+} from '../../posts/model/post.schema';
 import { LikeStatus } from '../../../feature/likes/dto/like-status';
 import {
   LikePosts,

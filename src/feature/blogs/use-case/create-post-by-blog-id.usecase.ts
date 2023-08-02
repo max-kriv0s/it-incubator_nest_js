@@ -5,8 +5,8 @@ import {
   ResultNotification,
 } from '../../../modules/notification';
 import { validateOrRejectModel } from '../../../modules/validation';
-import { BlogsRepository } from '../db/blogs.repository';
 import { PostsService } from '../../../feature/posts/posts.service';
+import { BlogsSqlRepository } from '../db/blogs.sql-repository';
 
 export class CreatePostByBlogIdCommand {
   constructor(
@@ -22,7 +22,7 @@ export class CreatePostByBlogIdUseCase
 {
   constructor(
     private readonly postsService: PostsService,
-    private readonly blogsRepository: BlogsRepository,
+    private readonly blogsSqlRepository: BlogsSqlRepository,
   ) {}
 
   async execute(
@@ -30,16 +30,16 @@ export class CreatePostByBlogIdUseCase
   ): Promise<ResultNotification<string>> {
     await validateOrRejectModel(command.createPostDto, CreateBlogPostDto);
 
-    const result = new ResultNotification<string>();
+    const creationResult = new ResultNotification<string>();
 
-    const blog = await this.blogsRepository.findBlogById(command.blogId);
+    const blog = await this.blogsSqlRepository.findBlogById(command.blogId);
     if (!blog) {
-      result.addError('Blog not found', ResultCodeError.NotFound);
-      return result;
+      creationResult.addError('Blog not found', ResultCodeError.NotFound);
+      return creationResult;
     }
 
-    if (!blog.thisIsOwner(command.userId)) {
-      result.addError('Access is denied', ResultCodeError.Forbidden);
+    if (blog.ownerId !== command.userId) {
+      creationResult.addError('Access is denied', ResultCodeError.Forbidden);
     }
 
     const postId = await this.postsService.createPostByBlogId(
@@ -48,7 +48,7 @@ export class CreatePostByBlogIdUseCase
       command.createPostDto,
     );
 
-    result.addData(postId);
-    return result;
+    creationResult.addData(postId);
+    return creationResult;
   }
 }

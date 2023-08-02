@@ -10,7 +10,7 @@ import { CreateBlogSqlType } from '../model/blog-sql.model';
 import { BlogsSqlRepository } from '../db/blogs.sql-repository';
 
 export class CreateBlogCommand {
-  constructor(public createDto: CreateBlogDto, public userId: number) {}
+  constructor(public createDto: CreateBlogDto, public userId: string) {}
 }
 
 @CommandHandler(CreateBlogCommand)
@@ -22,10 +22,10 @@ export class CreateBlogUseCase implements ICommandHandler<CreateBlogCommand> {
 
   async execute(
     command: CreateBlogCommand,
-  ): Promise<ResultNotification<number>> {
+  ): Promise<ResultNotification<string>> {
     await validateOrRejectModel(command.createDto, CreateBlogDto);
 
-    const creationResult = new ResultNotification<number>();
+    const creationResult = new ResultNotification<string>();
 
     const user = await this.usersService.findUserSqlById(command.userId);
     if (!user) {
@@ -40,11 +40,11 @@ export class CreateBlogUseCase implements ICommandHandler<CreateBlogCommand> {
       ownerId: user.id,
     };
 
-    const newBlogId = await this.blogsSqlRepository.createBlog(data);
-    if (!newBlogId) {
+    const newBlog = await this.blogsSqlRepository.createBlog(data);
+    if (!newBlog) {
       creationResult.addError('The blog is not created');
     } else {
-      creationResult.addData(newBlogId);
+      creationResult.addData(newBlog.id);
     }
     return creationResult;
   }

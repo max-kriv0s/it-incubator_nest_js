@@ -50,7 +50,7 @@ export class UsersController {
 
   @Post()
   async createUser(@Body() userDto: CreateUserDto): Promise<ViewUserDto> {
-    const userId = await this.commandBus.execute(
+    const userId: string | null = await this.commandBus.execute(
       new CreateUserCommand(userDto),
     );
     if (!userId) throw new BadRequestException();
@@ -64,7 +64,7 @@ export class UsersController {
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteUser(@Param('id', IdIntegerValidationPipe) id: string) {
-    const isDeleted = await this.commandBus.execute(new DeleteUserCommand(+id));
+    const isDeleted = await this.commandBus.execute(new DeleteUserCommand(id));
     if (!isDeleted) throw new NotFoundException('User not found');
     return;
   }
@@ -76,7 +76,7 @@ export class UsersController {
     @Body() dto: BanUnbanUserDto,
   ) {
     const updateResult = await this.commandBus.execute(
-      new BanUnbanUserCommand(+id, dto),
+      new BanUnbanUserCommand(id, dto),
     );
     return updateResult.getResult();
   }
