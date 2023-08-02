@@ -7,7 +7,7 @@ import {
   registerDecorator,
 } from 'class-validator';
 import { BlogsService } from '../../../feature/blogs/blogs.service';
-import { BlogsRepository } from 'src/feature/blogs/blogs.repository';
+import { BlogsRepository } from '../../blogs/db/blogs.repository';
 
 @ValidatorConstraint({ name: 'BlogExists', async: true })
 @Injectable()

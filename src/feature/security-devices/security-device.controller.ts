@@ -55,7 +55,7 @@ export class SecurityDevicesController {
   ) {
     const deleteResult =
       await this.securityDevicesService.deleteUserSessionByDeviceID(
-        +deviceId,
+        deviceId,
         tokenDto.userId,
       );
 

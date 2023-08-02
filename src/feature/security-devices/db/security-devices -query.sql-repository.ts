@@ -9,14 +9,14 @@ export class SecurityDevicesQuerySqlRepository {
   constructor(@InjectDataSource() protected dataSource: DataSource) {}
 
   async getAllDevicesSessionsByUserID(
-    userId: number,
+    userId: string,
   ): Promise<ViewSecurityDeviceDto[] | null> {
     const devices = await this.dataSource.query(
       `SELECT *
       FROM public."SecurityDevices"
       WHERE "UserId" = $1
         `,
-      [userId],
+      [+userId],
     );
     if (!devices.length) return null;
 

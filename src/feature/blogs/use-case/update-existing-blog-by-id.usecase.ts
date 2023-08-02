@@ -9,9 +9,9 @@ import { BlogsSqlRepository } from '../db/blogs.sql-repository';
 
 export class UpdateExistingBlogByIdCommand {
   constructor(
-    public id: number,
+    public id: string,
     public updateDto: UpdateBlogDto,
-    public userId: number,
+    public userId: string,
   ) {}
 }
 

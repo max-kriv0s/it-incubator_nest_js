@@ -42,6 +42,7 @@ import { DeletePostByIdCommand } from './use-case/delete-post-by-id.usecase';
 import { PaginatorViewBloggerCommentsDto } from './dto/view-blogger-comments.dto';
 import { IdIntegerValidationPipe } from 'src/modules/pipes/id-integer-validation.pipe';
 import { BloggerQuerySqlRepository } from './db/blogger-query.sql-repository';
+import { BloggerQueryRepository } from './db/blogger-query.repository';
 
 @UseGuards(AccessJwtAuthGuard)
 @Controller('blogger/blogs')
@@ -49,6 +50,7 @@ export class BloggersController {
   constructor(
     private commandBus: CommandBus,
     private readonly bloggerQuerySqlRepository: BloggerQuerySqlRepository,
+    private readonly bloggerQueryRepository: BloggerQueryRepository,
   ) {}
 
   @HttpCode(HttpStatus.NO_CONTENT)
@@ -59,7 +61,7 @@ export class BloggersController {
     @CurrentUserId() userId: string,
   ) {
     const updateResult: ResultNotification = await this.commandBus.execute(
-      new UpdateExistingBlogByIdCommand(+id, updateDto, userId),
+      new UpdateExistingBlogByIdCommand(id, updateDto, userId),
     );
     if (updateResult.hasError()) updateResult.getResult();
   }
@@ -118,7 +120,7 @@ export class BloggersController {
       new CreatePostByBlogIdCommand(blogId, createPostDto, userId),
     );
     const postId = replyByNotification(result);
-    const postView = await this.bloggerSqlQueryRepository.getPostById(
+    const postView = await this.bloggerQueryRepository.getPostById(
       postId,
       userId,
     );
