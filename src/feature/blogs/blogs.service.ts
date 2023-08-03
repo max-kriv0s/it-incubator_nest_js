@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { BlogsRepository } from './db/blogs.repository';
 import { BlogDocument } from './model/blog.schema';
-import { BlogSqlDocument } from './model/blog-sql.model';
 import { BlogsSqlRepository } from './db/blogs.sql-repository';
+import { BlogSqlDocument } from './model/blog-sql.model';
 
 @Injectable()
 export class BlogsService {
@@ -22,5 +22,9 @@ export class BlogsService {
 
   async findBlogModelById(id: string): Promise<BlogDocument | null> {
     return await this.blogsRepository.findBlogById(id);
+  }
+
+  async setBanUnbaneBlogByOwnerId(ownerId: string, isBanned: boolean) {
+    return this.blogsSqlRepository.setBanUnbaneBlogByOwnerId(ownerId, isBanned);
   }
 }

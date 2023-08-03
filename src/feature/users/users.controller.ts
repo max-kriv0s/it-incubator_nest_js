@@ -28,6 +28,7 @@ import { CreateUserCommand } from './use-case/create-user.usecase';
 import { UsersQuerySqlRepository } from './db/users-query.sql-repository';
 import { DeleteUserCommand } from './use-case/delete-user.usecase';
 import { IdIntegerValidationPipe } from '../../modules/pipes/id-integer-validation.pipe';
+import { ResultNotification } from 'src/modules/notification';
 
 @UseGuards(BasicAuthGuard)
 @Controller('sa/users')
@@ -75,7 +76,7 @@ export class UsersController {
     @Param('id', IdIntegerValidationPipe) id: string,
     @Body() dto: BanUnbanUserDto,
   ) {
-    const updateResult = await this.commandBus.execute(
+    const updateResult: ResultNotification = await this.commandBus.execute(
       new BanUnbanUserCommand(id, dto),
     );
     return updateResult.getResult();

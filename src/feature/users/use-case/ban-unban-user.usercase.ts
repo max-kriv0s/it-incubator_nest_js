@@ -4,13 +4,10 @@ import {
   ResultCodeError,
   ResultNotification,
 } from '../../../modules/notification';
-import { SetBanUnbanBlogsCommand } from '../../../feature/blogs/use-case/set-ban-unbane-blogs.usecase';
-import { SetBanUnbanCommentsCommand } from '../../../feature/comments/use-case/set-ban-unbane-comments.usecase';
-import { CountLikesPostsCommand } from '../../../feature/posts/use-case/count-likes-post.usecase';
-import { CountLikesCommentsCommand } from '../../../feature/comments/use-case/count-likes-comments.usecase';
 import { UsersSqlRepository } from '../db/users.sql-repository';
 import { UpdateBanUserDto } from '../dto/update-ban-user.dto';
 import { SecurityDevicesService } from '../../../feature/security-devices/security-devices.service';
+import { BlogsService } from 'src/feature/blogs/blogs.service';
 
 export class BanUnbanUserCommand {
   constructor(public userId: string, public dto: BanUnbanUserDto) {}
@@ -23,15 +20,15 @@ export class BanUnbanUserUseCase
   constructor(
     private readonly usersSqlRepository: UsersSqlRepository,
     private readonly securityDevicesService: SecurityDevicesService,
+    private readonly blogsService: BlogsService,
   ) {}
 
-  async execute(
-    command: BanUnbanUserCommand,
-  ): Promise<ResultNotification<boolean>> {
-    const updateResult = new ResultNotification<boolean>();
+  async execute(command: BanUnbanUserCommand): Promise<ResultNotification> {
+    const updateResult = new ResultNotification();
     const user = this.usersSqlRepository.findUserById(command.userId);
     if (!user) {
       updateResult.addError('User not found', ResultCodeError.NotFound);
+      return updateResult;
     }
 
     const updateDto: UpdateBanUserDto = {
@@ -42,6 +39,11 @@ export class BanUnbanUserUseCase
 
     await this.usersSqlRepository.updateBanUnban(command.userId, updateDto);
     await this.deleteAllDevicesByUsersId(command.userId, command.dto.isBanned);
+
+    await this.blogsService.setBanUnbaneBlogByOwnerId(
+      command.userId,
+      command.dto.isBanned,
+    );
 
     return updateResult;
 

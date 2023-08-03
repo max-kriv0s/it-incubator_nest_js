@@ -56,4 +56,13 @@ export class BlogsSqlRepository {
   async deleteBlogs() {
     await this.dataSource.query(`DELETE FROM public."Blogs"`);
   }
+
+  async setBanUnbaneBlogByOwnerId(ownerId: string, isBanned: boolean) {
+    await this.dataSource.query(
+      `UPDATE public."Blogs"
+        SET "isBanned" = $2 
+        WHERE "ownerId" = $1`,
+      [+ownerId, isBanned],
+    );
+  }
 }

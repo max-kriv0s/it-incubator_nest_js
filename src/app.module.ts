@@ -81,7 +81,6 @@ import { DeletePostByIdUseCase } from './feature/bloggers/use-case/delete-post-b
 import { UpdatePostByIdUseCase } from './feature/bloggers/use-case/update-post-by-id.usecase';
 import { CreatePostByBlogIdUseCase } from './feature/blogs/use-case/create-post-by-blog-id.usecase';
 import { DeleteBlogByIdUseCase } from './feature/blogs/use-case/delete-blog-by-id.usecase';
-import { SetBanUnbanBlogsUseCase } from './feature/blogs/use-case/set-ban-unbane-blogs.usecase';
 import { UpdateExistingBlogByIdUseCase } from './feature/blogs/use-case/update-existing-blog-by-id.usecase';
 import { CountLikesCommentsUseCase } from './feature/comments/use-case/count-likes-comments.usecase';
 import { SetBanUnbanCommentsUseCase } from './feature/comments/use-case/set-ban-unbane-comments.usecase';
@@ -172,7 +171,6 @@ const useCases = [
   UpdatePostByIdUseCase,
   CreatePostByBlogIdUseCase,
   DeleteBlogByIdUseCase,
-  SetBanUnbanBlogsUseCase,
   UpdateExistingBlogByIdUseCase,
   CountLikesCommentsUseCase,
   SetBanUnbanCommentsUseCase,
