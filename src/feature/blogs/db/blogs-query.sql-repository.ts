@@ -52,7 +52,7 @@ export class BlogsQuerySqlRepository {
     const blogsRaw: BlogRawSqlDocument[] = await this.dataSource.query(
       `SELECT *
       FROM public."Blogs"
-      WHERE NOT "isBanned"`,
+      WHERE NOT "isBanned" AND "id" = $1`,
       [+id],
     );
     if (!blogsRaw.length) return null;

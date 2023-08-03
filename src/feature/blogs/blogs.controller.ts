@@ -18,8 +18,8 @@ import {
 } from '../posts/dto/view-post.dto';
 import { PostsQueryRepository } from '../posts/db/posts-query.repository';
 import { CurrentUserId } from '../auth/decorators/current-user-id.param.decorator';
-import { IdValidationPipe } from '../../modules/pipes/id-validation.pipe';
 import { BlogsQuerySqlRepository } from './db/blogs-query.sql-repository';
+import { IdIntegerValidationPipe } from '../../modules/pipes/id-integer-validation.pipe';
 
 @Controller('blogs')
 export class BlogsController {
@@ -42,7 +42,7 @@ export class BlogsController {
 
   @Get(':blogId/posts')
   async findPostsByBlogId(
-    @Param('blogId', IdValidationPipe) blogId: string,
+    @Param('blogId', IdIntegerValidationPipe) blogId: string,
     @Query() queryParams: QueryParams,
     @CurrentUserId(false) userId: string,
   ): Promise<PaginatorPostSqlType> {
@@ -63,7 +63,7 @@ export class BlogsController {
 
   @Get(':id')
   async getBlogById(
-    @Param('id', IdValidationPipe) id: string,
+    @Param('id', IdIntegerValidationPipe) id: string,
   ): Promise<ViewBlogDto> {
     const blogView = await this.blogsQuerySqlRepository.getBlogById(id);
     if (!blogView) throw new NotFoundException('Blog not found');
