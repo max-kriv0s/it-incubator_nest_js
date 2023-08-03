@@ -1,7 +1,7 @@
 import {
   ArgumentMetadata,
-  BadRequestException,
   Injectable,
+  NotFoundException,
   PipeTransform,
 } from '@nestjs/common';
 import { GetFieldError } from '../../utils';
@@ -14,9 +14,7 @@ export class IdIntegerValidationPipe implements PipeTransform {
     }
 
     if (!Number.isInteger(Number(value))) {
-      throw new BadRequestException([
-        GetFieldError('Not true ID format', 'id'),
-      ]);
+      throw new NotFoundException([GetFieldError('Not true ID format', 'id')]);
     }
     return value;
   }
