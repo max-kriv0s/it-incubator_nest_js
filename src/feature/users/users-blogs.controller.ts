@@ -16,22 +16,28 @@ import { BindBlogWithUserCommand } from './use-case/bind-blog-with-user.usecase'
 import { GetFieldError } from '../../utils';
 import { CommandBus } from '@nestjs/cqrs';
 import { QueryParamsAllBlogs } from './dto/query-all-blogs.dto';
-import { UsersBlogsQueryRepository } from './db/users-blogs-query.repository';
 import { UserBanBlogInputDto } from './dto/user-ban-blog-input.dto';
 import { UserBanUnbanBlogCommand } from './use-case/user-ban-unban-blog.usecase';
+import { IdIntegerValidationPipe } from '../../modules/pipes/id-integer-validation.pipe';
+import { ResultNotification } from '../../modules/notification';
+import { UsersBlogsQuerySqlRepository } from './db/users-blogs-query.sql-repository';
+import {
+  PaginatorUsersBlogSql,
+  PaginatorUsersBlogSqlType,
+} from './dto/users-blog-view-model.dto';
 
 @UseGuards(BasicAuthGuard)
 @Controller('sa/blogs')
 export class UsersBlogsController {
   constructor(
     private commandBus: CommandBus,
-    private readonly usersBlogsQueryRepository: UsersBlogsQueryRepository,
+    private readonly usersBlogsQuerySqlRepository: UsersBlogsQuerySqlRepository,
   ) {}
 
   @HttpCode(HttpStatus.NO_CONTENT)
   @Put(':id/ban')
   async banUnbanBlog(
-    @Param('id', IdValidationPipe) blogId: string,
+    @Param('id', IdIntegerValidationPipe) blogId: string,
     @Body() inputDto: UserBanBlogInputDto,
   ) {
     const result = await this.commandBus.execute(
@@ -48,7 +54,7 @@ export class UsersBlogsController {
     @Param('id', IdValidationPipe) blogId: string,
     @Param('userId', IdValidationPipe) userId: string,
   ) {
-    const result = await this.commandBus.execute(
+    const result: ResultNotification = await this.commandBus.execute(
       new BindBlogWithUserCommand(blogId, userId),
     );
     if (result.hasError()) {
@@ -58,7 +64,16 @@ export class UsersBlogsController {
   }
 
   @Get()
-  async getAllUsersBlogs(@Query() queryParams: QueryParamsAllBlogs) {
-    return this.usersBlogsQueryRepository.getAllUsersBlogs(queryParams);
+  async getAllUsersBlogs(
+    @Query() queryParams: QueryParamsAllBlogs,
+  ): Promise<PaginatorUsersBlogSqlType> {
+    const paginator = new PaginatorUsersBlogSql(
+      +queryParams.pageNumber,
+      +queryParams.pageSize,
+    );
+    return this.usersBlogsQuerySqlRepository.getAllUsersBlogs(
+      queryParams,
+      paginator,
+    );
   }
 }

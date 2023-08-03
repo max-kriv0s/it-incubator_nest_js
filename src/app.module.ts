@@ -108,6 +108,8 @@ import { BlogsSqlRepository } from './feature/blogs/db/blogs.sql-repository';
 import { BloggerQuerySqlRepository } from './feature/bloggers/db/blogger-query.sql-repository';
 import { PostsSqlRepository } from './feature/posts/db/posts.sql-repository';
 import { BloggersSqlRepository } from './feature/bloggers/db/bloggers.sql-repository';
+import { UsersBlogsQuerySqlRepository } from './feature/users/db/users-blogs-query.sql-repository';
+import { BlogsQuerySqlRepository } from './feature/blogs/db/blogs-query.sql-repository';
 
 const apiCallsAdapters = [ApiCallsConfig, ApiCallsService, ApiCallsRepository];
 const authAdapters = [
@@ -129,6 +131,7 @@ const blogsAdapters = [
   BlogsQueryRepository,
   BlogExistsRule,
   BlogsSqlRepository,
+  BlogsQuerySqlRepository,
 ];
 const commentsAdapters = [
   CommentsService,
@@ -163,6 +166,7 @@ const usersAdapters = [
   UsersRepository,
   UsersSqlRepository,
   UsersQuerySqlRepository,
+  UsersBlogsQuerySqlRepository,
 ];
 
 const useCases = [

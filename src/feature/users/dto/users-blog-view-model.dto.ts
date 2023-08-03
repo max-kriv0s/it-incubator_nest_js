@@ -1,4 +1,4 @@
-import { OldPaginator, Paginator } from '../../../dto';
+import { OldPaginator, Paginator, PaginatorType } from '../../../dto';
 
 export class UsersBlogOwnerInfoViewModel {
   readonly userId: string;
@@ -22,3 +22,10 @@ export class UsersBlogViewDto {
 }
 
 export class PaginatorUsersBlogView extends OldPaginator<UsersBlogViewDto> {}
+
+export type PaginatorUsersBlogSqlType = PaginatorType<UsersBlogViewDto>;
+export class PaginatorUsersBlogSql extends Paginator<UsersBlogViewDto> {
+  constructor(page: number, pageSize: number) {
+    super(page, pageSize);
+  }
+}

@@ -167,7 +167,7 @@ export class BloggerQuerySqlRepository {
     const postsCount: { count: number }[] = await this.dataSource.query(
       `SELECT count(*)
         FROM public."Posts"
-        WHERE "id" = $1`,
+        WHERE "blogId" = $1`,
       params,
     );
 

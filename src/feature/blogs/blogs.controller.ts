@@ -5,19 +5,26 @@ import {
   Param,
   Query,
 } from '@nestjs/common';
-import { BlogsQueryRepository } from './db/blogs-query.repository';
 import { QueryParams } from '../../dto';
-import { PaginatorBlogView, ViewBlogDto } from './dto/view-blog.dto';
+import {
+  PaginatorBlogSql,
+  PaginatorBlogSqlType,
+  ViewBlogDto,
+} from './dto/view-blog.dto';
 import { BlogsService } from './blogs.service';
-import { PaginatorPostView } from '../posts/dto/view-post.dto';
+import {
+  PaginatorPostSql,
+  PaginatorPostSqlType,
+} from '../posts/dto/view-post.dto';
 import { PostsQueryRepository } from '../posts/db/posts-query.repository';
 import { CurrentUserId } from '../auth/decorators/current-user-id.param.decorator';
 import { IdValidationPipe } from '../../modules/pipes/id-validation.pipe';
+import { BlogsQuerySqlRepository } from './db/blogs-query.sql-repository';
 
 @Controller('blogs')
 export class BlogsController {
   constructor(
-    private readonly blogsQueryRepository: BlogsQueryRepository,
+    private readonly blogsQuerySqlRepository: BlogsQuerySqlRepository,
     private readonly blogsService: BlogsService,
     private readonly postsQueryRepository: PostsQueryRepository,
   ) {}
@@ -25,8 +32,12 @@ export class BlogsController {
   @Get()
   async getBlogs(
     @Query() queryParams: QueryParams,
-  ): Promise<PaginatorBlogView> {
-    return this.blogsQueryRepository.getBlogs(queryParams);
+  ): Promise<PaginatorBlogSqlType> {
+    const paginator = new PaginatorBlogSql(
+      +queryParams.pageNumber,
+      +queryParams.pageSize,
+    );
+    return this.blogsQuerySqlRepository.getBlogs(queryParams, paginator);
   }
 
   @Get(':blogId/posts')
@@ -34,10 +45,16 @@ export class BlogsController {
     @Param('blogId', IdValidationPipe) blogId: string,
     @Query() queryParams: QueryParams,
     @CurrentUserId(false) userId: string,
-  ): Promise<PaginatorPostView> {
-    const postsView = await this.blogsQueryRepository.findPostsByBlogId(
+  ): Promise<PaginatorPostSqlType> {
+    const paginator = new PaginatorPostSql(
+      +queryParams.pageNumber,
+      +queryParams.pageSize,
+    );
+
+    const postsView = await this.blogsQuerySqlRepository.findPostsByBlogId(
       blogId,
       queryParams,
+      paginator,
       userId,
     );
     if (!postsView) throw new NotFoundException('Blog not found');
@@ -48,7 +65,7 @@ export class BlogsController {
   async getBlogById(
     @Param('id', IdValidationPipe) id: string,
   ): Promise<ViewBlogDto> {
-    const blogView = await this.blogsQueryRepository.getBlogById(id);
+    const blogView = await this.blogsQuerySqlRepository.getBlogById(id);
     if (!blogView) throw new NotFoundException('Blog not found');
     return blogView;
   }

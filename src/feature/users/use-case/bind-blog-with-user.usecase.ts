@@ -21,18 +21,19 @@ export class BindBlogWithUserUseCase
 
   async execute(command: BindBlogWithUserCommand): Promise<ResultNotification> {
     const result = new ResultNotification();
-    const blog = await this.blogsService.findBlogModelById(command.blogId);
-    if (!blog || blog.blogOwner.userId) {
+    const blog = await this.blogsService.findBlogSqlById(command.blogId);
+    if (!blog || blog.ownerId) {
       result.addError('Blog not found', ResultCodeError.NotFound, 'blogId');
       return result;
     }
 
-    const user = await this.usersService.findUserById(command.userId);
+    const user = await this.usersService.findUserSqlById(command.userId);
     if (!user) {
       result.addError('User not found', ResultCodeError.NotFound, 'userId');
       return result;
     }
 
+    await this.blogsService.updateOwnerById(command.blogId, command.userId);
     return result;
   }
 }

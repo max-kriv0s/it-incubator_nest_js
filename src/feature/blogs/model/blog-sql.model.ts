@@ -12,6 +12,19 @@ export class BlogRawSqlDocument {
   banDate: Date | null;
 }
 
+export class UserBlogRawSqlDocument {
+  id: number;
+  name: string;
+  description: string;
+  websiteUrl: string;
+  createdAt: Date;
+  isMembership: boolean;
+  ownerId: number;
+  ownerLogin: string;
+  isBanned: boolean;
+  banDate: Date | null;
+}
+
 export class BlogSqlDocument {
   id: string;
   name: string;

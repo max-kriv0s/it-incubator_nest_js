@@ -70,4 +70,13 @@ export class PostsSqlRepository {
   async deletePosts() {
     await this.dataSource.query(`DELETE FROM public."Posts"`);
   }
+
+  async setBanUnbanePostsByBlogId(blogId: string, isBanned: boolean) {
+    await this.dataSource.query(
+      `UPDATE public."Posts"
+        SET "isBanned" = $2 
+        WHERE "blogIid" = $1`,
+      [+blogId, isBanned],
+    );
+  }
 }

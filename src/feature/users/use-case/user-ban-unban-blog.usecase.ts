@@ -1,7 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { UserBanBlogInputDto } from '../dto/user-ban-blog-input.dto';
-import { PostsRepository } from '../../posts/db/posts.repository';
-import { BlogsRepository } from '../../../feature/blogs/db/blogs.repository';
+import { BlogsSqlRepository } from 'src/feature/blogs/db/blogs.sql-repository';
+import { PostsSqlRepository } from 'src/feature/posts/db/posts.sql-repository';
 
 export class UserBanUnbanBlogCommand {
   constructor(public blogId: string, public inputDto: UserBanBlogInputDto) {}
@@ -12,22 +12,23 @@ export class UserBanUnbanBlogUseCase
   implements ICommandHandler<UserBanUnbanBlogCommand>
 {
   constructor(
-    private readonly blogsRepository: BlogsRepository,
-    private readonly postsRepository: PostsRepository,
+    private readonly blogsSqlRepository: BlogsSqlRepository,
+    private readonly postsSqlRepository: PostsSqlRepository,
   ) {}
 
   async execute(command: UserBanUnbanBlogCommand): Promise<boolean> {
-    const blog = await this.blogsRepository.findBlogById(command.blogId);
+    const blog = await this.blogsSqlRepository.findBlogById(command.blogId);
     if (!blog) return false;
 
-    blog.setBanUnbaneOwner(command.inputDto.isBanned);
-    await this.blogsRepository.save(blog);
-
-    const posts = await this.postsRepository.findPostsByblogId(command.blogId);
-    const postsId = posts.map((post) => post._id);
-    return this.postsRepository.updateBlockingFlagForPosts(
-      postsId,
+    await this.blogsSqlRepository.setBanUnbaneBlog(
+      command.blogId,
       command.inputDto.isBanned,
     );
+
+    await this.postsSqlRepository.setBanUnbanePostsByBlogId(
+      command.blogId,
+      command.inputDto.isBanned,
+    );
+    return true;
   }
 }

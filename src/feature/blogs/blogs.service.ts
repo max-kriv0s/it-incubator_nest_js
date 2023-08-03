@@ -24,6 +24,14 @@ export class BlogsService {
     return await this.blogsRepository.findBlogById(id);
   }
 
+  async findBlogSqlById(id: string): Promise<BlogSqlDocument | null> {
+    return this.blogsSqlRepository.findBlogById(id);
+  }
+
+  async updateOwnerById(id: string, userId: string) {
+    await this.blogsSqlRepository.updateOwnerById(id, userId);
+  }
+
   async setBanUnbaneBlogByOwnerId(ownerId: string, isBanned: boolean) {
     return this.blogsSqlRepository.setBanUnbaneBlogByOwnerId(ownerId, isBanned);
   }
