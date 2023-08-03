@@ -3,11 +3,11 @@ import { CommentsRepository } from '../comments/comments.repository';
 import { LikePostsRepository } from '../posts/db/like-posts.repository';
 import { ApiCallsRepository } from '../api-calls/api-calls.repository';
 import { LikeCommentsRepository } from '../comments/like-comments.repository';
-import { BloggersRepository } from '../bloggers/db/bloggers.repository';
 import { UsersSqlRepository } from '../users/db/users.sql-repository';
 import { SecurityDevicesSqlRepository } from '../security-devices/db/security-devices.sql-repository';
 import { BlogsSqlRepository } from '../blogs/db/blogs.sql-repository';
 import { PostsSqlRepository } from '../posts/db/posts.sql-repository';
+import { BloggersSqlRepository } from '../bloggers/db/bloggers.sql-repository';
 
 @Injectable()
 export class TestingService {
@@ -20,7 +20,7 @@ export class TestingService {
     private readonly likePostsRepository: LikePostsRepository,
     private readonly likeCommentsRepository: LikeCommentsRepository,
     private readonly apiCallsRepository: ApiCallsRepository,
-    private readonly bloggersRepository: BloggersRepository,
+    private readonly bloggersSqlRepository: BloggersSqlRepository,
   ) {}
 
   async deleteAllData() {
@@ -33,7 +33,7 @@ export class TestingService {
       this.likePostsRepository.deleteLikesPosts(),
       this.likeCommentsRepository.deleteLikesComments(),
       this.apiCallsRepository.deleteCalls(),
-      this.bloggersRepository.deleteBloggerBannedUsers(),
+      this.bloggersSqlRepository.deleteBloggerBannedUsers(),
     ]);
   }
 }

@@ -20,6 +20,13 @@ import {
   ResultCodeError,
   ResultNotification,
 } from '../../../modules/notification';
+import { BloggerBannedUsersQueryParams } from '../dto/blogger-banned-users-query-param.dto';
+import {
+  PaginatorViewBloggerBannedUsersSql,
+  PaginatorViewBloggerBannedUsersSqlType,
+  ViewBloggerBannedUsersDto,
+} from '../dto/view-blogger-banned-users.dto';
+import { BloggerQueryBannedUsersRawSqlDocument } from '../model/blogger-banned-users-sql.model';
 
 @Injectable()
 export class BloggerQuerySqlRepository {
@@ -184,6 +191,95 @@ export class BloggerQuerySqlRepository {
     const postsView = posts.map((post) => this.postDBToPostView(post));
     const postsViewPagination = paginator.paginate(totalCount, postsView);
     result.addData(postsViewPagination);
+    return result;
+  }
+
+  async getAllBannedUsersForBlog(
+    blogId: string,
+    userId: string,
+    queryParams: BloggerBannedUsersQueryParams,
+    paginator: PaginatorViewBloggerBannedUsersSql,
+  ): Promise<ResultNotification<PaginatorViewBloggerBannedUsersSqlType>> {
+    const searchLoginTerm: string = queryParams.searchLoginTerm ?? '';
+    const sortBy: string = queryParams.sortBy ?? 'createdAt';
+    const sortDirection: string = queryParams.sortDirection ?? 'desc';
+
+    // if (sortBy.toLowerCase() === 'login') sortBy = 'bannedUserLogin';
+
+    const result =
+      new ResultNotification<PaginatorViewBloggerBannedUsersSqlType>();
+
+    const blogsRaw: BlogRawSqlDocument[] = await this.dataSource.query(
+      `SELECT *`,
+      [+blogId],
+    );
+
+    if (!blogsRaw.length) {
+      result.addError('Blog not found', ResultCodeError.NotFound);
+      return result;
+    }
+    if (blogsRaw[0].ownerId.toString() !== userId) {
+      result.addError('Access is denied', ResultCodeError.Forbidden);
+      return result;
+    }
+
+    if (blogsRaw[0].isBanned) {
+      result.addError('Access is denied', ResultCodeError.Forbidden);
+      return result;
+    }
+
+    // const isBannedUser =
+    //   (await this.UserModel.countDocuments({
+    //     _id: castToObjectId(userId),
+    //     'banInfo.isBanned': true,
+    //   })) > 0;
+    // if (isBannedUser) {
+    //   result.addError('Access is denied', ResultCodeError.Forbidden);
+    //   return result;
+    // }
+
+    const params = [+blogId, `%${searchLoginTerm}%`];
+    const bannedUsersCount: { count: number }[] = await this.dataSource.query(
+      `SELECT count(*)
+      FROM public."BloggerBannedUsers" as "bannedUsers"
+      LEFT JOIN public."Users" as users
+        ON "bannedUsers"."bannedUserId" = users."id"
+      WHERE "bannedUsers"."blogId" = $1 AND "bannedUsers"."isBanned"
+        AND users."login" ILIKE $2`,
+      params,
+    );
+
+    const totalCount = +bannedUsersCount[0].count;
+
+    const bannedUsers: BloggerQueryBannedUsersRawSqlDocument[] =
+      await this.dataSource.query(
+        `SELECT "bannedUsers".*, users."login" as "bannedUserLogin"
+        FROM public."BloggerBannedUsers" as "bannedUsers"
+          LEFT JOIN public."Users" as users
+            ON "bannedUsers"."bannedUserId" = users."id"
+        WHERE "bannedUsers"."blogId" = $1 AND "bannedUsers"."isBanned"
+          AND users."login" ILIKE $2
+        ORDER BY "${sortBy}" ${sortDirection}
+        LIMIT ${paginator.pageSize} OFFSET ${paginator.skip}`,
+        params,
+      );
+
+    const bannedUsersView: ViewBloggerBannedUsersDto[] = bannedUsers.map(
+      (bannedUser) => ({
+        id: bannedUser.bannedUserId.toString(),
+        login: bannedUser.bannedUserLogin,
+        banInfo: {
+          isBanned: bannedUser.isBanned,
+          banDate: bannedUser.banDate
+            ? bannedUser.banDate.toISOString()
+            : bannedUser.banDate,
+          banReason: bannedUser.banReason,
+        },
+      }),
+    );
+
+    const paginateView = paginator.paginate(totalCount, bannedUsersView);
+    result.addData(paginateView);
     return result;
   }
 }

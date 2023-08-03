@@ -1,13 +1,13 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { BloggerBanUserInputDto } from '../dto/blogger-ban-user-input.dto';
-import { BlogsRepository } from '../../blogs/db/blogs.repository';
 import {
   ResultCodeError,
   ResultNotification,
 } from '../../../modules/notification';
 import { validateOrRejectModel } from '../../../modules/validation';
-import { UsersRepository } from '../../../feature/users/db/users.repository';
-import { BloggersRepository } from '../db/bloggers.repository';
+import { UsersSqlRepository } from '../../../feature/users/db/users.sql-repository';
+import { BlogsSqlRepository } from '../../../feature/blogs/db/blogs.sql-repository';
+import { BloggersSqlRepository } from '../db/bloggers.sql-repository';
 
 export class BloggerBanUnbanUserCommand {
   constructor(
@@ -22,9 +22,9 @@ export class BloggerBanUnbanUserUseCase
   implements ICommandHandler<BloggerBanUnbanUserCommand>
 {
   constructor(
-    private readonly blogsRepository: BlogsRepository,
-    private readonly usersRepository: UsersRepository,
-    private readonly bloggersRepository: BloggersRepository,
+    private readonly blogsSqlRepository: BlogsSqlRepository,
+    private readonly usersSqlRepository: UsersSqlRepository,
+    private readonly bloggersSqlRepository: BloggersSqlRepository,
   ) {}
 
   async execute(
@@ -37,19 +37,19 @@ export class BloggerBanUnbanUserUseCase
 
     const result = new ResultNotification<null>();
 
-    const blog = await this.blogsRepository.findBlogById(
+    const blog = await this.blogsSqlRepository.findBlogById(
       command.banUserInputDto.blogId,
     );
     if (!blog) {
       result.addError('Blog not found', ResultCodeError.NotFound, 'blogId');
       return result;
     }
-    if (!blog.thisIsOwner(command.userId)) {
+    if (blog.ownerId !== command.userId) {
       result.addError('Access is denied', ResultCodeError.Forbidden, 'blogId');
       return result;
     }
 
-    const userForBan = await this.usersRepository.findUserById(
+    const userForBan = await this.usersSqlRepository.findUserById(
       command.bannedUserId,
     );
     if (!userForBan) {
@@ -58,25 +58,22 @@ export class BloggerBanUnbanUserUseCase
     }
 
     let bannedUser =
-      await this.bloggersRepository.findBannedUserByblogIdAndUserId(
+      await this.bloggersSqlRepository.findBannedUserByBlogIdAndUserId(
         command.banUserInputDto.blogId,
         command.bannedUserId,
       );
 
     if (!bannedUser) {
-      // const userForBan = await this.usersRepository.findUserById(
-      //   command.bannedUserId,
-      // );
-      // const userLogin = userForBan ? userForBan.accountData.login : '';
-      bannedUser = this.bloggersRepository.createBloggerBannedUsers(
+      bannedUser = await this.bloggersSqlRepository.createBloggerBannedUsers(
         command.bannedUserId,
-        userForBan.accountData.login,
         blog.id,
       );
     }
 
-    bannedUser.updateBannedUser(command.banUserInputDto);
-    await this.bloggersRepository.save(bannedUser);
+    this.bloggersSqlRepository.updateBannedUser(
+      bannedUser.id,
+      command.banUserInputDto,
+    );
     return result;
   }
 }

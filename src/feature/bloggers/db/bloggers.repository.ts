@@ -14,7 +14,7 @@ export class BloggersRepository {
     private BloggerBannedUsersModel: BloggerBannedUsersModelType,
   ) {}
 
-  async findBannedUserByblogIdAndUserId(
+  async findBannedUserByBlogIdAndUserId(
     blogId: string,
     userId: string,
   ): Promise<BloggerBannedUsersDocument | null> {

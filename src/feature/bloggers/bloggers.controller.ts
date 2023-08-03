@@ -158,8 +158,8 @@ export class BloggersController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @Put(':blogId/posts/:postId')
   async updatePostById(
-    @Param('blogId', IdValidationPipe) blogId: string,
-    @Param('postId', IdValidationPipe) postId: string,
+    @Param('blogId', IdIntegerValidationPipe) blogId: string,
+    @Param('postId', IdIntegerValidationPipe) postId: string,
     @Body() updateDto: BlogPostUpdateDto,
     @CurrentUserId() userId: string,
   ) {
@@ -172,8 +172,8 @@ export class BloggersController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':blogId/posts/:postId')
   async deletePostById(
-    @Param('blogId', IdValidationPipe) blogId: string,
-    @Param('postId', IdValidationPipe) postId: string,
+    @Param('blogId', IdIntegerValidationPipe) blogId: string,
+    @Param('postId', IdIntegerValidationPipe) postId: string,
     @CurrentUserId() userId: string,
   ) {
     const result: ResultNotification<null> = await this.commandBus.execute(
