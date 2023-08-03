@@ -21,7 +21,7 @@ import {
   PaginatorViewBloggerBannedUsersSqlType,
 } from './dto/view-blogger-banned-users.dto';
 import { BloggerBanUnbanUserCommand } from './use-case/blogger-ban-unban-user.usecase';
-import { IdIntegerValidationPipe } from 'src/modules/pipes/id-integer-validation.pipe';
+import { IdIntegerValidationPipe } from '../../modules/pipes/id-integer-validation.pipe';
 import { BloggerQuerySqlRepository } from './db/blogger-query.sql-repository';
 
 @UseGuards(AccessJwtAuthGuard)

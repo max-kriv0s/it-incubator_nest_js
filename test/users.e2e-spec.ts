@@ -3,7 +3,7 @@ import { HttpStatus, INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { appSettings } from '../src/app.settings';
-import { CreateUserDto } from 'src/feature/users/dto/create-user.dto';
+import { CreateUserDto } from '../src/feature/users/dto/create-user.dto';
 import { randomString } from './utils/utils-for-tests';
 
 describe('UsersController (e2e) test', () => {

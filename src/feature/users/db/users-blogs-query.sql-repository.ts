@@ -7,7 +7,7 @@ import {
 } from '../dto/users-blog-view-model.dto';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { UserBlogRawSqlDocument } from 'src/feature/blogs/model/blog-sql.model';
+import { UserBlogRawSqlDocument } from '../../../feature/blogs/model/blog-sql.model';
 
 @Injectable()
 export class UsersBlogsQuerySqlRepository {

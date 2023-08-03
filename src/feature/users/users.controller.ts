@@ -28,7 +28,7 @@ import { CreateUserCommand } from './use-case/create-user.usecase';
 import { UsersQuerySqlRepository } from './db/users-query.sql-repository';
 import { DeleteUserCommand } from './use-case/delete-user.usecase';
 import { IdIntegerValidationPipe } from '../../modules/pipes/id-integer-validation.pipe';
-import { ResultNotification } from 'src/modules/notification';
+import { ResultNotification } from '../../modules/notification';
 
 @UseGuards(BasicAuthGuard)
 @Controller('sa/users')

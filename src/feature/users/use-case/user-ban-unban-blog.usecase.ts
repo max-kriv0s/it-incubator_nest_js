@@ -1,7 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { UserBanBlogInputDto } from '../dto/user-ban-blog-input.dto';
-import { BlogsSqlRepository } from 'src/feature/blogs/db/blogs.sql-repository';
-import { PostsSqlRepository } from 'src/feature/posts/db/posts.sql-repository';
+import { BlogsSqlRepository } from '../../../feature/blogs/db/blogs.sql-repository';
+import { PostsSqlRepository } from '../../../feature/posts/db/posts.sql-repository';
 
 export class UserBanUnbanBlogCommand {
   constructor(public blogId: string, public inputDto: UserBanBlogInputDto) {}

@@ -7,7 +7,7 @@ import {
 import { UsersSqlRepository } from '../db/users.sql-repository';
 import { UpdateBanUserDto } from '../dto/update-ban-user.dto';
 import { SecurityDevicesService } from '../../../feature/security-devices/security-devices.service';
-import { BlogsService } from 'src/feature/blogs/blogs.service';
+import { BlogsService } from '../../../feature/blogs/blogs.service';
 
 export class BanUnbanUserCommand {
   constructor(public userId: string, public dto: BanUnbanUserDto) {}
