@@ -16,7 +16,7 @@ export class PaginatorUserView extends OldPaginator<ViewUserDto> {}
 
 export type PaginatorUserSqlType = PaginatorType<ViewUserDto>;
 export class PaginatorUserSql extends Paginator<ViewUserDto> {
-  constructor(public page: number, public pageSize: number) {
+  constructor(page: number, pageSize: number) {
     super(page, pageSize);
   }
 }

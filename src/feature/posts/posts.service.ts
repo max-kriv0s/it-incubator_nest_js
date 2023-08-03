@@ -1,10 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { PostsRepository } from './posts.repository';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { BlogsRepository } from '../blogs/db/blogs.repository';
 import { CreatePostDto } from './dto/create-post.dto';
 import { PostDocument } from './model/post.schema';
-import { CreateBlogPostDto } from '../blogs/dto/create-blog-post.dto';
 import { CreateCommentDto } from '../comments/dto/create-comment.dto';
 import { UsersService } from '../users/users.service';
 import { CommentsService } from '../comments/comments.service';
@@ -15,6 +13,7 @@ import {
   ResultNotification,
 } from '../../modules/notification';
 import { BloggersRepository } from '../bloggers/db/bloggers.repository';
+import { PostsRepository } from './db/posts.repository';
 
 @Injectable()
 export class PostsService {
@@ -71,20 +70,20 @@ export class PostsService {
     return this.postsRepository.findPostById(id);
   }
 
-  async createPostByBlogId(
-    blogId: string,
-    blogName: string,
-    blogPostDto: CreateBlogPostDto,
-  ): Promise<string> {
-    const newPost = this.postsRepository.createPostByBlogId(
-      blogId,
-      blogName,
-      blogPostDto,
-    );
+  // async createPostByBlogId(
+  //   blogId: string,
+  //   blogName: string,
+  //   blogPostDto: CreateBlogPostDto,
+  // ): Promise<string> {
+  //   const newPost = this.postsRepository.createPostByBlogId(
+  //     blogId,
+  //     blogName,
+  //     blogPostDto,
+  //   );
 
-    const createdPost = await this.postsRepository.save(newPost);
-    return createdPost._id.toString();
-  }
+  //   const createdPost = await this.postsRepository.save(newPost);
+  //   return createdPost._id.toString();
+  // }
 
   async createCommentByPostID(
     postId: string,

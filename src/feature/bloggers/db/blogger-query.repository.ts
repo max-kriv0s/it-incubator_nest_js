@@ -23,7 +23,7 @@ import { LikeStatus } from '../../../feature/likes/dto/like-status';
 import {
   LikePosts,
   LikePostsModelType,
-} from '../../../feature/posts/like-posts.schema';
+} from '../../posts/model/like-posts.schema';
 import { ViewLikeDetailsDto } from '../../../feature/likes/dto/view-like.dto';
 import {
   ResultCodeError,

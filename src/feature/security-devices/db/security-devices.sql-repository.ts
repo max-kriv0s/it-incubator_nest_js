@@ -82,7 +82,7 @@ export class SecurityDevicesSqlRepository {
     const result = await this.dataSource.query(
       `UPDATE public."SecurityDevices"
       SET "ip" = $2, "title" = $3, "lastActiveDate" = $4, "expirationTime" = $5, "userId" = $6
-      WHERE "Id" = $1`,
+      WHERE "id" = $1`,
       [
         +deviceId,
         dataUpdate.ip,

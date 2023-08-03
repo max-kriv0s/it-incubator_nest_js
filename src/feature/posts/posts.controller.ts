@@ -11,7 +11,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { PostsQueryRepository } from './posts-query.repository';
+import { PostsQueryRepository } from './db/posts-query.repository';
 import { PostsService } from './posts.service';
 import { PaginatorPostView, ViewPostDto } from './dto/view-post.dto';
 import { QueryParams } from '../../dto';
@@ -26,7 +26,7 @@ import { CreateCommentDto } from '../comments/dto/create-comment.dto';
 import { ParamPostIdDto } from './dto/param-post-id.dto';
 import { LikeInputDto } from '../likes/dto/like-input.dto';
 import { IdValidationPipe } from '../../modules/pipes/id-validation.pipe';
-import { replyByNotification } from 'src/modules/notification';
+import { replyByNotification } from '../../modules/notification';
 
 @Controller('posts')
 export class PostsController {

@@ -19,7 +19,7 @@ export class BlogsSqlRepository {
       ("name", "description", "websiteUrl", "ownerId")
       VALUES
       ($1, $2, $3, $4)
-      RETURNING "id"`,
+      RETURNING *`,
       [dto.name, dto.description, dto.websiteUrl, +dto.ownerId],
     );
     if (!blogs.length) return null;
@@ -40,8 +40,8 @@ export class BlogsSqlRepository {
   async updateBlog(id: string, dto: UpdateBlogDto) {
     await this.dataSource.query(
       `UPDATE public."Blogs"
-      SET 
-      WHERE "id"`,
+      SET "name" = $2, "description" = $3, "websiteUrl" = $4
+      WHERE "id" = $1`,
       [+id, dto.name, dto.description, dto.websiteUrl],
     );
   }

@@ -30,7 +30,9 @@ import { BloggerQueryParams } from './dto/blogger-query-params.dto';
 import {
   PaginatorBloggerBlogSql,
   PaginatorBloggerBlogSqlViewType,
+  PaginatorBloggerPostSql,
   PaginatorBloggerPostView,
+  PaginatorBloggerpostSqlViewType,
   ViewBloggerBlogDto,
 } from './dto/view-blogger-blogs.dto';
 import { CreateBlogPostDto } from '../blogs/dto/create-blog-post.dto';
@@ -40,7 +42,7 @@ import { BlogPostUpdateDto } from './dto/blog-post-update.dto';
 import { UpdatePostByIdCommand } from './use-case/update-post-by-id.usecase';
 import { DeletePostByIdCommand } from './use-case/delete-post-by-id.usecase';
 import { PaginatorViewBloggerCommentsDto } from './dto/view-blogger-comments.dto';
-import { IdIntegerValidationPipe } from 'src/modules/pipes/id-integer-validation.pipe';
+import { IdIntegerValidationPipe } from '../../modules/pipes/id-integer-validation.pipe';
 import { BloggerQuerySqlRepository } from './db/blogger-query.sql-repository';
 import { BloggerQueryRepository } from './db/blogger-query.repository';
 
@@ -116,12 +118,13 @@ export class BloggersController {
     @Body() createPostDto: CreateBlogPostDto,
     @CurrentUserId(false) userId: string,
   ): Promise<ViewPostDto> {
-    const result = await this.commandBus.execute(
-      new CreatePostByBlogIdCommand(blogId, createPostDto, userId),
-    );
-    const postId = replyByNotification(result);
-    const postView = await this.bloggerQueryRepository.getPostById(
-      postId,
+    const creationResult: ResultNotification<string> =
+      await this.commandBus.execute(
+        new CreatePostByBlogIdCommand(blogId, createPostDto, userId),
+      );
+    const postId = creationResult.getResult();
+    const postView = await this.bloggerQuerySqlRepository.getPostById(
+      postId!,
       userId,
     );
     if (!postView) throw new NotFoundException('Post not found');
@@ -130,17 +133,24 @@ export class BloggersController {
 
   @Get(':blogId/posts')
   async findPostsByBlogId(
-    @Param('blogId', IdValidationPipe) blogId: string,
+    @Param('blogId', IdIntegerValidationPipe) blogId: string,
     @Query() queryParams: BloggerQueryParams,
     @CurrentUserId(false) userId: string,
-  ): Promise<PaginatorBloggerPostView> {
-    const result = await this.bloggerQueryRepository.findPostsByBlogId(
-      blogId,
-      queryParams,
-      userId,
+  ): Promise<PaginatorBloggerpostSqlViewType> {
+    const paginator = new PaginatorBloggerPostSql(
+      +queryParams.pageNumber,
+      +queryParams.pageSize,
     );
 
-    const postsView = replyByNotification<PaginatorBloggerPostView>(result);
+    const result: ResultNotification<PaginatorBloggerpostSqlViewType> =
+      await this.bloggerQuerySqlRepository.findPostsByBlogId(
+        blogId,
+        queryParams,
+        userId,
+        paginator,
+      );
+
+    const postsView = result.getResult();
     if (!postsView) throw new NotFoundException('Post not found');
     return postsView;
   }
@@ -153,10 +163,10 @@ export class BloggersController {
     @Body() updateDto: BlogPostUpdateDto,
     @CurrentUserId() userId: string,
   ) {
-    const result = await this.commandBus.execute(
+    const result: ResultNotification<boolean> = await this.commandBus.execute(
       new UpdatePostByIdCommand(blogId, postId, updateDto, userId),
     );
-    return replyByNotification(result);
+    return result.getResult();
   }
 
   @HttpCode(HttpStatus.NO_CONTENT)
@@ -166,10 +176,10 @@ export class BloggersController {
     @Param('postId', IdValidationPipe) postId: string,
     @CurrentUserId() userId: string,
   ) {
-    const result = await this.commandBus.execute(
+    const result: ResultNotification<null> = await this.commandBus.execute(
       new DeletePostByIdCommand(blogId, postId, userId),
     );
-    return replyByNotification(result);
+    return result.getResult();
   }
 
   @UseGuards(AccessJwtAuthGuard)

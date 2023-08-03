@@ -12,7 +12,7 @@ export class IdIntegerValidationPipe implements PipeTransform {
       return value;
     }
 
-    if (!Number.isInteger(value)) {
+    if (!Number.isInteger(Number(value))) {
       throw new BadRequestException('Not true ID format');
     }
     return value;

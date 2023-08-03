@@ -1,14 +1,33 @@
-export class PostSqlDocument {
+import { LikeStatus } from '../../../feature/likes/dto/like-status';
+
+export class PostRawSqlDocument {
   id: number;
   title: string;
   shortDescription: string;
   content: string;
   blogId: number;
+  blogName: string;
   isBanned: boolean;
   createdAt: Date;
   likesCount: number;
   dislikesCount: number;
-  newestLikes: NewestLikesType[];
+  myStatusLike: LikeStatus;
+  // newestLikes: NewestLikesType[];
+}
+
+export class PostSqlDocument {
+  id: string;
+  title: string;
+  shortDescription: string;
+  content: string;
+  blogId: string;
+  blogName: string;
+  isBanned: boolean;
+  createdAt: Date;
+  likesCount: number;
+  dislikesCount: number;
+  myStatusLike: LikeStatus;
+  // newestLikes: NewestLikesType[];
 }
 
 export type NewestLikesType = {
@@ -16,3 +35,13 @@ export type NewestLikesType = {
   userId: string;
   login: string;
 };
+
+export function convertPostRawSqlToSqlDocument(
+  post: PostRawSqlDocument,
+): PostSqlDocument {
+  return {
+    ...post,
+    id: post.id.toString(),
+    blogId: post.blogId.toString(),
+  };
+}

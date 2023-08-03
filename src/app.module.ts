@@ -16,8 +16,8 @@ import { Post, PostSchema } from './feature/posts/model/post.schema';
 import { Blog, BlogSchema } from './feature/blogs/model/blog.schema';
 import { PostsController } from './feature/posts/posts.controller';
 import { PostsService } from './feature/posts/posts.service';
-import { PostsRepository } from './feature/posts/posts.repository';
-import { PostsQueryRepository } from './feature/posts/posts-query.repository';
+import { PostsRepository } from './feature/posts/db/posts.repository';
+import { PostsQueryRepository } from './feature/posts/db/posts-query.repository';
 import { CommentsController } from './feature/comments/comments.controller';
 import { CommentsService } from './feature/comments/comments.service';
 import { CommentsRepository } from './feature/comments/comments.repository';
@@ -43,8 +43,11 @@ import { AccessJwtStrategy } from './feature/auth/strategies/jwt.strategy';
 import { RefreshJwtStrategy } from './feature/auth/strategies/jwt-refresh.strategy';
 import { SecurityDevicesController } from './feature/security-devices/security-device.controller';
 import { SecurityDevicesQueryRepository } from './feature/security-devices/db/security-devices -query.repository';
-import { LikePostsRepository } from './feature/posts/like-posts.repository';
-import { LikePosts, LikePostsSchema } from './feature/posts/like-posts.schema';
+import { LikePostsRepository } from './feature/posts/db/like-posts.repository';
+import {
+  LikePosts,
+  LikePostsSchema,
+} from './feature/posts/model/like-posts.schema';
 import {
   LikeComments,
   LikeCommentsSchema,
@@ -104,6 +107,7 @@ import { SecurityDevicesSqlRepository } from './feature/security-devices/db/secu
 import { SecurityDevicesQuerySqlRepository } from './feature/security-devices/db/security-devices -query.sql-repository';
 import { BlogsSqlRepository } from './feature/blogs/db/blogs.sql-repository';
 import { BloggerQuerySqlRepository } from './feature/bloggers/db/blogger-query.sql-repository';
+import { PostsSqlRepository } from './feature/posts/db/posts.sql-repository';
 
 const apiCallsAdapters = [ApiCallsConfig, ApiCallsService, ApiCallsRepository];
 const authAdapters = [
@@ -138,6 +142,7 @@ const postsAdapters = [
   PostsQueryRepository,
   LikePostsRepository,
   LikePostsService,
+  PostsSqlRepository,
 ];
 const securityDevicesAdapters = [
   SecurityDevicesService,

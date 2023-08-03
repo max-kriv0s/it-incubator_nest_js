@@ -54,9 +54,9 @@ export class Paginator<T> {
   skip: number;
 
   constructor(public page: number, public pageSize: number) {
-    this.page = page || this.DEFAULT_PAGE;
-    this.pageSize = pageSize || this.DEFAULT_PAGE_SIZE;
-    this.skip = (page - 1) * pageSize;
+    this.page = page ? page : this.DEFAULT_PAGE;
+    this.pageSize = pageSize ? pageSize : this.DEFAULT_PAGE_SIZE;
+    this.skip = (this.page - 1) * this.pageSize;
   }
 
   paginate(totalCount: number, data: T[]): PaginatorType<T> {

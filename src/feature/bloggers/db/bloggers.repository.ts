@@ -5,7 +5,7 @@ import {
   BloggerBannedUsersModelType,
 } from '../model/blogger-banned-users.schema';
 import { InjectModel } from '@nestjs/mongoose';
-import { castToObjectId } from 'src/utils';
+import { castToObjectId } from '../../../utils';
 
 @Injectable()
 export class BloggersRepository {

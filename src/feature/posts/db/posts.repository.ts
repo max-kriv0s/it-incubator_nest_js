@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Post, PostDocument, PostModelType } from './model/post.schema';
-import { CreatePostDto } from './dto/create-post.dto';
-import { CreateBlogPostDto } from '../blogs/dto/create-blog-post.dto';
-import { CountLikeDislikeDto } from '../likes/dto/count-like-dislike.dto';
-import { castToObjectId } from '../../utils';
+import { Post, PostDocument, PostModelType } from '../model/post.schema';
+import { CreatePostDto } from '../dto/create-post.dto';
+import { CreateBlogPostDto } from '../../blogs/dto/create-blog-post.dto';
+import { CountLikeDislikeDto } from '../../likes/dto/count-like-dislike.dto';
+import { castToObjectId } from '../../../utils';
 import { Types } from 'mongoose';
 
 @Injectable()

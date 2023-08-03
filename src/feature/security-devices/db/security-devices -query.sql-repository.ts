@@ -14,8 +14,7 @@ export class SecurityDevicesQuerySqlRepository {
     const devices = await this.dataSource.query(
       `SELECT *
       FROM public."SecurityDevices"
-      WHERE "UserId" = $1
-        `,
+      WHERE "userId" = $1`,
       [+userId],
     );
     if (!devices.length) return null;

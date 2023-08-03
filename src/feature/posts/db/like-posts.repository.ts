@@ -3,11 +3,11 @@ import {
   LikePosts,
   LikePostsDocument,
   LikePostsModelType,
-} from './like-posts.schema';
-import { castToObjectId } from '../../utils';
+} from '../model/like-posts.schema';
+import { castToObjectId } from '../../../utils';
 import { InjectModel } from '@nestjs/mongoose';
-import { LikeStatus } from '../likes/dto/like-status';
-import { NewestLikes } from './model/post.schema';
+import { LikeStatus } from '../../likes/dto/like-status';
+import { NewestLikes } from '../model/post.schema';
 
 @Injectable()
 export class LikePostsRepository {

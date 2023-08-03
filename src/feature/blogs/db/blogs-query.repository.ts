@@ -13,7 +13,7 @@ import {
 import { LikeStatus } from '../../likes/dto/like-status';
 import { castToObjectId } from '../../../utils';
 import { ViewLikeDetailsDto } from '../../likes/dto/view-like.dto';
-import { LikePosts, LikePostsModelType } from '../../posts/like-posts.schema';
+import { LikePosts, LikePostsModelType } from '../../posts/model/like-posts.schema';
 
 @Injectable()
 export class BlogsQueryRepository {

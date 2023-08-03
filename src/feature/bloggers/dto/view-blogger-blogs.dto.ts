@@ -15,7 +15,7 @@ export class PaginatorBloggerBlogView extends OldPaginator<ViewBloggerBlogDto> {
 
 export type PaginatorBloggerBlogSqlViewType = PaginatorType<ViewBloggerBlogDto>;
 export class PaginatorBloggerBlogSql extends Paginator<ViewBloggerBlogDto> {
-  constructor(public page: number, public pageSize: number) {
+  constructor(page: number, pageSize: number) {
     super(page, pageSize);
   }
 }
@@ -39,3 +39,10 @@ export class ViewBloggerPostDto {
 }
 
 export class PaginatorBloggerPostView extends OldPaginator<ViewBloggerPostDto> {}
+
+export type PaginatorBloggerpostSqlViewType = PaginatorType<ViewBloggerPostDto>;
+export class PaginatorBloggerPostSql extends Paginator<ViewBloggerPostDto> {
+  constructor(page: number, pageSize: number) {
+    super(page, pageSize);
+  }
+}

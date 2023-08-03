@@ -1,9 +1,9 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { PostsRepository } from '../posts.repository';
-import { LikePostsRepository } from '../like-posts.repository';
-import { LikePostsDocument } from '../like-posts.schema';
+import { PostsRepository } from '../db/posts.repository';
+import { LikePostsRepository } from '../db/like-posts.repository';
+import { LikePostsDocument } from '../model/like-posts.schema';
 import { CountLikeDislikeDto } from '../../../feature/likes/dto/count-like-dislike.dto';
-import { LikeStatus } from 'src/feature/likes/dto/like-status';
+import { LikeStatus } from '../../../feature/likes/dto/like-status';
 
 export class CountLikesPostsCommand {
   constructor(public userId: string, public ban: boolean) {}

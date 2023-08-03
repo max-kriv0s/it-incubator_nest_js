@@ -29,7 +29,7 @@ import { refreshTokenDto } from './dto/refresh-token.dto';
 import { RegistrationConfirmationCodeDto } from './dto/registration-confirmation-code.dto';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { ApiCallsThrottlerGuard } from '../../guard/throttler-api-calls.guard';
-import { GetFieldError } from 'src/utils';
+import { GetFieldError } from '../../utils';
 import { UsersQuerySqlRepository } from '../users/db/users-query.sql-repository';
 
 @Controller('auth')

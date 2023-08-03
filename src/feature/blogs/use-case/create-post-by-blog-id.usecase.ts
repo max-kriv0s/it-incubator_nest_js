@@ -7,6 +7,7 @@ import {
 import { validateOrRejectModel } from '../../../modules/validation';
 import { PostsService } from '../../../feature/posts/posts.service';
 import { BlogsSqlRepository } from '../db/blogs.sql-repository';
+import { PostsSqlRepository } from '../../../feature/posts/db/posts.sql-repository';
 
 export class CreatePostByBlogIdCommand {
   constructor(
@@ -23,6 +24,7 @@ export class CreatePostByBlogIdUseCase
   constructor(
     private readonly postsService: PostsService,
     private readonly blogsSqlRepository: BlogsSqlRepository,
+    private readonly postsSqlRepository: PostsSqlRepository,
   ) {}
 
   async execute(
@@ -42,13 +44,11 @@ export class CreatePostByBlogIdUseCase
       creationResult.addError('Access is denied', ResultCodeError.Forbidden);
     }
 
-    const postId = await this.postsService.createPostByBlogId(
+    const post = await this.postsSqlRepository.createPostByBlogId(
       blog.id,
-      blog.name,
       command.createPostDto,
     );
-
-    creationResult.addData(postId);
+    creationResult.addData(post.id);
     return creationResult;
   }
 }

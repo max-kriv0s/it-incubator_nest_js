@@ -10,7 +10,7 @@ import { QueryParams } from '../../dto';
 import { PaginatorBlogView, ViewBlogDto } from './dto/view-blog.dto';
 import { BlogsService } from './blogs.service';
 import { PaginatorPostView } from '../posts/dto/view-post.dto';
-import { PostsQueryRepository } from '../posts/posts-query.repository';
+import { PostsQueryRepository } from '../posts/db/posts-query.repository';
 import { CurrentUserId } from '../auth/decorators/current-user-id.param.decorator';
 import { IdValidationPipe } from '../../modules/pipes/id-validation.pipe';
 

@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { NewestLikes, PostDocument } from './model/post.schema';
-import { LikePostsRepository } from './like-posts.repository';
+import { LikePostsRepository } from './db/like-posts.repository';
 import { LikeStatus } from '../likes/dto/like-status';
-import { LikePostsDocument } from './like-posts.schema';
+import { LikePostsDocument } from './model/like-posts.schema';
 import { ViewLikeDetailsDto } from '../likes/dto/view-like.dto';
 import { CountLikeDislikeDto } from '../likes/dto/count-like-dislike.dto';
 

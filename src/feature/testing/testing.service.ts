@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { CommentsRepository } from '../comments/comments.repository';
-import { PostsRepository } from '../posts/posts.repository';
-import { LikePostsRepository } from '../posts/like-posts.repository';
+import { LikePostsRepository } from '../posts/db/like-posts.repository';
 import { ApiCallsRepository } from '../api-calls/api-calls.repository';
 import { LikeCommentsRepository } from '../comments/like-comments.repository';
 import { BloggersRepository } from '../bloggers/db/bloggers.repository';
 import { UsersSqlRepository } from '../users/db/users.sql-repository';
 import { SecurityDevicesSqlRepository } from '../security-devices/db/security-devices.sql-repository';
 import { BlogsSqlRepository } from '../blogs/db/blogs.sql-repository';
+import { PostsSqlRepository } from '../posts/db/posts.sql-repository';
 
 @Injectable()
 export class TestingService {
@@ -15,7 +15,7 @@ export class TestingService {
     private readonly blogsSqlRepository: BlogsSqlRepository,
     private readonly usersSqlRepository: UsersSqlRepository,
     private readonly commentsRepository: CommentsRepository,
-    private readonly postsRepository: PostsRepository,
+    private readonly postsSqlRepository: PostsSqlRepository,
     private readonly securityDevicesSqlRepository: SecurityDevicesSqlRepository,
     private readonly likePostsRepository: LikePostsRepository,
     private readonly likeCommentsRepository: LikeCommentsRepository,
@@ -28,7 +28,7 @@ export class TestingService {
       this.blogsSqlRepository.deleteBlogs(),
       this.usersSqlRepository.deleteUsers(),
       this.commentsRepository.deleteComments(),
-      this.postsRepository.deletePosts(),
+      this.postsSqlRepository.deletePosts(),
       this.securityDevicesSqlRepository.deleteSecurityDevices(),
       this.likePostsRepository.deleteLikesPosts(),
       this.likeCommentsRepository.deleteLikesComments(),
