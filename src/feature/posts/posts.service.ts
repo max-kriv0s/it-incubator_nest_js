@@ -105,7 +105,7 @@ export class PostsService {
     }
 
     const isBannedUser =
-      await this.bloggersRepository.findBannedUserByblogIdAndUserId(
+      await this.bloggersRepository.findBannedUserByBlogIdAndUserId(
         post.blogId.toString(),
         userId,
       );
