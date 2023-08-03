@@ -70,7 +70,7 @@ export class BloggerBanUnbanUserUseCase
       );
     }
 
-    this.bloggersSqlRepository.updateBannedUser(
+    await this.bloggersSqlRepository.updateBannedUser(
       bannedUser.id,
       command.banUserInputDto,
     );
