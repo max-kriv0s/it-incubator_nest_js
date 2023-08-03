@@ -94,7 +94,7 @@ export class PostsQuerySqlRepository {
       FROM public."Posts" as posts
       LEFT JOIN public."Blogs" as blogs
         ON blogs."id" = posts."blogId"
-      WHERE NOT posts."isBanned" AND "id" = $1`,
+      WHERE NOT posts."isBanned" AND posts."id" = $1`,
       [+id],
     );
 
