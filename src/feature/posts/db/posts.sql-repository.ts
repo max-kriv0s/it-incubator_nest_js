@@ -75,7 +75,7 @@ export class PostsSqlRepository {
     await this.dataSource.query(
       `UPDATE public."Posts"
         SET "isBanned" = $2 
-        WHERE "blogIid" = $1`,
+        WHERE "blogId" = $1`,
       [+blogId, isBanned],
     );
   }
