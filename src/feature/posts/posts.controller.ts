@@ -13,7 +13,11 @@ import {
 } from '@nestjs/common';
 import { PostsQueryRepository } from './db/posts-query.repository';
 import { PostsService } from './posts.service';
-import { PaginatorPostView, ViewPostDto } from './dto/view-post.dto';
+import {
+  PaginatorPostSql,
+  PaginatorPostSqlType,
+  ViewPostDto,
+} from './dto/view-post.dto';
 import { QueryParams } from '../../dto';
 import {
   PaginatorCommentView,
@@ -25,13 +29,15 @@ import { CurrentUserId } from '../auth/decorators/current-user-id.param.decorato
 import { CreateCommentDto } from '../comments/dto/create-comment.dto';
 import { ParamPostIdDto } from './dto/param-post-id.dto';
 import { LikeInputDto } from '../likes/dto/like-input.dto';
-import { IdValidationPipe } from '../../modules/pipes/id-validation.pipe';
 import { replyByNotification } from '../../modules/notification';
+import { PostsQuerySqlRepository } from './db/posts-query.sql-repository';
+import { IdIntegerValidationPipe } from '../../modules/pipes/id-integer-validation.pipe';
 
 @Controller('posts')
 export class PostsController {
   constructor(
     private readonly postsQueryRepository: PostsQueryRepository,
+    private readonly postsQuerySqlRepository: PostsQuerySqlRepository,
     private readonly postsService: PostsService,
     private readonly commentsQueryRepository: CommentsQueryRepository,
   ) {}
@@ -40,8 +46,16 @@ export class PostsController {
   async getPosts(
     @Query() queryParams: QueryParams,
     @CurrentUserId(false) userId: string,
-  ): Promise<PaginatorPostView> {
-    return this.postsQueryRepository.getPosts(queryParams, userId);
+  ): Promise<PaginatorPostSqlType> {
+    const paginator = new PaginatorPostSql(
+      +queryParams.pageNumber,
+      +queryParams.pageSize,
+    );
+    return this.postsQuerySqlRepository.getPosts(
+      queryParams,
+      paginator,
+      userId,
+    );
   }
 
   // @UseGuards(BasicAuthGuard)
@@ -66,10 +80,10 @@ export class PostsController {
 
   @Get(':id')
   async getPostById(
-    @Param('id', IdValidationPipe) id: string,
+    @Param('id', IdIntegerValidationPipe) id: string,
     @CurrentUserId(false) userId: string,
   ): Promise<ViewPostDto> {
-    const postView = await this.postsQueryRepository.getPostById(id, userId);
+    const postView = await this.postsQuerySqlRepository.getPostById(id, userId);
     if (!postView) throw new NotFoundException('Post not found');
     return postView;
   }

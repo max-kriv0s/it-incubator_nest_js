@@ -110,6 +110,7 @@ import { PostsSqlRepository } from './feature/posts/db/posts.sql-repository';
 import { BloggersSqlRepository } from './feature/bloggers/db/bloggers.sql-repository';
 import { UsersBlogsQuerySqlRepository } from './feature/users/db/users-blogs-query.sql-repository';
 import { BlogsQuerySqlRepository } from './feature/blogs/db/blogs-query.sql-repository';
+import { PostsQuerySqlRepository } from './feature/posts/db/posts-query.sql-repository';
 
 const apiCallsAdapters = [ApiCallsConfig, ApiCallsService, ApiCallsRepository];
 const authAdapters = [
@@ -147,6 +148,7 @@ const postsAdapters = [
   LikePostsRepository,
   LikePostsService,
   PostsSqlRepository,
+  PostsQuerySqlRepository,
 ];
 const securityDevicesAdapters = [
   SecurityDevicesService,
