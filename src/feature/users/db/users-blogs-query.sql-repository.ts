@@ -31,7 +31,7 @@ export class UsersBlogsQuerySqlRepository {
 
     const totalCount = +blogsCount[0].count;
     const blogsRaw: UserBlogRawSqlDocument[] = await this.dataSource.query(
-      `SELECT "blogs".*, "users".login as ownerLogin
+      `SELECT "blogs".*, "users".login as "ownerLogin"
       FROM public."Blogs" as "blogs"
         LEFT JOIN public."Users" as "users"
           ON "blogs"."ownerId" = "users"."id"
