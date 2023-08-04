@@ -66,11 +66,12 @@ export class BlogsSqlRepository {
     );
   }
   async setBanUnbaneBlog(id: string, isBanned: boolean) {
+    const banDate = isBanned ? new Date() : null;
     await this.dataSource.query(
       `UPDATE public."Blogs"
-        SET "isBanned" = $2 
+        SET "isBanned" = $2, "banDate" = $3 
         WHERE "id" = $1`,
-      [+id, isBanned],
+      [+id, isBanned, banDate],
     );
   }
 
