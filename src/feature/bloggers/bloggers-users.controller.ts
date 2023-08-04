@@ -47,7 +47,7 @@ export class BloggersUsersController {
 
   @Get('blog/:id')
   async getAllBannedUsersForBlog(
-    @Param('id', IdValidationPipe) id: string,
+    @Param('id', IdIntegerValidationPipe) id: string,
     @Query() queryParams: BloggerBannedUsersQueryParams,
     @CurrentUserId() userId: string,
   ): Promise<PaginatorViewBloggerBannedUsersSqlType> {

@@ -210,7 +210,9 @@ export class BloggerQuerySqlRepository {
       new ResultNotification<PaginatorViewBloggerBannedUsersSqlType>();
 
     const blogsRaw: BlogRawSqlDocument[] = await this.dataSource.query(
-      `SELECT *`,
+      `SELECT "id", "ownerId", "isBanned"
+      FROM public."Blogs"
+      WHERE "id" = $1`,
       [+blogId],
     );
 
