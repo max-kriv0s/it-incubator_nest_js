@@ -179,8 +179,8 @@ export class BlogsQuerySqlRepository {
           blogName: postRaw.blogName,
           createdAt: postRaw.createdAt.toISOString(),
           extendedLikesInfo: {
-            likesCount: postRaw.likesCount,
-            dislikesCount: postRaw.dislikesCount,
+            likesCount: +postRaw.likesCount,
+            dislikesCount: +postRaw.dislikesCount,
             myStatus: postRaw.myStatusLike,
             newestLikes: [],
           },

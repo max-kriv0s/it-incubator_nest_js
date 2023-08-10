@@ -171,8 +171,8 @@ export class BloggerQuerySqlRepository {
           blogName: postRaw.blogName,
           createdAt: postRaw.createdAt.toISOString(),
           extendedLikesInfo: {
-            likesCount: postRaw.likesCount,
-            dislikesCount: postRaw.dislikesCount,
+            likesCount: +postRaw.likesCount,
+            dislikesCount: +postRaw.dislikesCount,
             myStatus: postRaw.myStatusLike,
             newestLikes: [],
           },
@@ -494,8 +494,8 @@ export class BloggerQuerySqlRepository {
       },
       createdAt: comment.createdAt.toISOString(),
       likesInfo: {
-        likesCount: comment.likesCount,
-        dislikesCount: comment.dislikesCount,
+        likesCount: +comment.likesCount,
+        dislikesCount: +comment.dislikesCount,
         myStatus: comment.myStatus,
       },
       postInfo: {
