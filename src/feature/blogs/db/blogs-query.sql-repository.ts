@@ -13,7 +13,7 @@ import {
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { BlogRawSqlDocument } from '../model/blog-sql.model';
-import { PostRawSqlDocument } from '../../../feature/posts/model/post-sql.model';
+import { PostWithLikesRawSqlDocument } from '../../../feature/posts/model/post-sql.model';
 
 @Injectable()
 export class BlogsQuerySqlRepository {
@@ -82,12 +82,12 @@ export class BlogsQuerySqlRepository {
     const blogsRaw: BlogRawSqlDocument[] = await this.dataSource.query(
       `SELECT *
       FROM public."Blogs"
-      WHERE NOT "isBanned"`,
+      WHERE NOT "isBanned" AND "id" = $1`,
       [+blogId],
     );
     if (!blogsRaw.length) return null;
 
-    const params = [+blogId];
+    const params: [number | null] = [+blogId];
     const postsCount = await this.dataSource.query(
       `SELECT count(*)
         FROM public."Posts"
@@ -95,81 +95,109 @@ export class BlogsQuerySqlRepository {
       params,
     );
     const totalCount: number = +postsCount[0].count;
-    const postsRaw: PostRawSqlDocument[] = await this.dataSource.query(
-      `SELECT 
-          posts.*, 
-          blogs."name" as "blogName", 
-          0 as "likesCount", 
-          0 as "dislikesCount",
-          'None' as "myStatusLike"
-        FROM public."Posts" as posts
-        LEFT JOIN public."Blogs" as blogs
-          ON blogs."id" = posts."blogId"
-        WHERE posts."blogId" = $1
-        ORDER BY posts."${sortBy}" ${sortDirection}
-        LIMIT ${paginator.pageSize} OFFSET ${paginator.skip}`,
+
+    params.push(userId ? +userId : null);
+    const postsRaw: PostWithLikesRawSqlDocument[] = await this.dataSource.query(
+      `WITH posts_blog AS (
+        SELECT *
+        FROM public."Posts"
+        WHERE "blogId" = $1 AND NOT "isBanned"
+        ORDER BY "${sortBy}" ${sortDirection}
+        LIMIT ${paginator.pageSize} OFFSET ${paginator.skip}
+      ), likes_dislikes AS (
+        SELECT
+          "postId",
+          SUM(CASE 
+            WHEN "status" = 'Like' 
+                    THEN 1
+                  ELSE 0
+              END) AS "likesCount",  
+          SUM(CASE 
+            WHEN "status" = 'Dislike' 
+                    THEN 1
+                  ELSE 0
+              END) AS "dislikesCount"
+        FROM public."PostLikes"
+        WHERE "postId" in (SELECT posts_blog."id" FROM posts_blog)
+        GROUP BY "postId"
+      ), newest_likes AS (
+        SELECT
+          post_likes."postId" AS "postId",
+          post_likes."addedAt" AS "addedAt",
+          post_likes."userId" AS "userId",
+          users."login" AS "login"
+        FROM public."PostLikes" AS post_likes
+        LEFT JOIN public."Users" AS users
+          ON post_likes."userId" = users."id"
+        WHERE 
+          "postId" in (SELECT posts_blog."id" FROM posts_blog) AND 
+          "status" = 'Like'
+        ORDER BY "addedAt" DESC 
+        LIMIT 3
+      )
+      SELECT 
+        posts_blog.*,
+        blogs."name" AS "blogName",
+        COALESCE(
+          (SELECT "status"
+          FROM public."PostLikes"
+          WHERE "postId" = posts_blog."id" AND "userId" = $2)
+          , 'None') AS "myStatusLike",
+        COALESCE(likes_dislikes."likesCount", 0) AS "likesCount",
+        COALESCE(likes_dislikes."dislikesCount", 0) AS "dislikesCount",
+        newest_likes."addedAt" AS "addedAt",
+        newest_likes."userId" AS "userId",
+        newest_likes."login" AS "login"
+      FROM posts_blog
+      LEFT JOIN likes_dislikes
+        ON posts_blog."id" = likes_dislikes."postId"
+      LEFT JOIN newest_likes
+        ON posts_blog."id" = newest_likes."postId"
+      LEFT JOIN public."Blogs" AS blogs
+        ON posts_blog."blogId" = blogs."id" `,
       params,
     );
-    const postsView = postsRaw.map((post) => this.postDBToPostView(post));
+    const postsView = this.postsDBToPostsView(postsRaw);
     return paginator.paginate(totalCount, postsView);
   }
 
-  private postDBToPostView(post: PostRawSqlDocument): ViewPostDto {
-    return {
-      id: post.id.toString(),
-      title: post.title,
-      shortDescription: post.shortDescription,
-      content: post.content,
-      blogId: post.blogId.toString(),
-      blogName: post.blogName,
-      createdAt: post.createdAt.toISOString(),
-      extendedLikesInfo: {
-        likesCount: post.likesCount,
-        dislikesCount: post.dislikesCount,
-        myStatus: post.myStatusLike,
-        newestLikes: [],
-      },
-    };
+  private postsDBToPostsView(
+    postsRaw: PostWithLikesRawSqlDocument[],
+  ): ViewPostDto[] {
+    const result: ViewPostDto[] = [];
+    const addedPosts = {};
+
+    for (const postRaw of postsRaw) {
+      let post: ViewPostDto = addedPosts[postRaw.id];
+      if (!post) {
+        post = {
+          id: postRaw.id.toString(),
+          title: postRaw.title,
+          shortDescription: postRaw.shortDescription,
+          content: postRaw.content,
+          blogId: postRaw.blogId.toString(),
+          blogName: postRaw.blogName,
+          createdAt: postRaw.createdAt.toISOString(),
+          extendedLikesInfo: {
+            likesCount: postRaw.likesCount,
+            dislikesCount: postRaw.dislikesCount,
+            myStatus: postRaw.myStatusLike,
+            newestLikes: [],
+          },
+        };
+        result.push(post);
+        addedPosts[postRaw.id] = post;
+      }
+
+      if (postRaw.userId) {
+        post.extendedLikesInfo.newestLikes.push({
+          addedAt: postRaw.addedAt.toISOString(),
+          userId: postRaw.userId.toString(),
+          login: postRaw.login,
+        });
+      }
+    }
+
+    return result;
   }
 }
-// async postDBToPostView(
-//   post: PostDocument,
-//   userId?: string,
-// ): Promise<ViewPostDto> {
-//   let statusMyLike = LikeStatus.None;
-
-//   if (userId) {
-//     const myLike = await this.LikePostsModel.findOne({
-//       postId: post._id,
-//       userId: castToObjectId(userId),
-//     }).exec();
-//     if (myLike) statusMyLike = myLike.status;
-//   }
-
-//   return {
-//     id: post._id.toString(),
-//     title: post.title,
-//     shortDescription: post.shortDescription,
-//     content: post.content,
-//     blogId: post.blogId.toString(),
-//     blogName: post.blogName,
-//     createdAt: post.createdAt.toISOString(),
-//     extendedLikesInfo: {
-//       likesCount: post.likesCount,
-//       dislikesCount: post.dislikesCount,
-//       myStatus: statusMyLike,
-//       newestLikes: await Promise.all(
-//         post.newestLikes.map((like) => this.newestLikesToView(like)),
-//       ),
-//     },
-//   };
-// }
-
-//   async newestLikesToView(like: NewestLikes): Promise<ViewLikeDetailsDto> {
-//     return {
-//       addedAt: like.addedAt.toISOString(),
-//       userId: like.userId,
-//       login: like.login,
-//     };
-//   }
-// }

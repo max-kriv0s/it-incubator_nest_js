@@ -83,4 +83,13 @@ export class BlogsSqlRepository {
       [+id, userId],
     );
   }
+
+  async updateBanUnban(userId: string, isBanned: boolean) {
+    await this.dataSource.query(
+      `UPDATE public."Blogs"
+        SET "isBanned" = $2 
+        WHERE "ownerId" = $1`,
+      [+userId, isBanned],
+    );
+  }
 }

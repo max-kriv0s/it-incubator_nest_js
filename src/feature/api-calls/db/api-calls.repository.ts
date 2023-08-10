@@ -4,7 +4,7 @@ import {
   ApiCalls,
   ApiCallsDocument,
   ApiCallsModelType,
-} from './api-calls.schema';
+} from '../model/api-calls.schema';
 
 @Injectable()
 export class ApiCallsRepository {

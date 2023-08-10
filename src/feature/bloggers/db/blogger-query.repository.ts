@@ -33,7 +33,7 @@ import {
   Comment,
   CommentDocument,
   CommentModelType,
-} from '../../../feature/comments/comment.schema';
+} from '../../comments/model/comment.schema';
 import {
   PaginatorViewBloggerCommentsDto,
   ViewBloggerCommentsDto,

@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { LikeStatus } from '../likes/dto/like-status';
 import { CountLikeDislikeDto } from '../likes/dto/count-like-dislike.dto';
-import { LikeCommentsRepository } from './like-comments.repository';
-import { LikeCommentsDocument } from './like-comments.schema';
+import { LikeCommentsRepository } from './db/like-comments.repository';
+import { LikeCommentsDocument } from './model/like-comments.schema';
 
 @Injectable()
 export class LikeCommentsService {

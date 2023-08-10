@@ -20,13 +20,16 @@ import { PostsRepository } from './feature/posts/db/posts.repository';
 import { PostsQueryRepository } from './feature/posts/db/posts-query.repository';
 import { CommentsController } from './feature/comments/comments.controller';
 import { CommentsService } from './feature/comments/comments.service';
-import { CommentsRepository } from './feature/comments/comments.repository';
-import { CommentsQueryRepository } from './feature/comments/comments-query.repository';
+import { CommentsRepository } from './feature/comments/db/comments.repository';
+import { CommentsQueryRepository } from './feature/comments/db/comments-query.repository';
 import { BlogsController } from './feature/blogs/blogs.controller';
 import { BlogsService } from './feature/blogs/blogs.service';
 import { BlogsRepository } from './feature/blogs/db/blogs.repository';
 import { BlogsQueryRepository } from './feature/blogs/db/blogs-query.repository';
-import { Comment, CommentSchema } from './feature/comments/comment.schema';
+import {
+  Comment,
+  CommentSchema,
+} from './feature/comments/model/comment.schema';
 import { AuthConfig } from './feature/auth/configuration/auth.configuration';
 import { BasicStategy } from './feature/auth/strategies/basic.strategy';
 import { PassportModule } from '@nestjs/passport';
@@ -51,10 +54,10 @@ import {
 import {
   LikeComments,
   LikeCommentsSchema,
-} from './feature/comments/like-comments.schema';
+} from './feature/comments/model/like-comments.schema';
 import { LikePostsService } from './feature/posts/like-posts.service';
 import { LikeCommentsService } from './feature/comments/like-comments.service';
-import { LikeCommentsRepository } from './feature/comments/like-comments.repository';
+import { LikeCommentsRepository } from './feature/comments/db/like-comments.repository';
 import { UsersConfig } from './feature/users/configuration/users.configuration';
 import { EmailManagerService } from './feature/email-managers/email-manager.service';
 import { EmailConfig } from './infrastructure/configuration/email.configuration';
@@ -65,9 +68,12 @@ import { ThrottlerBehindProxyGuard } from './guard/throttler-behind-proxy.guard'
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { ApiCallsConfig } from './feature/api-calls/configuration/api-calls.configuration';
-import { ApiCallsRepository } from './feature/api-calls/api-calls.repository';
+import { ApiCallsRepository } from './feature/api-calls/db/api-calls.repository';
 import { ApiCallsService } from './feature/api-calls/api-calls.service';
-import { ApiCallSchema, ApiCalls } from './feature/api-calls/api-calls.schema';
+import {
+  ApiCallSchema,
+  ApiCalls,
+} from './feature/api-calls/model/api-calls.schema';
 import { ThrottlerConfigService } from './guard/throttler-api-calls.configuration';
 import { OptionalJwtTokenGuard } from './feature/auth/guard/optional-jwt-token.guard';
 import { BlogExistsRule } from './feature/posts/validators/blog-exists.validator';
@@ -111,6 +117,15 @@ import { BloggersSqlRepository } from './feature/bloggers/db/bloggers.sql-reposi
 import { UsersBlogsQuerySqlRepository } from './feature/users/db/users-blogs-query.sql-repository';
 import { BlogsQuerySqlRepository } from './feature/blogs/db/blogs-query.sql-repository';
 import { PostsQuerySqlRepository } from './feature/posts/db/posts-query.sql-repository';
+import { CreateCommentByPostIdUseCase } from './feature/posts/use-case/create-comment-by-post-id.usecase';
+import { CommentsSqlRepository } from './feature/comments/db/comments.sql-repository';
+import { CommentsQuerySqlRepository } from './feature/comments/db/comments-query.sql-repository';
+import { LikePostsSqlRepository } from './feature/posts/db/like-posts.sql-repository';
+import { LikeCommentsSqlRepository } from './feature/comments/db/like-comments.sql-repository';
+import { LikeStatusByPostIdUseCase } from './feature/posts/use-case/like-status-by-post-id.usecase';
+import { DeleteCommentbyIdUseCase } from './feature/comments/use-case/delete-comment-by-id.usecase';
+import { UpdateCommentByIdUseCase } from './feature/comments/use-case/update-comment-by-id.usecase';
+import { SetLikeStatusByCommentIdUseCase } from './feature/comments/use-case/set-like-status-by-comment-id.usecase';
 
 const apiCallsAdapters = [ApiCallsConfig, ApiCallsService, ApiCallsRepository];
 const authAdapters = [
@@ -140,6 +155,9 @@ const commentsAdapters = [
   CommentsQueryRepository,
   LikeCommentsService,
   LikeCommentsRepository,
+  CommentsSqlRepository,
+  CommentsQuerySqlRepository,
+  LikeCommentsSqlRepository,
 ];
 const postsAdapters = [
   PostsService,
@@ -149,6 +167,7 @@ const postsAdapters = [
   LikePostsService,
   PostsSqlRepository,
   PostsQuerySqlRepository,
+  LikePostsSqlRepository,
 ];
 const securityDevicesAdapters = [
   SecurityDevicesService,
@@ -169,6 +188,7 @@ const usersAdapters = [
   UsersSqlRepository,
   UsersQuerySqlRepository,
   UsersBlogsQuerySqlRepository,
+  LikeStatusByPostIdUseCase,
 ];
 
 const useCases = [
@@ -188,6 +208,10 @@ const useCases = [
   UserBanUnbanBlogUseCase,
   CreateUserUseCase,
   DeleteUserUseCase,
+  CreateCommentByPostIdUseCase,
+  DeleteCommentbyIdUseCase,
+  UpdateCommentByIdUseCase,
+  SetLikeStatusByCommentIdUseCase,
 ];
 
 @Module({

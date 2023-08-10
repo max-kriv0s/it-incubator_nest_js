@@ -1,5 +1,5 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { CommentsRepository } from '../comments.repository';
+import { CommentsRepository } from '../db/comments.repository';
 
 export class SetBanUnbanCommentsCommand {
   constructor(public userId: string, public valueBan: boolean) {}

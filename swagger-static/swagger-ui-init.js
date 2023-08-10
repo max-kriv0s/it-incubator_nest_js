@@ -216,7 +216,16 @@ window.onload = function() {
       "/posts/{postId}/comments": {
         "get": {
           "operationId": "PostsController_findCommentsByPostId",
-          "parameters": [],
+          "parameters": [
+            {
+              "name": "postId",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
           "responses": {
             "200": {
               "description": ""
@@ -225,7 +234,16 @@ window.onload = function() {
         },
         "post": {
           "operationId": "PostsController_createCommentByPostID",
-          "parameters": [],
+          "parameters": [
+            {
+              "name": "postId",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
           "requestBody": {
             "required": true,
             "content": {
@@ -246,7 +264,16 @@ window.onload = function() {
       "/posts/{postId}/like-status": {
         "put": {
           "operationId": "PostsController_likeStatusByPostId",
-          "parameters": [],
+          "parameters": [
+            {
+              "name": "postId",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
           "requestBody": {
             "required": true,
             "content": {
@@ -287,7 +314,16 @@ window.onload = function() {
       "/comments/{commentId}": {
         "delete": {
           "operationId": "CommentsController_deleteCommentByID",
-          "parameters": [],
+          "parameters": [
+            {
+              "name": "commentId",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
           "responses": {
             "204": {
               "description": ""
@@ -296,7 +332,16 @@ window.onload = function() {
         },
         "put": {
           "operationId": "CommentsController_updatedComment",
-          "parameters": [],
+          "parameters": [
+            {
+              "name": "commentId",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
           "requestBody": {
             "required": true,
             "content": {
@@ -317,7 +362,16 @@ window.onload = function() {
       "/comments/{commentId}/like-status": {
         "put": {
           "operationId": "CommentsController_likeStatusByCommentID",
-          "parameters": [],
+          "parameters": [
+            {
+              "name": "commentId",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
           "requestBody": {
             "required": true,
             "content": {

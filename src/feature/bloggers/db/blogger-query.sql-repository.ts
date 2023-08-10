@@ -11,11 +11,7 @@ import {
 } from '../dto/view-blogger-blogs.dto';
 import { BlogRawSqlDocument } from '../../../feature/blogs/model/blog-sql.model';
 import { BloggerQueryParams } from '../dto/blogger-query-params.dto';
-import {
-  PostRawSqlDocument,
-  PostSqlDocument,
-  convertPostRawSqlToSqlDocument,
-} from '../../../feature/posts/model/post-sql.model';
+import { PostWithLikesRawSqlDocument } from '../../../feature/posts/model/post-sql.model';
 import {
   ResultCodeError,
   ResultNotification,
@@ -27,6 +23,12 @@ import {
   ViewBloggerBannedUsersDto,
 } from '../dto/view-blogger-banned-users.dto';
 import { BloggerQueryBannedUsersRawSqlDocument } from '../model/blogger-banned-users-sql.model';
+import {
+  PaginatorViewBloggerCommentsDto,
+  ViewBloggerCommentsDto,
+} from '../dto/view-blogger-comments.dto';
+import { IPaginator } from '../../../dto';
+import { CommentForPostRawSqlDocument } from '../../../feature/comments/model/comment-sql.model';
 
 @Injectable()
 export class BloggerQuerySqlRepository {
@@ -88,50 +90,107 @@ export class BloggerQuerySqlRepository {
     id: string,
     userId: string,
   ): Promise<ViewBloggerPostDto | null> {
-    const postsRaw: PostRawSqlDocument[] = await this.dataSource.query(
-      `SELECT 
-        posts.*, 
-        blogs."name" as "blogName", 
-        0 as "likesCount", 
-        0 as "dislikesCount",
-        'None' as "myStatusLike"
-      FROM public."Posts" as posts
-      LEFT JOIN public."Blogs" as blogs
-        ON blogs."id" = posts."blogId"
-      WHERE posts."id" = $1`,
-      [+id],
+    const postsRaw: PostWithLikesRawSqlDocument[] = await this.dataSource.query(
+      `WITH posts_blog AS (
+        SELECT *
+        FROM public."Posts"
+        WHERE "id" = $1
+      ), likes_dislikes AS (
+        SELECT
+          "postId",
+          SUM(CASE 
+            WHEN "status" = 'Like' 
+                    THEN 1
+                  ELSE 0
+              END) AS "likesCount",  
+          SUM(CASE 
+            WHEN "status" = 'Dislike' 
+                    THEN 1
+                  ELSE 0
+              END) AS "dislikesCount"
+        FROM public."PostLikes"
+        WHERE "postId" in (SELECT posts_blog."id" FROM posts_blog)
+        GROUP BY "postId"
+      ), newest_likes AS (
+        SELECT
+          post_likes."postId" AS "postId",
+          post_likes."addedAt" AS "addedAt",
+          post_likes."userId" AS "userId",
+          users."login" AS "login"
+        FROM public."PostLikes" AS post_likes
+        LEFT JOIN public."Users" AS users
+          ON post_likes."userId" = users."id"
+        WHERE 
+          "postId" in (SELECT posts_blog."id" FROM posts_blog) AND 
+          "status" = 'Like'
+        ORDER BY "addedAt" DESC 
+        LIMIT 3
+      )
+      SELECT 
+        posts_blog.*,
+        blogs."name" AS "blogName",
+        COALESCE(
+          (SELECT "status"
+          FROM public."PostLikes"
+          WHERE "postId" = posts_blog."id" AND "userId" = $2)
+          , 'None') AS "myStatusLike",
+        COALESCE(likes_dislikes."likesCount", 0) AS "likesCount",
+        COALESCE(likes_dislikes."dislikesCount", 0) AS "dislikesCount",
+        newest_likes."addedAt" AS "addedAt",
+        newest_likes."userId" AS "userId",
+        newest_likes."login" AS "login"
+      FROM posts_blog
+      LEFT JOIN likes_dislikes
+        ON posts_blog."id" = likes_dislikes."postId"
+      LEFT JOIN newest_likes
+        ON posts_blog."id" = newest_likes."postId"
+      LEFT JOIN public."Blogs" AS blogs
+        ON posts_blog."blogId" = blogs."id" `,
+      [+id, +userId],
     );
     if (!postsRaw.length) return null;
-    const post = convertPostRawSqlToSqlDocument(postsRaw[0]);
-    return this.postDBToPostView(post);
+    const postsView = this.postsDBToPostsView(postsRaw);
+    return postsView[0];
   }
 
-  postDBToPostView(post: PostSqlDocument): ViewBloggerPostDto {
-    // let statusMyLike = LikeStatus.None;
+  private postsDBToPostsView(
+    postsRaw: PostWithLikesRawSqlDocument[],
+  ): ViewBloggerPostDto[] {
+    const result: ViewBloggerPostDto[] = [];
+    const addedPosts = {};
 
-    // if (userId) {
-    //   const myLike = await this.LikePostsModel.findOne({
-    //     postId: post._id,
-    //     userId: castToObjectId(userId),
-    //   }).exec();
-    //   if (myLike) statusMyLike = myLike.status;
-    // }
+    for (const postRaw of postsRaw) {
+      let post: ViewBloggerPostDto = addedPosts[postRaw.id];
+      if (!post) {
+        post = {
+          id: postRaw.id.toString(),
+          title: postRaw.title,
+          shortDescription: postRaw.shortDescription,
+          content: postRaw.content,
+          blogId: postRaw.blogId.toString(),
+          blogName: postRaw.blogName,
+          createdAt: postRaw.createdAt.toISOString(),
+          extendedLikesInfo: {
+            likesCount: postRaw.likesCount,
+            dislikesCount: postRaw.dislikesCount,
+            myStatus: postRaw.myStatusLike,
+            newestLikes: [],
+          },
+        };
+        result.push(post);
+        addedPosts[postRaw.id] = post;
+      }
 
-    return {
-      id: post.id.toString(),
-      title: post.title,
-      shortDescription: post.shortDescription,
-      content: post.content,
-      blogId: post.blogId.toString(),
-      blogName: post.blogName,
-      createdAt: post.createdAt.toISOString(),
-      extendedLikesInfo: {
-        likesCount: post.likesCount,
-        dislikesCount: post.dislikesCount,
-        myStatus: post.myStatusLike,
-        newestLikes: [],
-      },
-    };
+      if (postRaw.userId) {
+        post.extendedLikesInfo.newestLikes.push({
+          addedAt: postRaw.addedAt.toISOString(),
+          userId: postRaw.userId.toString(),
+          login: postRaw.login,
+        });
+      }
+    }
+
+    return result;
   }
 
   async findPostsByBlogId(
@@ -172,23 +231,69 @@ export class BloggerQuerySqlRepository {
     );
 
     const totalCount: number = +postsCount[0].count;
-    const postsRaw: PostRawSqlDocument[] = await this.dataSource.query(
-      `SELECT 
-        posts.*, 
-        blogs."name" as "blogName", 
-        0 as "likesCount", 
-        0 as "dislikesCount",
-        'None' as "myStatusLike"
-      FROM public."Posts" as posts
-      LEFT JOIN public."Blogs" as blogs
-        ON blogs."id" = posts."blogId"
-      WHERE posts."blogId" = $1
-      ORDER BY posts."${sortBy}" ${sortDirection}
-      LIMIT ${paginator.pageSize} OFFSET ${paginator.skip}`,
+
+    params.push(+userId);
+    const postsRaw: PostWithLikesRawSqlDocument[] = await this.dataSource.query(
+      `WITH posts_blog AS (
+        SELECT *
+        FROM public."Posts"
+        WHERE "blogId" = $1
+        ORDER BY "${sortBy}" ${sortDirection}
+        LIMIT ${paginator.pageSize} OFFSET ${paginator.skip}
+      ), likes_dislikes AS (
+        SELECT
+          "postId",
+          SUM(CASE 
+            WHEN "status" = 'Like' 
+                    THEN 1
+                  ELSE 0
+              END) AS "likesCount",  
+          SUM(CASE 
+            WHEN "status" = 'Dislike' 
+                    THEN 1
+                  ELSE 0
+              END) AS "dislikesCount"
+        FROM public."PostLikes"
+        WHERE "postId" in (SELECT posts_blog."id" FROM posts_blog)
+        GROUP BY "postId"
+      ), newest_likes AS (
+        SELECT
+          post_likes."postId" AS "postId",
+          post_likes."addedAt" AS "addedAt",
+          post_likes."userId" AS "userId",
+          users."login" AS "login"
+        FROM public."PostLikes" AS post_likes
+        LEFT JOIN public."Users" AS users
+          ON post_likes."userId" = users."id"
+        WHERE 
+          "postId" in (SELECT posts_blog."id" FROM posts_blog) AND 
+          "status" = 'Like'
+        ORDER BY "addedAt" DESC 
+        LIMIT 3
+      )
+      SELECT 
+        posts_blog.*,
+        blogs."name" AS "blogName",
+        COALESCE(
+          (SELECT "status"
+          FROM public."PostLikes"
+          WHERE "postId" = posts_blog."id" AND "userId" = $2)
+          , 'None') AS "myStatusLike",
+        COALESCE(likes_dislikes."likesCount", 0) AS "likesCount",
+        COALESCE(likes_dislikes."dislikesCount", 0) AS "dislikesCount",
+        newest_likes."addedAt" AS "addedAt",
+        newest_likes."userId" AS "userId",
+        newest_likes."login" AS "login"
+      FROM posts_blog
+      LEFT JOIN likes_dislikes
+        ON posts_blog."id" = likes_dislikes."postId"
+      LEFT JOIN newest_likes
+        ON posts_blog."id" = newest_likes."postId"
+      LEFT JOIN public."Blogs" AS blogs
+        ON posts_blog."blogId" = blogs."id" `,
       params,
     );
-    const posts = postsRaw.map((post) => convertPostRawSqlToSqlDocument(post));
-    const postsView = posts.map((post) => this.postDBToPostView(post));
+    const postsView = this.postsDBToPostsView(postsRaw);
     const postsViewPagination = paginator.paginate(totalCount, postsView);
     result.addData(postsViewPagination);
     return result;
@@ -283,5 +388,122 @@ export class BloggerQuerySqlRepository {
     const paginateView = paginator.paginate(totalCount, bannedUsersView);
     result.addData(paginateView);
     return result;
+  }
+
+  async allCommentsForAllPostsInsideBlogs(
+    queryParams: BloggerQueryParams,
+    userId: string,
+    paginator: IPaginator<ViewBloggerCommentsDto>,
+  ): Promise<PaginatorViewBloggerCommentsDto> {
+    const sortBy: string = queryParams.sortBy || 'createdAt';
+    const sortDirection = queryParams.sortDirection || 'desc';
+
+    const params = [+userId];
+    const commentCount: { count: number }[] = await this.dataSource.query(
+      `WITH blogs AS (
+        SELECT "id"
+        FROM public."Blogs"
+        WHERE "ownerId" = $1
+      ), posts AS (
+        SELECT "id"
+        FROM public."Posts"
+        WHERE "blogId" IN (SELECT "id" FROM blogs)
+      ) 
+      SELECT count(*)
+      FROM public."Comments"
+      WHERE "postId" IN (SELECT "id" FROM posts)
+      `,
+      params,
+    );
+
+    const totalCount: number = +commentCount[0].count;
+    const commentsRaw: CommentForPostRawSqlDocument[] =
+      await this.dataSource.query(
+        `WITH blogs AS (
+        SELECT "id", "name"
+        FROM public."Blogs"
+        WHERE "ownerId" = $1
+      ), posts AS (
+        SELECT "id", "blogId", "title"
+        FROM public."Posts"
+        WHERE "blogId" IN (SELECT "id" FROM blogs)
+      ), comments AS (
+        SELECT "id", "postId", "userId", "content", "createdAt"
+        FROM public."Comments" AS comments
+        WHERE "postId" IN (SELECT "id" FROM posts)
+        ORDER BY "${sortBy}" ${sortDirection}
+        LIMIT ${paginator.pageSize} OFFSET ${paginator.skip}
+      ), likes_dislikes AS (
+        SELECT
+          "commentId",
+          SUM(CASE 
+            WHEN "status" = 'Like' 
+                    THEN 1
+                  ELSE 0
+              END) AS "likesCount",  
+          SUM(CASE 
+            WHEN "status" = 'Dislike' 
+                    THEN 1
+                  ELSE 0
+              END) AS "dislikesCount"
+        FROM public."CommentLikes"
+        WHERE "commentId" in (SELECT "id" FROM comments)
+        GROUP BY "commentId"
+      )
+    SELECT 
+      comments.*,
+      COALESCE(likes_dislikes."likesCount", 0) AS "likesCount",
+      COALESCE(likes_dislikes."dislikesCount", 0) AS "dislikesCount",
+      COALESCE(
+        (SELECT "status"
+        FROM public."CommentLikes"
+        WHERE "commentId" = comments."id" AND "userId" = $1)
+        , 'None') AS "myStatus",
+        users."login" AS "userLogin",
+        posts."title",
+        posts."blogId",
+        blogs."name" AS "blogName"
+    FROM comments
+    LEFT JOIN likes_dislikes
+      ON comments."id" = likes_dislikes."commentId"
+    LEFT JOIN public."Users" AS users
+      ON comments."userId" = users."id"
+    LEFT JOIN posts
+      ON comments."postId" = posts."id"
+    LEFT JOIN blogs
+      ON posts."blogId" = blogs."id"
+      `,
+        params,
+      );
+
+    const commentsView = commentsRaw.map((comment) =>
+      this.commentToCommentView(comment),
+    );
+    return paginator.paginate(totalCount, commentsView);
+  }
+
+  private commentToCommentView(
+    comment: CommentForPostRawSqlDocument,
+  ): ViewBloggerCommentsDto {
+    return {
+      id: comment.id.toString(),
+      content: comment.content,
+      commentatorInfo: {
+        userId: comment.userId.toString(),
+        userLogin: comment.userLogin,
+      },
+      createdAt: comment.createdAt.toISOString(),
+      likesInfo: {
+        likesCount: comment.likesCount,
+        dislikesCount: comment.dislikesCount,
+        myStatus: comment.myStatus,
+      },
+      postInfo: {
+        id: comment.postId.toString(),
+        title: comment.title,
+        blogId: comment.blogId.toString(),
+        blogName: comment.blogName,
+      },
+    };
   }
 }

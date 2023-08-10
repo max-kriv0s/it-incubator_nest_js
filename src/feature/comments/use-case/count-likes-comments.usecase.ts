@@ -2,9 +2,9 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
 import { CountLikeDislikeDto } from '../../../feature/likes/dto/count-like-dislike.dto';
 import { LikeStatus } from '../../../feature/likes/dto/like-status';
-import { CommentsRepository } from '../comments.repository';
-import { LikeCommentsRepository } from '../like-comments.repository';
-import { LikeCommentsDocument } from '../like-comments.schema';
+import { CommentsRepository } from '../db/comments.repository';
+import { LikeCommentsRepository } from '../db/like-comments.repository';
+import { LikeCommentsDocument } from '../model/like-comments.schema';
 
 export class CountLikesCommentsCommand {
   constructor(public userId: string, public ban: boolean) {}

@@ -41,7 +41,10 @@ import { CreatePostByBlogIdCommand } from '../blogs/use-case/create-post-by-blog
 import { BlogPostUpdateDto } from './dto/blog-post-update.dto';
 import { UpdatePostByIdCommand } from './use-case/update-post-by-id.usecase';
 import { DeletePostByIdCommand } from './use-case/delete-post-by-id.usecase';
-import { PaginatorViewBloggerCommentsDto } from './dto/view-blogger-comments.dto';
+import {
+  PaginatorBloggerCommentsSql,
+  PaginatorViewBloggerCommentsDto,
+} from './dto/view-blogger-comments.dto';
 import { IdIntegerValidationPipe } from '../../modules/pipes/id-integer-validation.pipe';
 import { BloggerQuerySqlRepository } from './db/blogger-query.sql-repository';
 import { BloggerQueryRepository } from './db/blogger-query.repository';
@@ -188,9 +191,15 @@ export class BloggersController {
     @Query() queryParams: BloggerQueryParams,
     @CurrentUserId() userId: string,
   ): Promise<PaginatorViewBloggerCommentsDto> {
-    return await this.bloggerQueryRepository.allCommentsForAllPostsInsideBlogs(
+    const paginator = new PaginatorBloggerCommentsSql(
+      +queryParams.pageNumber,
+      +queryParams.pageSize,
+    );
+
+    return await this.bloggerQuerySqlRepository.allCommentsForAllPostsInsideBlogs(
       queryParams,
       userId,
+      paginator,
     );
   }
 }

@@ -48,7 +48,14 @@ export type PaginatorType<T> = {
   totalCount: number;
   items: T[];
 };
-export class Paginator<T> {
+
+export interface IPaginator<T> {
+  page: number;
+  pageSize: number;
+  skip: number;
+  paginate(totalCount: number, data: T[]): PaginatorType<T>;
+}
+export class Paginator<T> implements IPaginator<T> {
   DEFAULT_PAGE = 1;
   DEFAULT_PAGE_SIZE = 10;
   skip: number;

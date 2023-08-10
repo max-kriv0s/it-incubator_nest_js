@@ -1,9 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Comment, CommentDocument, CommentModelType } from './comment.schema';
-import { CreateCommentDto } from './dto/create-comment.dto';
-import { castToObjectId } from '../../utils';
-import { CountLikeDislikeDto } from '../likes/dto/count-like-dislike.dto';
+import {
+  Comment,
+  CommentDocument,
+  CommentModelType,
+} from '../model/comment.schema';
+import { CreateCommentDto } from '../dto/create-comment.dto';
+import { castToObjectId } from '../../../utils';
+import { CountLikeDislikeDto } from '../../likes/dto/count-like-dislike.dto';
 
 @Injectable()
 export class CommentsRepository {

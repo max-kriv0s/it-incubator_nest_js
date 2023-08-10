@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Model, Types } from 'mongoose';
-import { LikeStatus } from '../likes/dto/like-status';
-import { castToObjectId } from '../../utils';
+import { LikeStatus } from '../../likes/dto/like-status';
+import { castToObjectId } from '../../../utils';
 import { Comment } from './comment.schema';
 
 export type LikeCommentsDocument = HydratedDocument<LikeComments>;

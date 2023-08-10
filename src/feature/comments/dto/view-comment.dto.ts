@@ -1,4 +1,4 @@
-import { OldPaginator, Paginator } from '../../../dto';
+import { OldPaginator, Paginator, PaginatorType } from '../../../dto';
 import { LikeStatus } from '../../likes/dto/like-status';
 
 export class ViewCommentDto {
@@ -17,3 +17,10 @@ export class ViewCommentDto {
 }
 
 export class PaginatorCommentView extends OldPaginator<ViewCommentDto> {}
+
+export type PaginatorCommentSqlType = PaginatorType<ViewCommentDto>;
+export class PaginatorCommentSql extends Paginator<ViewCommentDto> {
+  constructor(page: number, pageSize: number) {
+    super(page, pageSize);
+  }
+}

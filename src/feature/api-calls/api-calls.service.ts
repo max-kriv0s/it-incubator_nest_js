@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ApiCallsRepository } from './api-calls.repository';
+import { ApiCallsRepository } from './db/api-calls.repository';
 import { ApiCallsConfig } from './configuration/api-calls.configuration';
 
 @Injectable()

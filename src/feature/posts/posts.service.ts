@@ -14,6 +14,7 @@ import {
 } from '../../modules/notification';
 import { BloggersRepository } from '../bloggers/db/bloggers.repository';
 import { PostsRepository } from './db/posts.repository';
+import { PostsSqlRepository } from './db/posts.sql-repository';
 
 @Injectable()
 export class PostsService {
@@ -127,36 +128,37 @@ export class PostsService {
     return result;
   }
 
-  async likeStatusByPostID(
-    postId: string,
-    userId: string,
-    likeStatus: LikeStatus,
-  ): Promise<boolean> {
-    const postExists = await this.postsRepository.postExists(postId);
-    if (!postExists) return false;
+  //   async likeStatusByPostID(
+  //     postId: string,
+  //     userId: string,
+  //     likeStatus: LikeStatus,
+  //   ): Promise<boolean> {
+  //     const postExists = await this.postsRepository.postExists(postId);
+  //     if (!postExists) return false;
 
-    const user = await this.usersService.findUserById(userId);
-    if (!user) return false;
+  //     const user = await this.usersService.findUserById(userId);
+  //     if (!user) return false;
 
-    const countLikeDislyke = await this.likePostsService.ChangeLike(
-      postId,
-      userId,
-      user.accountData.login,
-      likeStatus,
-    );
-    // записывать newestLikes при обновлении
-    const isUpdated = await this.postsRepository.updateCountLikeDislike(
-      postId,
-      countLikeDislyke,
-    );
-    if (!isUpdated) return false;
+  //     const countLikeDislyke = await this.likePostsService.ChangeLike(
+  //       postId,
+  //       userId,
+  //       user.accountData.login,
+  //       likeStatus,
+  //     );
+  //     // записывать newestLikes при обновлении
+  //     const isUpdated = await this.postsRepository.updateCountLikeDislike(
+  //       postId,
+  //       countLikeDislyke,
+  //     );
+  //     if (!isUpdated) return false;
 
-    const post = await this.postsRepository.findPostById(postId);
-    if (!post) return false;
-    // post.updateCountLikeDislike(countLikeDislyke);
-    post.newestLikes = await this.likePostsService.getNewestLikes(post.id);
+  //     const post = await this.postsRepository.findPostById(postId);
+  //     if (!post) return false;
+  //     // post.updateCountLikeDislike(countLikeDislyke);
+  //     post.newestLikes = await this.likePostsService.getNewestLikes(post.id);
 
-    await this.postsRepository.save(post);
-    return true;
-  }
+  //     await this.postsRepository.save(post);
+  //     return true;
+  //   }
+  // }
 }

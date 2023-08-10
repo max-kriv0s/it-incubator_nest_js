@@ -2,7 +2,6 @@ import {
   Body,
   Controller,
   Delete,
-  ForbiddenException,
   Get,
   HttpCode,
   HttpStatus,
@@ -11,28 +10,35 @@ import {
   Put,
   UseGuards,
 } from '@nestjs/common';
-import { CommentsQueryRepository } from './comments-query.repository';
+import { CommentsQueryRepository } from './db/comments-query.repository';
 import { AccessJwtAuthGuard } from '../auth/guard/jwt.guard';
-import { ParamCommentId } from './dto/param-comment-id.dto';
 import { CommentsService } from './comments.service';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { CurrentUserId } from '../auth/decorators/current-user-id.param.decorator';
 import { LikeInputDto } from '../likes/dto/like-input.dto';
-import { IdValidationPipe } from '../../modules/pipes/id-validation.pipe';
+import { IdIntegerValidationPipe } from 'src/modules/pipes/id-integer-validation.pipe';
+import { CommentsQuerySqlRepository } from './db/comments-query.sql-repository';
+import { ResultNotification } from '../../modules/notification';
+import { CommandBus } from '@nestjs/cqrs';
+import { DeleteCommentbyIdCommand } from './use-case/delete-comment-by-id.usecase';
+import { UpdateCommentByIdCommand } from './use-case/update-comment-by-id.usecase';
+import { SetLikeStatusByCommentIdCommand } from './use-case/set-like-status-by-comment-id.usecase';
 
 @Controller('comments')
 export class CommentsController {
   constructor(
     private readonly commentsService: CommentsService,
     private readonly commentsQueryRepository: CommentsQueryRepository,
+    private readonly commentsQuerySqlRepository: CommentsQuerySqlRepository,
+    private readonly commandBus: CommandBus,
   ) {}
 
   @Get(':id')
   async findCommentByID(
-    @Param('id', IdValidationPipe) id: string,
+    @Param('id', IdIntegerValidationPipe) id: string,
     @CurrentUserId(false) userId: string,
   ) {
-    const comment = await this.commentsQueryRepository.getCommentViewById(
+    const comment = await this.commentsQuerySqlRepository.getCommentViewById(
       id,
       userId,
     );
@@ -45,51 +51,41 @@ export class CommentsController {
   @Delete(':commentId')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteCommentByID(
-    @Param() params: ParamCommentId,
+    @Param('commentId', IdIntegerValidationPipe) commentId: string,
     @CurrentUserId() userId: string,
   ) {
-    const result = await this.commentsService.deleteCommentByID(
-      params.commentId,
-      userId,
+    const result: ResultNotification = await this.commandBus.execute(
+      new DeleteCommentbyIdCommand(commentId, userId),
     );
-    if (!result.commentExists) throw new NotFoundException();
-    if (!result.isUserComment) throw new ForbiddenException();
-
-    return;
+    return result.getResult();
   }
 
   @UseGuards(AccessJwtAuthGuard)
   @Put(':commentId')
   @HttpCode(HttpStatus.NO_CONTENT)
   async updatedComment(
-    @Param() params: ParamCommentId,
+    @Param('commentId', IdIntegerValidationPipe) commentId: string,
     @Body() commentDto: UpdateCommentDto,
     @CurrentUserId() userId: string,
   ) {
-    const result = await this.commentsService.updatedComment(
-      params.commentId,
-      commentDto,
-      userId,
+    const result: ResultNotification = await this.commandBus.execute(
+      new UpdateCommentByIdCommand(commentId, commentDto, userId),
     );
-    if (!result.commentExists) throw new NotFoundException();
-    if (!result.isUserComment) throw new ForbiddenException();
-
-    return;
+    return result.getResult();
   }
 
   @UseGuards(AccessJwtAuthGuard)
   @Put(':commentId/like-status')
   @HttpCode(HttpStatus.NO_CONTENT)
   async likeStatusByCommentID(
-    @Param() params: ParamCommentId,
+    @Param('commentId', IdIntegerValidationPipe) commentId: string,
     @Body() dto: LikeInputDto,
     @CurrentUserId() userId: string,
   ) {
-    const commentСhanged = await this.commentsService.likeStatusByCommentID(
-      params.commentId,
-      userId,
-      dto.likeStatus,
+    const commentСhanged = await this.commandBus.execute(
+      new SetLikeStatusByCommentIdCommand(commentId, userId, dto.likeStatus),
     );
+
     if (!commentСhanged) throw new NotFoundException('Comment not found');
     return;
   }

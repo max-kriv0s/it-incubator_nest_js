@@ -13,6 +13,7 @@ import {
   UserSqlDocument,
   convertUserRawSqlToSqlDocument,
 } from '../model/user-sql.model';
+import { IPaginator } from '../../../dto';
 
 @Injectable()
 export class UsersQuerySqlRepository {
@@ -20,7 +21,7 @@ export class UsersQuerySqlRepository {
 
   async getAllUsersView(
     queryParams: QueryUserDto,
-    paginator: PaginatorUserSql,
+    paginator: IPaginator<ViewUserDto>,
   ): Promise<PaginatorUserSqlType> {
     const sortBy = queryParams.sortBy ? queryParams.sortBy : 'createdAt';
     const sortDirection = queryParams.sortDirection || 'desc';

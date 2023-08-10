@@ -6,12 +6,12 @@ export class PostRawSqlDocument {
   shortDescription: string;
   content: string;
   blogId: number;
-  blogName: string;
+  // blogName: string;
   isBanned: boolean;
   createdAt: Date;
-  likesCount: number;
-  dislikesCount: number;
-  myStatusLike: LikeStatus;
+  // likesCount: number;
+  // dislikesCount: number;
+  // myStatusLike: LikeStatus;
   // newestLikes: NewestLikesType[];
 }
 
@@ -21,20 +21,38 @@ export class PostSqlDocument {
   shortDescription: string;
   content: string;
   blogId: string;
+  // blogName: string;
+  isBanned: boolean;
+  createdAt: Date;
+  // likesCount: number;
+  // dislikesCount: number;
+  // myStatusLike: LikeStatus;
+  // newestLikes: NewestLikesType[];
+}
+
+export class PostWithLikesRawSqlDocument {
+  id: number;
+  title: string;
+  shortDescription: string;
+  content: string;
+  blogId: number;
   blogName: string;
   isBanned: boolean;
   createdAt: Date;
   likesCount: number;
   dislikesCount: number;
   myStatusLike: LikeStatus;
+  addedAt: Date;
+  userId: number;
+  login: string;
   // newestLikes: NewestLikesType[];
 }
 
-export type NewestLikesType = {
-  addedAt: Date;
-  userId: string;
-  login: string;
-};
+// export type NewestLikesType = {
+//   addedAt: Date;
+//   userId: string;
+//   login: string;
+// };
 
 export function convertPostRawSqlToSqlDocument(
   post: PostRawSqlDocument,

@@ -20,18 +20,23 @@ import {
 } from './dto/view-post.dto';
 import { QueryParams } from '../../dto';
 import {
+  PaginatorCommentSql,
   PaginatorCommentView,
   ViewCommentDto,
 } from '../comments/dto/view-comment.dto';
-import { CommentsQueryRepository } from '../comments/comments-query.repository';
+import { CommentsQueryRepository } from '../comments/db/comments-query.repository';
 import { AccessJwtAuthGuard } from '../auth/guard/jwt.guard';
 import { CurrentUserId } from '../auth/decorators/current-user-id.param.decorator';
 import { CreateCommentDto } from '../comments/dto/create-comment.dto';
 import { ParamPostIdDto } from './dto/param-post-id.dto';
 import { LikeInputDto } from '../likes/dto/like-input.dto';
-import { replyByNotification } from '../../modules/notification';
+import { ResultNotification } from '../../modules/notification';
 import { PostsQuerySqlRepository } from './db/posts-query.sql-repository';
 import { IdIntegerValidationPipe } from '../../modules/pipes/id-integer-validation.pipe';
+import { CommandBus } from '@nestjs/cqrs';
+import { CreateCommentByPostIdCommand } from './use-case/create-comment-by-post-id.usecase';
+import { CommentsQuerySqlRepository } from '../comments/db/comments-query.sql-repository';
+import { LikeStatusByPostIdCommand } from './use-case/like-status-by-post-id.usecase';
 
 @Controller('posts')
 export class PostsController {
@@ -40,6 +45,8 @@ export class PostsController {
     private readonly postsQuerySqlRepository: PostsQuerySqlRepository,
     private readonly postsService: PostsService,
     private readonly commentsQueryRepository: CommentsQueryRepository,
+    private readonly commentsQuerySqlRepository: CommentsQuerySqlRepository,
+    private commandBus: CommandBus,
   ) {}
 
   @Get()
@@ -58,26 +65,6 @@ export class PostsController {
     );
   }
 
-  // @UseGuards(BasicAuthGuard)
-  // @Post()
-  // async createPost(
-  //   @Body() postDto: CreatePostDto,
-  //   @CurrentUserId(false) userId: string,
-  // ): Promise<ViewPostDto> {
-  //   const postId = await this.postsService.createPost(postDto);
-  //   if (!postId)
-  //     throw new BadRequestException([
-  //       GetFieldError('Blog not found', 'blogId'),
-  //     ]);
-  //   const postView = await this.postsQueryRepository.getPostById(
-  //     postId,
-  //     userId,
-  //   );
-
-  //   if (!postView) throw new NotFoundException('Post not found');
-  //   return postView;
-  // }
-
   @Get(':id')
   async getPostById(
     @Param('id', IdIntegerValidationPipe) id: string,
@@ -88,35 +75,21 @@ export class PostsController {
     return postView;
   }
 
-  // @UseGuards(BasicAuthGuard)
-  // @Put(':id')
-  // @HttpCode(HttpStatus.NO_CONTENT)
-  // async updatePost(
-  //   @Param('id', IdValidationPipe) id: string,
-  //   @Body() postDto: UpdatePostDto,
-  // ) {
-  //   const result = await this.postsService.updatePost(id, postDto);
-  //   return replyByNotification(result);
-  // }
-
-  // @UseGuards(BasicAuthGuard)
-  // @Delete(':id')
-  // @HttpCode(HttpStatus.NO_CONTENT)
-  // async deleteBlog(@Param('id', IdValidationPipe) id: string) {
-  //   const isDeleted = await this.postsService.deletePostById(id);
-  //   if (!isDeleted) throw new NotFoundException('Post not found');
-  //   return;
-  // }
-
   @Get(':postId/comments')
   async findCommentsByPostId(
-    @Param() params: ParamPostIdDto,
+    @Param('postId', IdIntegerValidationPipe) postId: string,
     @Query() queryParams: QueryParams,
     @CurrentUserId(false) userId: string,
   ): Promise<PaginatorCommentView> {
-    const comments = await this.commentsQueryRepository.findCommentsByPostId(
-      params.postId,
+    const paginator = new PaginatorCommentSql(
+      +queryParams.pageNumber,
+      +queryParams.pageSize,
+    );
+
+    const comments = await this.commentsQuerySqlRepository.findCommentsByPostId(
+      postId,
       queryParams,
+      paginator,
       userId,
     );
     if (!comments) throw new NotFoundException('Post not found');
@@ -127,19 +100,17 @@ export class PostsController {
   @UseGuards(AccessJwtAuthGuard)
   @Post(':postId/comments')
   async createCommentByPostID(
-    @Param() params: ParamPostIdDto,
+    @Param('postId', IdIntegerValidationPipe) postId: string,
     @Body() createCommentDto: CreateCommentDto,
     @CurrentUserId() userId: string,
   ): Promise<ViewCommentDto> {
-    const result = await this.postsService.createCommentByPostID(
-      params.postId,
-      userId,
-      createCommentDto,
+    const result: ResultNotification<string> = await this.commandBus.execute(
+      new CreateCommentByPostIdCommand(postId, userId, createCommentDto),
     );
-    const commentId = replyByNotification(result);
+    const commentId = result.getResult();
 
-    const comment = await this.commentsQueryRepository.getCommentViewById(
-      commentId,
+    const comment = await this.commentsQuerySqlRepository.getCommentViewById(
+      commentId!,
       userId,
     );
     if (!comment) throw new NotFoundException('Comment not fount');
@@ -150,16 +121,13 @@ export class PostsController {
   @Put(':postId/like-status')
   @HttpCode(HttpStatus.NO_CONTENT)
   async likeStatusByPostId(
-    @Param() params: ParamPostIdDto,
+    @Param('postId', IdIntegerValidationPipe) postId: string,
     @CurrentUserId() userId: string,
     @Body() dto: LikeInputDto,
   ) {
-    const postСhanged = await this.postsService.likeStatusByPostID(
-      params.postId,
-      userId,
-      dto.likeStatus,
+    const isDone = await this.commandBus.execute(
+      new LikeStatusByPostIdCommand(postId, userId, dto.likeStatus),
     );
-    if (!postСhanged) throw new NotFoundException('Post not found');
-    return;
+    if (!isDone) throw new NotFoundException('Post not found');
   }
 }

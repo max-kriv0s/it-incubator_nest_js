@@ -3,10 +3,10 @@ import {
   LikeComments,
   LikeCommentsDocument,
   LikeCommentsModelType,
-} from './like-comments.schema';
+} from '../model/like-comments.schema';
 import { InjectModel } from '@nestjs/mongoose';
-import { castToObjectId } from '../../utils';
-import { LikeStatus } from '../likes/dto/like-status';
+import { castToObjectId } from '../../../utils';
+import { LikeStatus } from '../../likes/dto/like-status';
 
 @Injectable()
 export class LikeCommentsRepository {
