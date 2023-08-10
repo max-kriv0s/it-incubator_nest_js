@@ -137,8 +137,8 @@ export class CommentsQuerySqlRepository {
       },
       createdAt: comment.createdAt.toISOString(),
       likesInfo: {
-        likesCount: comment.likesCount,
-        dislikesCount: comment.dislikesCount,
+        likesCount: +comment.likesCount,
+        dislikesCount: +comment.dislikesCount,
         myStatus: comment.StatusMyLike,
       },
     };
