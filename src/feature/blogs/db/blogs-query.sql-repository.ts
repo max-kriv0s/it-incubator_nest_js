@@ -133,7 +133,6 @@ export class BlogsQuerySqlRepository {
           "postId" in (SELECT posts_blog."id" FROM posts_blog) AND 
           "status" = 'Like' AND NOT post_likes."isBanned"
         ORDER BY "addedAt" DESC 
-        LIMIT 3
       )
       SELECT 
         posts_blog.*,
@@ -189,7 +188,7 @@ export class BlogsQuerySqlRepository {
         addedPosts[postRaw.id] = post;
       }
 
-      if (postRaw.userId) {
+      if (postRaw.userId && post.extendedLikesInfo.newestLikes.length < 3) {
         post.extendedLikesInfo.newestLikes.push({
           addedAt: postRaw.addedAt.toISOString(),
           userId: postRaw.userId.toString(),
