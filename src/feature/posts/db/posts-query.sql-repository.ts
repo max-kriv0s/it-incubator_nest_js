@@ -53,18 +53,21 @@ export class PostsQuerySqlRepository {
         WHERE "postId" in (SELECT posts_blog."id" FROM posts_blog) AND NOT "isBanned"
         GROUP BY "postId"
       ), newest_likes AS (
-        SELECT
-          post_likes."postId" AS "postId",
-          post_likes."addedAt" AS "addedAt",
-          post_likes."userId" AS "userId",
-          users."login" AS "login"
-        FROM public."PostLikes" AS post_likes
-        LEFT JOIN public."Users" AS users
-          ON post_likes."userId" = users."id"
-        WHERE 
-          "postId" in (SELECT "id" FROM posts_blog) AND 
-          "status" = 'Like' AND NOT post_likes."isBanned"
-        ORDER BY "addedAt" DESC 
+        SELECT *
+        FROM (SELECT
+            post_likes."postId" AS "postId",
+            post_likes."addedAt" AS "addedAt",
+            post_likes."userId" AS "userId",
+            users."login" AS "login",
+            ROW_NUMBER () OVER (PARTITION BY post_likes."postId" ORDER BY post_likes."addedAt" desc)
+          FROM public."PostLikes" AS post_likes
+          LEFT JOIN public."Users" AS users
+            ON post_likes."userId" = users."id"
+          WHERE 
+            "postId" in (SELECT "id" FROM posts_blog) AND 
+            "status" = 'Like' AND NOT post_likes."isBanned"
+          ORDER BY "addedAt" DESC) AS post_likes_limit
+        WHERE post_likes_limit.ROW_NUMBER <= 3
       )
       SELECT 
         posts_blog.*,
@@ -185,7 +188,7 @@ export class PostsQuerySqlRepository {
         addedPosts[postRaw.id] = post;
       }
 
-      if (postRaw.userId && post.extendedLikesInfo.newestLikes.length < 3) {
+      if (postRaw.userId) {
         post.extendedLikesInfo.newestLikes.push({
           addedAt: postRaw.addedAt.toISOString(),
           userId: postRaw.userId.toString(),
