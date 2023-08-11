@@ -118,7 +118,7 @@ export class BlogsQuerySqlRepository {
                   ELSE 0
               END) AS "dislikesCount"
         FROM public."PostLikes"
-        WHERE "postId" in (SELECT posts_blog."id" FROM posts_blog)
+        WHERE "postId" in (SELECT posts_blog."id" FROM posts_blog) AND NOT "isBanned"
         GROUP BY "postId"
       ), newest_likes AS (
         SELECT
@@ -131,7 +131,7 @@ export class BlogsQuerySqlRepository {
           ON post_likes."userId" = users."id"
         WHERE 
           "postId" in (SELECT posts_blog."id" FROM posts_blog) AND 
-          "status" = 'Like'
+          "status" = 'Like' AND NOT "isBanned"
         ORDER BY "addedAt" DESC 
         LIMIT 3
       )

@@ -109,7 +109,7 @@ export class BloggerQuerySqlRepository {
                   ELSE 0
               END) AS "dislikesCount"
         FROM public."PostLikes"
-        WHERE "postId" in (SELECT posts_blog."id" FROM posts_blog)
+        WHERE "postId" in (SELECT posts_blog."id" FROM posts_blog) AND NOT "isBanned"
         GROUP BY "postId"
       ), newest_likes AS (
         SELECT
@@ -254,7 +254,7 @@ export class BloggerQuerySqlRepository {
                   ELSE 0
               END) AS "dislikesCount"
         FROM public."PostLikes"
-        WHERE "postId" in (SELECT posts_blog."id" FROM posts_blog)
+        WHERE "postId" in (SELECT posts_blog."id" FROM posts_blog) AND NOT "isBanned"
         GROUP BY "postId"
       ), newest_likes AS (
         SELECT
@@ -447,7 +447,7 @@ export class BloggerQuerySqlRepository {
                   ELSE 0
               END) AS "dislikesCount"
         FROM public."CommentLikes"
-        WHERE "commentId" in (SELECT "id" FROM comments)
+        WHERE "commentId" in (SELECT "id" FROM comments) AND NOT "isBanned"
         GROUP BY "commentId"
       )
     SELECT 

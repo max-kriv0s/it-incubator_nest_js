@@ -70,6 +70,7 @@ export class CommentsQuerySqlRepository {
             ON comments."userId" = users."id"
         LEFT JOIN public."CommentLikes" as "likes"
                 ON comments."id" = "likes"."commentId"
+                AND NOT "likes"."isBanned"
       WHERE comments."postId" = $1 AND NOT comments."isBanned"
 	  GROUP BY comments."id", users."login"
       ORDER BY "${sortBy}" ${sortDirection}
@@ -114,7 +115,7 @@ export class CommentsQuerySqlRepository {
                     END
                 ) as "dislikesCount"
             FROM public."CommentLikes"
-            WHERE "commentId" = $1
+            WHERE "commentId" = $1 AND NOT "isBanned"
             GROUP BY "commentId") as "likes"
                 ON comments."id" = "likes"."commentId"
       WHERE comments."id" = $1`,
