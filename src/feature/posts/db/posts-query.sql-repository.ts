@@ -87,7 +87,7 @@ export class PostsQuerySqlRepository {
         ON posts_blog."id" = newest_likes."postId"
       LEFT JOIN public."Blogs" AS blogs
         ON posts_blog."blogId" = blogs."id"
-      ORDER BY posts_blog."id", newest_likes."addedAt" DESC`,
+        ORDER BY posts_blog."${sortBy}" ${sortDirection}, newest_likes."addedAt" DESC`,
       [userId ? +userId : null],
     );
     const postsView = this.postsDBToPostsView(postsRaw);
