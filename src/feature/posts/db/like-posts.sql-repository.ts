@@ -48,4 +48,13 @@ export class LikePostsSqlRepository {
       [+postId, +userId, likeStatus],
     );
   }
+
+  async updateBanUnban(userId: string, isBanned: boolean) {
+    await this.dataSource.query(
+      `UPDATE public."PostLikes"
+        SET "isBanned" = $2 
+        WHERE "userId" = $1`,
+      [+userId, isBanned],
+    );
+  }
 }

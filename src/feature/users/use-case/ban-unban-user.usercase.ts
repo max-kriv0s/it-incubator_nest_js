@@ -9,7 +9,9 @@ import { UpdateBanUserDto } from '../dto/update-ban-user.dto';
 import { SecurityDevicesService } from '../../../feature/security-devices/security-devices.service';
 import { BlogsService } from '../../../feature/blogs/blogs.service';
 import { BlogsSqlRepository } from '../../../feature/blogs/db/blogs.sql-repository';
-import { CommentsSqlRepository } from 'src/feature/comments/db/comments.sql-repository';
+import { CommentsSqlRepository } from '../../../feature/comments/db/comments.sql-repository';
+import { LikePostsSqlRepository } from '../../../feature/posts/db/like-posts.sql-repository';
+import { LikeCommentsSqlRepository } from '../../../feature/comments/db/like-comments.sql-repository';
 
 export class BanUnbanUserCommand {
   constructor(public userId: string, public dto: BanUnbanUserDto) {}
@@ -25,6 +27,8 @@ export class BanUnbanUserUseCase
     private readonly blogsService: BlogsService,
     private readonly blogsSqlRepository: BlogsSqlRepository,
     private readonly commentsSqlRepository: CommentsSqlRepository,
+    private readonly likePostsSqlRepository: LikePostsSqlRepository,
+    private readonly likeCommentsSqlRepository: LikeCommentsSqlRepository,
   ) {}
 
   async execute(command: BanUnbanUserCommand): Promise<ResultNotification> {
@@ -58,6 +62,14 @@ export class BanUnbanUserUseCase
       command.dto.isBanned,
     );
 
+    await this.likePostsSqlRepository.updateBanUnban(
+      command.userId,
+      command.dto.isBanned,
+    );
+    await this.likeCommentsSqlRepository.updateBanUnban(
+      command.userId,
+      command.dto.isBanned,
+    );
     return updateResult;
   }
 
