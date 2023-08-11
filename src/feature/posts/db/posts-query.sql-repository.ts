@@ -62,8 +62,9 @@ export class PostsQuerySqlRepository {
         LEFT JOIN public."Users" AS users
           ON post_likes."userId" = users."id"
         WHERE 
-          "postId" in (SELECT posts_blog."id" FROM posts_blog) AND 
-          "status" = 'Like' AND NOT post_likes."isBanned"
+          "postId" in (SELECT "id" FROM posts_blog) AND 
+          "status" = 'Like' 
+          
         ORDER BY "addedAt" DESC 
         LIMIT 3
       )
