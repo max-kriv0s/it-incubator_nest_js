@@ -42,7 +42,7 @@ export class CommentsQuerySqlRepository {
     const commentsCount: { count: number } = await this.dataSource.query(
       `SELECT count(*)
         FROM public."Comments"
-        WHERE "id" = $1 AND NOT "isBanned"`,
+        WHERE "postId" = $1 AND NOT "isBanned"`,
       params,
     );
 
