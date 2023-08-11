@@ -63,7 +63,7 @@ export class PostsQuerySqlRepository {
           ON post_likes."userId" = users."id"
         WHERE 
           "postId" in (SELECT posts_blog."id" FROM posts_blog) AND 
-          "status" = 'Like' AND NOT "isBanned"
+          "status" = 'Like' AND NOT post_likes."isBanned"
         ORDER BY "addedAt" DESC 
         LIMIT 3
       )
@@ -126,7 +126,7 @@ export class PostsQuerySqlRepository {
           ON post_likes."userId" = users."id"
         WHERE 
           "postId" in (SELECT posts_blog."id" FROM posts_blog) AND 
-          "status" = 'Like' AND NOT "isBanned"
+          "status" = 'Like' AND NOT post_likes."isBanned"
         ORDER BY "addedAt" DESC 
         LIMIT 3
       )
