@@ -31,18 +31,30 @@ export class UsersQuerySqlRepository {
     const banStatus = queryParams.banStatus ?? BanStatus.all;
     const isBanFilter = banStatus !== BanStatus.all;
 
-    const params = [
-      `%${searchLoginTerm}%`,
-      `%${searchEmailTerm}%`,
+    const params: (string | boolean)[] = [
       isBanFilter,
       banStatus === BanStatus.banned,
     ];
+
+    let searchFilter = `true`;
+    if (searchLoginTerm && searchEmailTerm) {
+      searchFilter = `"login" ILIKE $3 OR "email" ILIKE $4`;
+      params.push(`%${searchLoginTerm}%`);
+      params.push(`%${searchEmailTerm}%`);
+    } else if (searchLoginTerm) {
+      searchFilter = `"login" ILIKE $3`;
+      params.push(`%${searchLoginTerm}%`);
+    } else if (searchEmailTerm) {
+      searchFilter = `"email" ILIKE $3`;
+      params.push(`%${searchEmailTerm}%`);
+    }
+
     const usersCount: { count: number }[] = await this.dataSource.query(
       `SELECT count(*)
       FROM public."Users"
-      WHERE ("login" ILIKE $1 AND "email" ILIKE $2)
+      WHERE (${searchFilter})
         AND 
-        (CASE WHEN $3 THEN "isBanned" = $4
+        (CASE WHEN $1 THEN "isBanned" = $2
           ELSE true
         END)`,
       params,
@@ -52,9 +64,9 @@ export class UsersQuerySqlRepository {
     const usersRaw: UserRawSqlDocument[] = await this.dataSource.query(
       `SELECT *
       FROM public."Users"
-      WHERE ("login" ILIKE $1 AND "email" ILIKE $2)
+      WHERE (${searchFilter})
         AND 
-        (CASE WHEN $3 THEN "isBanned" = $4
+        (CASE WHEN $1 THEN "isBanned" = $2
           ELSE true
         END)
       ORDER BY "${sortBy}" ${sortDirection}

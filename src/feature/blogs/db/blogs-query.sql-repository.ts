@@ -156,7 +156,8 @@ export class BlogsQuerySqlRepository {
       LEFT JOIN newest_likes
         ON posts_blog."id" = newest_likes."postId"
       LEFT JOIN public."Blogs" AS blogs
-        ON posts_blog."blogId" = blogs."id" `,
+        ON posts_blog."blogId" = blogs."id" 
+        ORDER BY posts_blog."${sortBy}" ${sortDirection}`,
       params,
     );
     const postsView = this.postsDBToPostsView(postsRaw);
