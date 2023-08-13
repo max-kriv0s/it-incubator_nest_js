@@ -16,7 +16,6 @@ import {
   PaginatorPostSql,
   PaginatorPostSqlType,
 } from '../posts/dto/view-post.dto';
-import { PostsQueryRepository } from '../posts/db/posts-query.repository';
 import { CurrentUserId } from '../auth/decorators/current-user-id.param.decorator';
 import { BlogsQuerySqlRepository } from './db/blogs-query.sql-repository';
 import { IdIntegerValidationPipe } from '../../modules/pipes/id-integer-validation.pipe';
@@ -26,7 +25,6 @@ export class BlogsController {
   constructor(
     private readonly blogsQuerySqlRepository: BlogsQuerySqlRepository,
     private readonly blogsService: BlogsService,
-    private readonly postsQueryRepository: PostsQueryRepository,
   ) {}
 
   @Get()

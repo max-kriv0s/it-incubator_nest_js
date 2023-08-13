@@ -10,9 +10,7 @@ import {
   Put,
   UseGuards,
 } from '@nestjs/common';
-import { CommentsQueryRepository } from './db/comments-query.repository';
 import { AccessJwtAuthGuard } from '../auth/guard/jwt.guard';
-import { CommentsService } from './comments.service';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { CurrentUserId } from '../auth/decorators/current-user-id.param.decorator';
 import { LikeInputDto } from '../likes/dto/like-input.dto';
@@ -27,8 +25,6 @@ import { SetLikeStatusByCommentIdCommand } from './use-case/set-like-status-by-c
 @Controller('comments')
 export class CommentsController {
   constructor(
-    private readonly commentsService: CommentsService,
-    private readonly commentsQueryRepository: CommentsQueryRepository,
     private readonly commentsQuerySqlRepository: CommentsQuerySqlRepository,
     private readonly commandBus: CommandBus,
   ) {}

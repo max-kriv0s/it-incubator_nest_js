@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { UsersRepository } from './db/users.repository';
 import { CreateUserDto } from './dto/create-user.dto';
 import bcrypt from 'bcrypt';
 import { UserDocument, UserEmailConfirmation } from './model/user.schema';
@@ -16,7 +15,6 @@ import { UserSqlDocument } from './model/user-sql.model';
 @Injectable()
 export class UsersService {
   constructor(
-    private readonly usersRepository: UsersRepository,
     private readonly usersConfig: UsersConfig,
     private readonly emailManagerService: EmailManagerService,
     private readonly usersSqlRepository: UsersSqlRepository,
@@ -47,9 +45,9 @@ export class UsersService {
     return user.id;
   }
 
-  async findUserById(userId: string): Promise<UserDocument | null> {
-    return this.usersRepository.findUserById(userId);
-  }
+  // async findUserById(userId: string): Promise<UserDocument | null> {
+  //   return this.usersRepository.findUserById(userId);
+  // }
 
   async findUserSqlById(userId: string): Promise<UserSqlDocument | null> {
     return this.usersSqlRepository.findUserById(userId);

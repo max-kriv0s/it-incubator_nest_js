@@ -6,19 +6,15 @@ import {
   ValidatorConstraintInterface,
   registerDecorator,
 } from 'class-validator';
-import { BlogsService } from '../../../feature/blogs/blogs.service';
-import { BlogsRepository } from '../../blogs/db/blogs.repository';
+import { BlogsSqlRepository } from '../../../feature/blogs/db/blogs.sql-repository';
 
 @ValidatorConstraint({ name: 'BlogExists', async: true })
 @Injectable()
 export class BlogExistsRule implements ValidatorConstraintInterface {
-  constructor(
-    private blogsService: BlogsService,
-    private blogsRepository: BlogsRepository,
-  ) {}
+  constructor(private blogsSqlRepository: BlogsSqlRepository) {}
 
   async validate(value: string, args: ValidationArguments) {
-    const blogId = await this.blogsService.findBlogById(value);
+    const blogId = await this.blogsSqlRepository.findBlogById(value);
     return blogId ? true : false;
   }
 

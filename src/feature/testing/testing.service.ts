@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { ApiCallsRepository } from '../api-calls/db/api-calls.repository';
 import { UsersSqlRepository } from '../users/db/users.sql-repository';
 import { SecurityDevicesSqlRepository } from '../security-devices/db/security-devices.sql-repository';
 import { BlogsSqlRepository } from '../blogs/db/blogs.sql-repository';
@@ -19,7 +18,6 @@ export class TestingService {
     private readonly securityDevicesSqlRepository: SecurityDevicesSqlRepository,
     private readonly likePostsSqlRepository: LikePostsSqlRepository,
     private readonly likeCommentsSqlRepository: LikeCommentsSqlRepository,
-    private readonly apiCallsRepository: ApiCallsRepository,
     private readonly bloggersSqlRepository: BloggersSqlRepository,
   ) {}
 
@@ -32,7 +30,6 @@ export class TestingService {
       this.securityDevicesSqlRepository.deleteSecurityDevices(),
       this.likePostsSqlRepository.deleteLikesPosts(),
       this.likeCommentsSqlRepository.deleteLikesComments(),
-      this.apiCallsRepository.deleteCalls(),
       this.bloggersSqlRepository.deleteBloggerBannedUsers(),
     ]);
   }

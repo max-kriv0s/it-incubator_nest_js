@@ -1,29 +1,28 @@
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { CommentsRepository } from '../db/comments.repository';
+// import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
-export class SetBanUnbanCommentsCommand {
-  constructor(public userId: string, public valueBan: boolean) {}
-}
+// export class SetBanUnbanCommentsCommand {
+//   constructor(public userId: string, public valueBan: boolean) {}
+// }
 
-@CommandHandler(SetBanUnbanCommentsCommand)
-export class SetBanUnbanCommentsUseCase
-  implements ICommandHandler<SetBanUnbanCommentsCommand>
-{
-  constructor(private readonly commentsRepository: CommentsRepository) {}
+// @CommandHandler(SetBanUnbanCommentsCommand)
+// export class SetBanUnbanCommentsUseCase
+//   implements ICommandHandler<SetBanUnbanCommentsCommand>
+// {
+//   constructor(private readonly commentsRepository: CommentsRepository) {}
 
-  async execute(command: SetBanUnbanCommentsCommand): Promise<boolean> {
-    const comments = await this.commentsRepository.findCommentsByUserId(
-      command.userId,
-    );
-    if (!comments) return false;
+//   async execute(command: SetBanUnbanCommentsCommand): Promise<boolean> {
+//     const comments = await this.commentsRepository.findCommentsByUserId(
+//       command.userId,
+//     );
+//     if (!comments) return false;
 
-    await Promise.all(
-      comments.map((comment) => {
-        comment.setBanUnbaneUser(command.valueBan);
-        this.commentsRepository.save(comment);
-      }),
-    );
+//     await Promise.all(
+//       comments.map((comment) => {
+//         comment.setBanUnbaneUser(command.valueBan);
+//         this.commentsRepository.save(comment);
+//       }),
+//     );
 
-    return true;
-  }
-}
+//     return true;
+//   }
+// }

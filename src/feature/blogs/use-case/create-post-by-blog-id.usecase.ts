@@ -5,7 +5,6 @@ import {
   ResultNotification,
 } from '../../../modules/notification';
 import { validateOrRejectModel } from '../../../modules/validation';
-import { PostsService } from '../../../feature/posts/posts.service';
 import { BlogsSqlRepository } from '../db/blogs.sql-repository';
 import { PostsSqlRepository } from '../../../feature/posts/db/posts.sql-repository';
 
@@ -22,7 +21,6 @@ export class CreatePostByBlogIdUseCase
   implements ICommandHandler<CreatePostByBlogIdCommand>
 {
   constructor(
-    private readonly postsService: PostsService,
     private readonly blogsSqlRepository: BlogsSqlRepository,
     private readonly postsSqlRepository: PostsSqlRepository,
   ) {}

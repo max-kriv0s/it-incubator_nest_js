@@ -17,12 +17,8 @@ import { AccessJwtAuthGuard } from '../auth/guard/jwt.guard';
 import { UpdateBlogDto } from '../blogs/dto/update-blog.dto';
 import { CommandBus } from '@nestjs/cqrs';
 import { UpdateExistingBlogByIdCommand } from '../blogs/use-case/update-existing-blog-by-id.usecase';
-import {
-  ResultNotification,
-  replyByNotification,
-} from '../../modules/notification';
+import { ResultNotification } from '../../modules/notification';
 import { CurrentUserId } from '../auth/decorators/current-user-id.param.decorator';
-import { IdValidationPipe } from '../../modules/pipes/id-validation.pipe';
 import { DeleteBlogByIdCommand } from '../blogs/use-case/delete-blog-by-id.usecase';
 import { CreateBlogDto } from '../blogs/dto/create-blog.dto';
 import { CreateBlogCommand } from '../blogs/use-case/create-blog.usecase';
@@ -31,7 +27,6 @@ import {
   PaginatorBloggerBlogSql,
   PaginatorBloggerBlogSqlViewType,
   PaginatorBloggerPostSql,
-  PaginatorBloggerPostView,
   PaginatorBloggerpostSqlViewType,
   ViewBloggerBlogDto,
 } from './dto/view-blogger-blogs.dto';
@@ -47,7 +42,6 @@ import {
 } from './dto/view-blogger-comments.dto';
 import { IdIntegerValidationPipe } from '../../modules/pipes/id-integer-validation.pipe';
 import { BloggerQuerySqlRepository } from './db/blogger-query.sql-repository';
-import { BloggerQueryRepository } from './db/blogger-query.repository';
 
 @UseGuards(AccessJwtAuthGuard)
 @Controller('blogger/blogs')
@@ -55,7 +49,6 @@ export class BloggersController {
   constructor(
     private commandBus: CommandBus,
     private readonly bloggerQuerySqlRepository: BloggerQuerySqlRepository,
-    private readonly bloggerQueryRepository: BloggerQueryRepository,
   ) {}
 
   @HttpCode(HttpStatus.NO_CONTENT)

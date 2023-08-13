@@ -11,8 +11,6 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { PostsQueryRepository } from './db/posts-query.repository';
-import { PostsService } from './posts.service';
 import {
   PaginatorPostSql,
   PaginatorPostSqlType,
@@ -24,11 +22,9 @@ import {
   PaginatorCommentView,
   ViewCommentDto,
 } from '../comments/dto/view-comment.dto';
-import { CommentsQueryRepository } from '../comments/db/comments-query.repository';
 import { AccessJwtAuthGuard } from '../auth/guard/jwt.guard';
 import { CurrentUserId } from '../auth/decorators/current-user-id.param.decorator';
 import { CreateCommentDto } from '../comments/dto/create-comment.dto';
-import { ParamPostIdDto } from './dto/param-post-id.dto';
 import { LikeInputDto } from '../likes/dto/like-input.dto';
 import { ResultNotification } from '../../modules/notification';
 import { PostsQuerySqlRepository } from './db/posts-query.sql-repository';
@@ -41,10 +37,7 @@ import { LikeStatusByPostIdCommand } from './use-case/like-status-by-post-id.use
 @Controller('posts')
 export class PostsController {
   constructor(
-    private readonly postsQueryRepository: PostsQueryRepository,
     private readonly postsQuerySqlRepository: PostsQuerySqlRepository,
-    private readonly postsService: PostsService,
-    private readonly commentsQueryRepository: CommentsQueryRepository,
     private readonly commentsQuerySqlRepository: CommentsQuerySqlRepository,
     private commandBus: CommandBus,
   ) {}
