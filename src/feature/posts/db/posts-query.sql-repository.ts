@@ -101,7 +101,7 @@ export class PostsQuerySqlRepository {
       `WITH posts_blog AS (
         SELECT *
         FROM public."Posts"
-        WHERE "id" = $1
+        WHERE "id" = $1 AND NOT "isBanned"
       ), likes_dislikes AS (
         SELECT
           "postId",
