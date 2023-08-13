@@ -472,6 +472,7 @@ export class BloggerQuerySqlRepository {
       ON comments."postId" = posts."id"
     LEFT JOIN blogs
       ON posts."blogId" = blogs."id"
+      ORDER BY comments."${sortBy}" ${sortDirection}
       `,
         params,
       );
@@ -488,21 +489,21 @@ export class BloggerQuerySqlRepository {
     return {
       id: comment.id.toString(),
       content: comment.content,
+      createdAt: comment.createdAt.toISOString(),
       commentatorInfo: {
         userId: comment.userId.toString(),
         userLogin: comment.userLogin,
       },
-      createdAt: comment.createdAt.toISOString(),
       likesInfo: {
         likesCount: +comment.likesCount,
         dislikesCount: +comment.dislikesCount,
         myStatus: comment.myStatus,
       },
       postInfo: {
-        id: comment.postId.toString(),
-        title: comment.title,
         blogId: comment.blogId.toString(),
         blogName: comment.blogName,
+        title: comment.title,
+        id: comment.postId.toString(),
       },
     };
   }
