@@ -71,7 +71,7 @@ export class PostsQuerySqlRepository {
       )
       SELECT 
         posts_blog.*,
-        blogs."name" AS "blogName",
+        COALESCE(blogs."name", '') AS "blogName",
         COALESCE(
           (SELECT "status"
           FROM public."PostLikes"
