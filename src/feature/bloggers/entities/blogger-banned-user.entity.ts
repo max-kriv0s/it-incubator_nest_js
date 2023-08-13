@@ -26,9 +26,9 @@ export class BloggerBannedUser {
   @Column({ default: false })
   isBanned: boolean;
 
-  @Column()
+  @Column({ nullable: true, default: null })
   banDate: Date;
 
-  @Column({ default: null })
+  @Column({ nullable: true, default: null })
   banReason: string;
 }

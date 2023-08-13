@@ -11,7 +11,6 @@ import {
 } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { ResultNotification } from '../../modules/notification';
-import { IdValidationPipe } from '../../modules/pipes/id-validation.pipe';
 import { CurrentUserId } from '../auth/decorators/current-user-id.param.decorator';
 import { AccessJwtAuthGuard } from '../auth/guard/jwt.guard';
 import { BloggerBanUserInputDto } from './dto/blogger-ban-user-input.dto';

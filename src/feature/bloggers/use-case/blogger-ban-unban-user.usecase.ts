@@ -38,7 +38,7 @@ export class BloggerBanUnbanUserUseCase
     const result = new ResultNotification<null>();
 
     const blog = await this.blogsSqlRepository.findBlogById(
-      command.banUserInputDto.blogId,
+      command.banUserInputDto.blogId.toString(),
     );
     if (!blog) {
       result.addError('Blog not found', ResultCodeError.NotFound, 'blogId');
@@ -59,7 +59,7 @@ export class BloggerBanUnbanUserUseCase
 
     let bannedUser =
       await this.bloggersSqlRepository.findBannedUserByBlogIdAndUserId(
-        command.banUserInputDto.blogId,
+        command.banUserInputDto.blogId.toString(),
         command.bannedUserId,
       );
 

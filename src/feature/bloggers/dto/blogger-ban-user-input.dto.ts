@@ -3,6 +3,7 @@ import {
   IsBoolean,
   IsMongoId,
   IsNotEmpty,
+  IsNumber,
   IsString,
   MinLength,
 } from 'class-validator';
@@ -19,10 +20,10 @@ export class BloggerBanUserInputDto {
   @MinLength(20)
   banReason: string;
 
-  @Transform(({ value }) => value?.trim())
+  // @Transform(({ value }) => value?.trim())
   @IsNotEmpty()
-  @IsString()
+  @IsNumber()
   // @IsMongoId()
   // @BlogExists()
-  blogId: string;
+  blogId: number;
 }
