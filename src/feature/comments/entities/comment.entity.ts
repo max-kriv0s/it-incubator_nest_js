@@ -2,6 +2,7 @@ import { User } from '../../../feature/users/entities/user.entity';
 import { Post } from '../../../feature/posts/entities/post.entity';
 import {
   Column,
+  CreateDateColumn,
   Entity,
   ManyToOne,
   OneToMany,
@@ -35,7 +36,7 @@ export class Comment {
   @Column({ length: 300 })
   content: string;
 
-  @Column({ default: new Date() })
+  @CreateDateColumn()
   createdAt: Date;
 
   @OneToMany(() => CommentLike, (like) => like.comment)

@@ -2,6 +2,7 @@ import { Comment } from '../../../feature/comments/entities/comment.entity';
 import { Blog } from '../../../feature/blogs/entities/blog.entity';
 import {
   Column,
+  CreateDateColumn,
   Entity,
   ManyToOne,
   OneToMany,
@@ -32,7 +33,7 @@ export class Post {
   @Column({ default: false })
   isBanned: boolean;
 
-  @Column({ default: new Date() })
+  @CreateDateColumn()
   createdAt: Date;
 
   @OneToMany(() => Comment, (comment) => comment.post)

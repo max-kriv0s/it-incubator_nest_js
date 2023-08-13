@@ -3,6 +3,7 @@ import { Post } from '../../../feature/posts/entities/post.entity';
 import { User } from '../../../feature/users/entities/user.entity';
 import {
   Column,
+  CreateDateColumn,
   Entity,
   ManyToOne,
   OneToMany,
@@ -23,7 +24,7 @@ export class Blog {
   @Column({ length: 100 })
   websiteUrl: string;
 
-  @Column({ default: new Date() })
+  @CreateDateColumn()
   createdAt: Date;
 
   @Column({ default: false })

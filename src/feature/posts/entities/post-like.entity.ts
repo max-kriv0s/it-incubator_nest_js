@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Post } from './post.entity';
 import { User } from '../../users/entities/user.entity';
 import { LikeStatus } from '../../likes/dto/like-status';
@@ -23,7 +23,7 @@ export class PostLike {
   })
   user: User;
 
-  @Column({ default: new Date() })
+  @CreateDateColumn()
   addedAt: Date;
 
   @Column({ type: 'enum', enum: LikeStatus, default: LikeStatus.None })

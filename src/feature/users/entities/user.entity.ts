@@ -4,7 +4,13 @@ import { Blog } from '../../../feature/blogs/entities/blog.entity';
 import { Comment } from '../../../feature/comments/entities/comment.entity';
 import { PostLike } from '../../../feature/posts/entities/post-like.entity';
 import { SecurityDevice } from '../../../feature/security-devices/entities/security-device.entity';
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity({ name: 'Users' })
 export class User {
@@ -20,7 +26,7 @@ export class User {
   @Column()
   email: string;
 
-  @Column({ default: new Date() })
+  @CreateDateColumn()
   createdAt: Date;
 
   @Column({ nullable: true })
