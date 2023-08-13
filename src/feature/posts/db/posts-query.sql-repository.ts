@@ -31,9 +31,13 @@ export class PostsQuerySqlRepository {
 
     const postsRaw: PostWithLikesRawSqlDocument[] = await this.dataSource.query(
       `WITH posts_blog AS (
-        SELECT *
-        FROM public."Posts"
-        WHERE NOT "isBanned"
+        SELECT 
+          posts.*,
+          COALESCE(blogs."name", '') AS "blogName"
+        FROM public."Posts" AS posts
+        LEFT JOIN public."Blogs" AS blogs
+          ON posts."blogId" = blogs."id"
+        WHERE NOT posts."isBanned"
         ORDER BY "${sortBy}" ${sortDirection}
         LIMIT ${paginator.pageSize} OFFSET ${paginator.skip}
       ), likes_dislikes AS (
@@ -71,7 +75,6 @@ export class PostsQuerySqlRepository {
       )
       SELECT 
         posts_blog.*,
-        COALESCE(blogs."name", '') AS "blogName",
         COALESCE(
           (SELECT "status"
           FROM public."PostLikes"
@@ -87,9 +90,7 @@ export class PostsQuerySqlRepository {
         ON posts_blog."id" = likes_dislikes."postId"
       LEFT JOIN newest_likes
         ON posts_blog."id" = newest_likes."postId"
-      LEFT JOIN public."Blogs" AS blogs
-        ON posts_blog."blogId" = blogs."id"
-        ORDER BY posts_blog."${sortBy}" ${sortDirection}, newest_likes."addedAt" DESC`,
+      ORDER BY posts_blog."${sortBy}" ${sortDirection}, newest_likes."addedAt" DESC`,
       [userId ? +userId : null],
     );
     const postsView = this.postsDBToPostsView(postsRaw);
