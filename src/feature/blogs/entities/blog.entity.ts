@@ -29,7 +29,7 @@ export class Blog {
   @Column({ default: false })
   isMembership: boolean;
 
-  @Column()
+  @Column({ nullable: true })
   ownerId: number;
 
   @ManyToOne(() => User, (user) => user.blogs, {

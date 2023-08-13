@@ -11,7 +11,7 @@ export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ length: 10 })
+  @Column({ length: 10, collation: 'C' })
   login: string;
 
   @Column()
