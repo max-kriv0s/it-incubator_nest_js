@@ -18,10 +18,11 @@ export function GetFieldError(message: string, field: string): FieldError {
 // }
 
 // export function convertRawSqlToSqlDocument<
-//   RawType,
-//   Key extends keyof RawType,
-//   SqlType,
-// >(rawDocument: RawType, conversionField: Key[]): SqlType {
+//   T extends object,
+//   S extends Array<keyof T>,
+// >(rawDocument: T, conversionField: S): Omit<T, keyof S> & {
+//   [key: keyof S]: string
+// } {
 //   const newDocument: O = {};
 
 //   for (const key in rawDocument) {
@@ -29,5 +30,5 @@ export function GetFieldError(message: string, field: string): FieldError {
 //       newDocument[key] = rawDocument[key].toString();
 //     }
 //   }
-
+//   return '' as any
 // }
