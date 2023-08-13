@@ -11,13 +11,16 @@ export class CommentLike {
   @Column()
   commentId: number;
 
-  @ManyToOne(() => Comment, (comment) => comment.likes)
+  @ManyToOne(() => Comment, (comment) => comment.likes, { onDelete: 'CASCADE' })
   comment: Comment;
 
   @Column()
   userId: number;
 
-  @ManyToOne(() => User, (user) => user.commentLikes)
+  @ManyToOne(() => User, (user) => user.commentLikes, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
   user: User;
 
   @Column({ type: 'enum', enum: LikeStatus, default: LikeStatus.None })

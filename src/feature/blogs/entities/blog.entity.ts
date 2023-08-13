@@ -32,7 +32,10 @@ export class Blog {
   @Column()
   ownerId: number;
 
-  @ManyToOne(() => User, (user) => user.blogs)
+  @ManyToOne(() => User, (user) => user.blogs, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
   owner: User;
 
   @Column({ default: false })

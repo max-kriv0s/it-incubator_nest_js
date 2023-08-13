@@ -21,6 +21,8 @@ export class SecurityDevice {
   @Column()
   userId: number;
 
-  @ManyToOne(() => User, (user) => user.securityDevices)
+  @ManyToOne(() => User, (user) => user.securityDevices, {
+    onDelete: 'CASCADE',
+  })
   user: User;
 }

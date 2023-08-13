@@ -11,13 +11,16 @@ export class PostLike {
   @Column()
   postId: number;
 
-  @ManyToOne(() => Post, (post) => post.likes)
+  @ManyToOne(() => Post, (post) => post.likes, { onDelete: 'CASCADE' })
   post: Post;
 
   @Column()
   userId: number;
 
-  @ManyToOne(() => User, (user) => user.postLikes)
+  @ManyToOne(() => User, (user) => user.postLikes, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
   user: User;
 
   @Column({ default: new Date() })

@@ -10,13 +10,17 @@ export class BloggerBannedUser {
   @Column()
   blogId: number;
 
-  @ManyToOne(() => Blog, (blog) => blog.bloggerBannedUsers)
+  @ManyToOne(() => Blog, (blog) => blog.bloggerBannedUsers, {
+    onDelete: 'CASCADE',
+  })
   blog: Blog;
 
   @Column()
   bannedUserId: number;
 
-  @ManyToOne(() => User, (user) => user.bloggerBannedUsers)
+  @ManyToOne(() => User, (user) => user.bloggerBannedUsers, {
+    onDelete: 'CASCADE',
+  })
   bannedUser: User;
 
   @Column({ default: false })

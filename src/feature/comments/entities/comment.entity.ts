@@ -17,13 +17,16 @@ export class Comment {
   @Column()
   postId: number;
 
-  @ManyToOne(() => Post, (post) => post.comments)
+  @ManyToOne(() => Post, (post) => post.comments, { onDelete: 'CASCADE' })
   post: Post;
 
   @Column()
   userId: number;
 
-  @ManyToOne(() => User, (user) => user.comments)
+  @ManyToOne(() => User, (user) => user.comments, {
+    nullable: true,
+    onDelete: 'CASCADE',
+  })
   user: User;
 
   @Column({ default: false })
