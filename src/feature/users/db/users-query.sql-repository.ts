@@ -1,10 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { BanStatus, QueryUserDto } from '../dto/query-user.dto';
-import {
-  PaginatorUserSql,
-  PaginatorUserSqlType,
-  ViewUserDto,
-} from '../dto/view-user.dto';
+import { PaginatorUserSqlType, ViewUserDto } from '../dto/view-user.dto';
 import { ViewMeDto } from '../../auth/dto/view-me.dto';
 import { DataSource } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
