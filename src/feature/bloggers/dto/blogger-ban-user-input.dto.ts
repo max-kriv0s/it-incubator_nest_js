@@ -20,10 +20,10 @@ export class BloggerBanUserInputDto {
   @MinLength(20)
   banReason: string;
 
-  // @Transform(({ value }) => value?.trim())
+  @Transform(({ value }) => value?.trim())
   @IsNotEmpty()
-  @IsNumber()
+  @IsString()
   // @IsMongoId()
   // @BlogExists()
-  blogId: number;
+  blogId: string;
 }
