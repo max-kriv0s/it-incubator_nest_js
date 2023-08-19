@@ -1,7 +1,10 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { UpdateCommentDto } from '../dto/update-comment.dto';
 import { validateOrRejectModel } from '../../../modules/validation';
-import { ResultCodeError, ResultNotification } from 'src/modules/notification';
+import {
+  ResultCodeError,
+  ResultNotification,
+} from '../../../modules/notification';
 import { CommentsSqlRepository } from '../db/comments.sql-repository';
 
 export class UpdateCommentByIdCommand {

@@ -1,4 +1,4 @@
-import { User } from 'src/feature/users/entities/user.entity';
+import { User } from '../../../feature/users/entities/user.entity';
 import { Blog } from '../../../feature/blogs/entities/blog.entity';
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 

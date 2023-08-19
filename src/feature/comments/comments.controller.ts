@@ -14,7 +14,7 @@ import { AccessJwtAuthGuard } from '../auth/guard/jwt.guard';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { CurrentUserId } from '../auth/decorators/current-user-id.param.decorator';
 import { LikeInputDto } from '../likes/dto/like-input.dto';
-import { IdIntegerValidationPipe } from 'src/modules/pipes/id-integer-validation.pipe';
+import { IdIntegerValidationPipe } from '../../modules/pipes/id-integer-validation.pipe';
 import { CommentsQuerySqlRepository } from './db/comments-query.sql-repository';
 import { ResultNotification } from '../../modules/notification';
 import { CommandBus } from '@nestjs/cqrs';

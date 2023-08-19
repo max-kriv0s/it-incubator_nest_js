@@ -1,8 +1,8 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { PostsSqlRepository } from '../db/posts.sql-repository';
-import { UsersSqlRepository } from 'src/feature/users/db/users.sql-repository';
+import { UsersSqlRepository } from '../../../feature/users/db/users.sql-repository';
 import { LikePostsSqlRepository } from '../db/like-posts.sql-repository';
-import { LikeStatus } from 'src/feature/likes/dto/like-status';
+import { LikeStatus } from '../../../feature/likes/dto/like-status';
 
 export class LikeStatusByPostIdCommand {
   constructor(
