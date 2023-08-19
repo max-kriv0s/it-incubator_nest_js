@@ -17,6 +17,7 @@ export class TypeOrmServiceConfiguration implements TypeOrmOptionsFactory {
       autoLoadEntities: true,
       synchronize: true,
       ssl: process.env.TYPE_ORM_TYPE_SERVER === 'local' ? false : true,
+      logging: ['error'],
     };
   }
 }
