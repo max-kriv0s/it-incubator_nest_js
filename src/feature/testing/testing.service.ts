@@ -7,10 +7,15 @@ import { BloggersSqlRepository } from '../bloggers/db/bloggers.sql-repository';
 import { CommentsSqlRepository } from '../comments/db/comments.sql-repository';
 import { LikePostsSqlRepository } from '../posts/db/like-posts.sql-repository';
 import { LikeCommentsSqlRepository } from '../comments/db/like-comments.sql-repository';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class TestingService {
   constructor(
+    @InjectDataSource() protected dataSource: DataSource,
+    private readonly configService: ConfigService,
     private readonly blogsSqlRepository: BlogsSqlRepository,
     private readonly usersSqlRepository: UsersSqlRepository,
     private readonly commentsSqlRepository: CommentsSqlRepository,
@@ -22,15 +27,22 @@ export class TestingService {
   ) {}
 
   async deleteAllData() {
-    return Promise.all([
-      this.blogsSqlRepository.deleteBlogs(),
-      this.usersSqlRepository.deleteUsers(),
-      this.commentsSqlRepository.deleteComments(),
-      this.postsSqlRepository.deletePosts(),
-      this.securityDevicesSqlRepository.deleteSecurityDevices(),
-      this.likePostsSqlRepository.deleteLikesPosts(),
-      this.likeCommentsSqlRepository.deleteLikesComments(),
-      this.bloggersSqlRepository.deleteBloggerBannedUsers(),
-    ]);
+    const userNameDB = this.configService.get('TYPE_ORM_USERNAME', 'postgres');
+    await this.dataSource.query(
+      `CREATE OR REPLACE FUNCTION truncate_tables(username IN VARCHAR) RETURNS void AS $$
+      DECLARE
+      statements CURSOR FOR
+        SELECT tablename FROM pg_tables
+        WHERE tableowner = username AND schemaname = 'public';
+
+      BEGIN
+        FOR stmt IN statements LOOP
+        EXECUTE 'TRUNCATE TABLE ' || quote_ident(stmt.tablename) || ' RESTART IDENTITY CASCADE;';
+        END LOOP;
+      END;
+      $$ LANGUAGE plpgsql;
+
+      SELECT truncate_tables('${userNameDB}')`,
+    );
   }
 }
