@@ -81,6 +81,8 @@ import { SecurityDevice } from './feature/security-devices/entities/security-dev
 import { BloggerBannedUser } from './feature/bloggers/entities/blogger-banned-user.entity';
 import { CommentLike } from './feature/comments/entities/comment-likes.entity';
 import { PostLike } from './feature/posts/entities/post-like.entity';
+import { UsersRepository } from './feature/users/db/users.repository';
+import { UsersQueryRepository } from './feature/users/db/users-query.repository';
 
 const apiCallsAdapters = [
   ApiCallsConfig,
@@ -137,8 +139,8 @@ const securityDevicesAdapters = [
 const usersAdapters = [
   UsersConfig,
   UsersService,
-  // UsersRepository,
-  // UsersQueryRepository,
+  UsersRepository,
+  UsersQueryRepository,
   // UsersBlogsQueryRepository,
   UsersSqlRepository,
   UsersQuerySqlRepository,
