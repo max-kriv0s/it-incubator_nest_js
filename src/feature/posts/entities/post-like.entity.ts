@@ -32,7 +32,11 @@ export class PostLike {
   @CreateDateColumn()
   addedAt: Date;
 
-  @Column({ type: 'enum', enum: LikeStatus, default: LikeStatus.None })
+  @Column({
+    type: 'enum',
+    enum: LikeStatus,
+    default: LikeStatus.None,
+  })
   status: LikeStatus;
 
   @Column({ default: false })
