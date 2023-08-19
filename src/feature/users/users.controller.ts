@@ -48,7 +48,7 @@ export class UsersController {
       +queryParams.pageNumber,
       +queryParams.pageSize,
     );
-    return this.usersQuerySqlRepository.getAllUsersView(queryParams, paginator);
+    return this.usersQueryRepository.getAllUsersView(queryParams, paginator);
   }
 
   @Post()
