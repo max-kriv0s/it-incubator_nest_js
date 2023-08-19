@@ -1,51 +1,27 @@
-// import { Injectable } from '@nestjs/common';
-// import { User, UserDocument, UserModelType } from '../model/user.schema';
-// import { InjectModel } from '@nestjs/mongoose';
-// import { CreateUserDto } from '../dto/create-user.dto';
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { DeleteResult, Repository } from 'typeorm';
+import { User } from '../entities/user.entity';
 
-// @Injectable()
-// export class UsersRepository {
-//   constructor(@InjectModel(User.name) private UserModel: UserModelType) {}
+@Injectable()
+export class UsersRepository {
+  constructor(
+    @InjectRepository(User) private readonly usersRepository: Repository<User>,
+  ) {}
 
-//   createUser(userDto: CreateUserDto): UserDocument {
-//     return this.UserModel.createUser(userDto, this.UserModel);
-//   }
+  async createUser(user: User): Promise<User> {
+    return this.usersRepository.save(user);
+  }
 
-//   async deleteUserById(id: string): Promise<UserDocument | null> {
-//     return this.UserModel.findByIdAndDelete(id);
-//   }
+  async deleteUserById(id: number): Promise<DeleteResult> {
+    return this.usersRepository.delete({ id });
+  }
 
-//   async deleteUsers() {
-//     await this.UserModel.deleteMany({});
-//   }
-//   async save(user: UserDocument): Promise<UserDocument> {
-//     return user.save();
-//   }
+  async findUserById(id: number): Promise<User | null> {
+    return this.usersRepository.findOneBy({ id });
+  }
 
-//   async findByLoginOrEmail(loginOrEmail: string): Promise<UserDocument | null> {
-//     return this.UserModel.findOne({
-//       $or: [
-//         { 'accountData.login': loginOrEmail },
-//         { 'accountData.email': loginOrEmail },
-//       ],
-//     });
-//   }
-
-//   async findUserById(userId: string): Promise<UserDocument | null> {
-//     return this.UserModel.findById(userId);
-//   }
-
-//   async findUserByRecoveryCode(
-//     recoveryCode: string,
-//   ): Promise<UserDocument | null> {
-//     return this.UserModel.findOne({
-//       'passwordRecovery.recoveryCode': recoveryCode,
-//     });
-//   }
-
-//   async findUserByCodeConfirmation(code: string): Promise<UserDocument | null> {
-//     return this.UserModel.findOne({
-//       'emailConfirmation.confirmationCode': code,
-//     }).exec();
-//   }
-// }
+  async save(user: User) {
+    await this.usersRepository.save(user);
+  }
+}

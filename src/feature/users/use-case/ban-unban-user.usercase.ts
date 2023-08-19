@@ -4,17 +4,16 @@ import {
   ResultCodeError,
   ResultNotification,
 } from '../../../modules/notification';
-import { UsersSqlRepository } from '../db/users.sql-repository';
-import { UpdateBanUserDto } from '../dto/update-ban-user.dto';
 import { SecurityDevicesService } from '../../../feature/security-devices/security-devices.service';
 import { BlogsService } from '../../../feature/blogs/blogs.service';
 import { BlogsSqlRepository } from '../../../feature/blogs/db/blogs.sql-repository';
 import { CommentsSqlRepository } from '../../../feature/comments/db/comments.sql-repository';
 import { LikePostsSqlRepository } from '../../../feature/posts/db/like-posts.sql-repository';
 import { LikeCommentsSqlRepository } from '../../../feature/comments/db/like-comments.sql-repository';
+import { UsersRepository } from '../db/users.repository';
 
 export class BanUnbanUserCommand {
-  constructor(public userId: string, public dto: BanUnbanUserDto) {}
+  constructor(public userId: number, public dto: BanUnbanUserDto) {}
 }
 
 @CommandHandler(BanUnbanUserCommand)
@@ -22,7 +21,7 @@ export class BanUnbanUserUseCase
   implements ICommandHandler<BanUnbanUserCommand>
 {
   constructor(
-    private readonly usersSqlRepository: UsersSqlRepository,
+    private readonly usersRepository: UsersRepository,
     private readonly securityDevicesService: SecurityDevicesService,
     private readonly blogsService: BlogsService,
     private readonly blogsSqlRepository: BlogsSqlRepository,
@@ -33,48 +32,48 @@ export class BanUnbanUserUseCase
 
   async execute(command: BanUnbanUserCommand): Promise<ResultNotification> {
     const updateResult = new ResultNotification();
-    const user = this.usersSqlRepository.findUserById(command.userId);
+    const user = await this.usersRepository.findUserById(command.userId);
     if (!user) {
       updateResult.addError('User not found', ResultCodeError.NotFound);
       return updateResult;
     }
 
-    const updateDto: UpdateBanUserDto = {
-      isBanned: command.dto.isBanned,
-      banDate: command.dto.isBanned ? new Date() : null,
-      banReason: command.dto.isBanned ? command.dto.banReason : null,
-    };
+    user.isBanned = command.dto.isBanned;
+    user.banDate = command.dto.isBanned ? new Date() : null;
+    user.banReason = command.dto.isBanned ? command.dto.banReason : null;
 
-    await this.usersSqlRepository.updateBanUnban(command.userId, updateDto);
+    await this.usersRepository.save(user);
     await this.deleteAllDevicesByUsersId(command.userId, command.dto.isBanned);
 
     await this.blogsService.setBanUnbaneBlogByOwnerId(
-      command.userId,
+      command.userId.toString(),
       command.dto.isBanned,
     );
 
     await this.blogsSqlRepository.updateBanUnban(
-      command.userId,
+      command.userId.toString(),
       command.dto.isBanned,
     );
     await this.commentsSqlRepository.updateBanUnban(
-      command.userId,
+      command.userId.toString(),
       command.dto.isBanned,
     );
 
     await this.likePostsSqlRepository.updateBanUnban(
-      command.userId,
+      command.userId.toString(),
       command.dto.isBanned,
     );
     await this.likeCommentsSqlRepository.updateBanUnban(
-      command.userId,
+      command.userId.toString(),
       command.dto.isBanned,
     );
     return updateResult;
   }
 
-  private async deleteAllDevicesByUsersId(userId: string, isBanned: boolean) {
+  private async deleteAllDevicesByUsersId(userId: number, isBanned: boolean) {
     if (isBanned)
-      await this.securityDevicesService.deleteAllDevicesByUserID(userId);
+      await this.securityDevicesService.deleteAllDevicesByUserID(
+        userId.toString(),
+      );
   }
 }

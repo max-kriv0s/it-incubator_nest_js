@@ -2,7 +2,8 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UsersService } from '../users.service';
 import { validateOrRejectModel } from '../../../modules/validation';
-import { UsersSqlRepository } from '../db/users.sql-repository';
+import { UsersRepository } from '../db/users.repository';
+import { User } from '../entities/user.entity';
 
 export class CreateUserCommand {
   constructor(public userDto: CreateUserDto) {}
@@ -12,19 +13,22 @@ export class CreateUserCommand {
 export class CreateUserUseCase implements ICommandHandler<CreateUserCommand> {
   constructor(
     protected usersService: UsersService,
-    protected usersSqlRepository: UsersSqlRepository,
+    protected usersRepository: UsersRepository,
   ) {}
 
-  async execute(command: CreateUserCommand): Promise<string | null> {
+  async execute(command: CreateUserCommand): Promise<number> {
     await validateOrRejectModel(command.userDto, CreateUserDto);
 
     const hashPassword = await this.usersService._generatePasswordHash(
       command.userDto.password,
     );
 
-    return this.usersSqlRepository.createUser({
-      ...command.userDto,
-      password: hashPassword,
-    });
+    const user = new User();
+    user.login = command.userDto.login;
+    user.password = hashPassword;
+    user.email = command.userDto.email;
+    await this.usersRepository.createUser(user);
+
+    return user.id;
   }
 }
