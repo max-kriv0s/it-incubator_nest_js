@@ -1,53 +1,49 @@
 import { Injectable } from '@nestjs/common';
-import { CreateSecurityDeviceDto } from './dto/create-security-device.dto';
 import { TokenDataDto } from '../auth/dto/token-data.dto';
-import { UpdateSecurityDeviceSqlDto } from './dto/update-security-device.dto';
-import { SecurityDevicesSqlRepository } from './db/security-devices.sql-repository';
 import {
   ResultCodeError,
   ResultNotification,
 } from '../../modules/notification';
+import { SecurityDevicesRepository } from './db/security-devices.repository';
+import { SecurityDevice } from './entities/security-device.entity';
 
 @Injectable()
 export class SecurityDevicesService {
   constructor(
-    private readonly securityDevicesSqlRepository: SecurityDevicesSqlRepository,
+    private readonly securityDevicesRepository: SecurityDevicesRepository,
   ) {}
 
   async CreateSecurityDevice(
-    userId: string,
+    userId: number,
     ip: string,
     userAgent: string,
-  ): Promise<string | null> {
-    const data: CreateSecurityDeviceDto = {
-      ip: ip,
-      title: this.getNameUserAgent(userAgent),
-      userId: userId,
-    };
-    const device = await this.securityDevicesSqlRepository.createSecurityDevice(
-      data,
-    );
-    return device ? device.id : null;
+  ): Promise<number> {
+    const newDevice = new SecurityDevice();
+    newDevice.ip = ip;
+    newDevice.title = this.getNameUserAgent(userAgent);
+    newDevice.userId = userId;
+    await this.securityDevicesRepository.createSecurityDevice(newDevice);
+    return newDevice.id;
   }
 
   getNameUserAgent(userAgent?: string): string {
     return userAgent ? userAgent : 'Chrome';
   }
 
-  async deleteAllDevicesSessionsByUserID(userId: string, deviceId: string) {
-    await this.securityDevicesSqlRepository.deleteAllDevicesSessionsByUserID(
+  async deleteAllDevicesSessionsByUserID(userId: number, deviceId: number) {
+    await this.securityDevicesRepository.deleteAllDevicesSessionsByUserID(
       userId,
       deviceId,
     );
   }
 
   async deleteUserSessionByDeviceID(
-    deviceID: string,
-    userId: string,
+    deviceId: number,
+    userId: number,
   ): Promise<ResultNotification<null>> {
     const deleteResult = new ResultNotification<null>();
     const securitySession =
-      await this.securityDevicesSqlRepository.findSessionByDeviceID(deviceID);
+      await this.securityDevicesRepository.findSessionByDeviceID(deviceId);
     if (!securitySession) {
       deleteResult.addError('Device not found', ResultCodeError.NotFound);
       return deleteResult;
@@ -58,8 +54,8 @@ export class SecurityDevicesService {
       return deleteResult;
     }
 
-    await this.securityDevicesSqlRepository.deleteUserSessionByDeviceID(
-      deviceID,
+    await this.securityDevicesRepository.deleteUserSessionByDeviceID(
+      deviceId,
       userId,
     );
     return deleteResult;
@@ -70,22 +66,23 @@ export class SecurityDevicesService {
     ip: string,
     userAgent: string,
   ): Promise<boolean> {
-    const dataUpdate: UpdateSecurityDeviceSqlDto = {
-      ip: ip,
-      title: this.getNameUserAgent(userAgent),
-      lastActiveDate: dataRefreshTokenDto.issuedAd,
-      expirationTime: dataRefreshTokenDto.expirationTime,
-      userId: dataRefreshTokenDto.userId,
-    };
-
-    return this.securityDevicesSqlRepository.updateSecurityDeviceSession(
+    const device = await this.securityDevicesRepository.findSessionByDeviceID(
       dataRefreshTokenDto.deviceId,
-      dataUpdate,
     );
+    if (!device) return false;
+
+    device.ip = ip;
+    device.title = this.getNameUserAgent(userAgent);
+    device.lastActiveDate = dataRefreshTokenDto.issuedAd;
+    device.expirationTime = dataRefreshTokenDto.expirationTime;
+    device.userId = dataRefreshTokenDto.userId;
+
+    await this.securityDevicesRepository.save(device);
+    return true;
   }
 
-  async logoutUserSessionByDeviceID(deviceID: string, userId: string) {
-    await this.securityDevicesSqlRepository.deleteUserSessionByDeviceID(
+  async logoutUserSessionByDeviceID(deviceID: number, userId: number) {
+    await this.securityDevicesRepository.deleteUserSessionByDeviceID(
       deviceID,
       userId,
     );
@@ -93,7 +90,7 @@ export class SecurityDevicesService {
 
   async verifySecurityDeviceByToken(dataToken: TokenDataDto): Promise<boolean> {
     const securitySession =
-      await this.securityDevicesSqlRepository.findUserSessionByDeviceID(
+      await this.securityDevicesRepository.findUserSessionByDeviceID(
         dataToken.userId,
         dataToken.deviceId,
       );
@@ -107,7 +104,7 @@ export class SecurityDevicesService {
     );
   }
 
-  async deleteAllDevicesByUserID(userId: string) {
-    await this.securityDevicesSqlRepository.deleteAllDevicesByUserID(userId);
+  async deleteAllDevicesByUserID(userId: number) {
+    await this.securityDevicesRepository.deleteAllDevicesByUserID(userId);
   }
 }
