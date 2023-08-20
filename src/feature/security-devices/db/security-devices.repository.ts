@@ -1,83 +1,57 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import {
-  SecurityDevices,
-  SecurityDevicesDocument,
-  SecurityDevicesModelType,
-} from '../model/security-devices.schema';
-import { CreateSecurityDeviceDto } from '../dto/create-security-device.dto';
-import { castToObjectId } from '../../../utils';
+import { InjectRepository } from '@nestjs/typeorm';
+import { SecurityDevice } from '../entities/security-device.entity';
+import { Not, Repository } from 'typeorm';
 
 @Injectable()
 export class SecurityDevicesRepository {
   constructor(
-    @InjectModel(SecurityDevices.name)
-    private SecurityDevicesModel: SecurityDevicesModelType,
+    @InjectRepository(SecurityDevice)
+    private readonly securityDevicesRepository: Repository<SecurityDevice>,
   ) {}
 
-  CreateSecurityDevice(
-    securityDeviceDto: CreateSecurityDeviceDto,
-  ): SecurityDevicesDocument {
-    return this.SecurityDevicesModel.createSecurityDevices(
-      securityDeviceDto,
-      this.SecurityDevicesModel,
-    );
+  async deleteAllDevicesSessionsByUserID(userId: number, deviceId: number) {
+    await this.securityDevicesRepository.delete({ userId, id: Not(deviceId) });
   }
 
-  async deleteSecurityDevices() {
-    await this.SecurityDevicesModel.deleteMany({});
+  async deleteAllDevicesByUserID(userId: number) {
+    await this.securityDevicesRepository.delete({ userId });
   }
 
-  async save(
-    securityDevices: SecurityDevicesDocument,
-  ): Promise<SecurityDevicesDocument> {
-    return securityDevices.save();
-  }
-
-  async deleteAllDevicesSessionsByUserID(
-    userId: string,
-    deviceId: string,
-  ): Promise<boolean> {
-    const result = await this.SecurityDevicesModel.deleteMany({
-      userId: castToObjectId(userId),
-      _id: { $ne: castToObjectId(deviceId) },
-    });
-
-    return result.acknowledged;
+  async deleteUserSessionByDeviceID(deviceId: number, userId: number) {
+    await this.securityDevicesRepository.delete({ id: deviceId, userId });
   }
 
   async findSessionByDeviceID(
-    deviceId: string,
-  ): Promise<SecurityDevicesDocument | null> {
-    return this.SecurityDevicesModel.findById(deviceId);
+    deviceId: number,
+  ): Promise<SecurityDevice | null> {
+    const device = await this.securityDevicesRepository.findOneBy({
+      id: deviceId,
+    });
+    if (!device) return null;
+    return device;
   }
 
-  async deleteUserSessionByDeviceID(
-    deviceID: string,
-    userId: string,
-  ): Promise<boolean> {
-    const result = await this.SecurityDevicesModel.deleteOne({
-      _id: castToObjectId(deviceID),
-      userId: castToObjectId(userId),
-    });
-    return result.deletedCount === 1;
+  async createSecurityDevice(
+    securityDevice: SecurityDevice,
+  ): Promise<SecurityDevice> {
+    return this.securityDevicesRepository.save(securityDevice);
+  }
+
+  async save(securityDevice: SecurityDevice) {
+    await this.securityDevicesRepository.save(securityDevice);
   }
 
   async findUserSessionByDeviceID(
-    userId: string,
-    deviceId: string,
-  ): Promise<SecurityDevicesDocument | null> {
-    return this.SecurityDevicesModel.findOne({
-      _id: castToObjectId(deviceId),
-      userId: castToObjectId(userId),
-    });
-  }
-
-  async deleteAllDevicesByUserID(userId: string): Promise<boolean> {
-    const result = await this.SecurityDevicesModel.deleteMany({
-      userId: castToObjectId(userId),
+    userId: number,
+    deviceId: number,
+  ): Promise<SecurityDevice | null> {
+    const device = await this.securityDevicesRepository.findOneBy({
+      id: deviceId,
+      userId,
     });
 
-    return result.acknowledged;
+    if (!device) return null;
+    return device;
   }
 }
