@@ -5,6 +5,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  ParseIntPipe,
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
@@ -13,14 +14,13 @@ import { CurrentUser } from '../auth/decorators/current-user-id-device.decorator
 import { RefreshJwtAuthGuard } from '../auth/guard/jwt-refresh.guard';
 import { refreshTokenDto } from '../auth/dto/refresh-token.dto';
 import { SecurityDevicesService } from './security-devices.service';
-import { SecurityDevicesQuerySqlRepository } from './db/security-devices -query.sql-repository';
-import { IdIntegerValidationPipe } from '../../modules/pipes/id-integer-validation.pipe';
+import { SecurityDevicesQueryRepository } from './db/security-devices -query.repository';
 
 @Controller('security/devices')
 export class SecurityDevicesController {
   constructor(
     private readonly securityDevicesService: SecurityDevicesService,
-    private readonly securityDevicesQuerySqlRepository: SecurityDevicesQuerySqlRepository,
+    private readonly securityDevicesQueryRepository: SecurityDevicesQueryRepository
   ) {}
 
   @UseGuards(RefreshJwtAuthGuard)
@@ -29,7 +29,7 @@ export class SecurityDevicesController {
     @CurrentUser() tokenDto: refreshTokenDto,
   ): Promise<ViewSecurityDeviceDto[]> {
     const devices =
-      await this.securityDevicesQuerySqlRepository.getAllDevicesSessionsByUserID(
+      await this.securityDevicesQueryRepository.getAllDevicesSessionsByUserID(
         tokenDto.userId,
       );
     if (!devices) throw new UnauthorizedException('User not found');
@@ -41,8 +41,8 @@ export class SecurityDevicesController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteSecurityDevices(@CurrentUser() tokenDto: refreshTokenDto) {
     await this.securityDevicesService.deleteAllDevicesSessionsByUserID(
-      tokenDto.userId,
-      tokenDto.deviceId,
+      +tokenDto.userId,
+      +tokenDto.deviceId,
     );
   }
 
@@ -50,13 +50,13 @@ export class SecurityDevicesController {
   @Delete(':deviceId')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteSecurityDeviceByID(
-    @Param('deviceId', IdIntegerValidationPipe) deviceId: string,
+    @Param('deviceId', ParseIntPipe) deviceId: number,
     @CurrentUser() tokenDto: refreshTokenDto,
   ) {
     const deleteResult =
       await this.securityDevicesService.deleteUserSessionByDeviceID(
         deviceId,
-        tokenDto.userId,
+        +tokenDto.userId,
       );
 
     return deleteResult.getResult();
