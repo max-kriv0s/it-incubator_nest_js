@@ -2,7 +2,7 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { SecurityDevicesService } from '../security-devices.service';
 
 export class DeleteAllDevicesByUsersIdCommand {
-  constructor(public userId: string) {}
+  constructor(public userId: number) {}
 }
 
 @CommandHandler(DeleteAllDevicesByUsersIdCommand)
