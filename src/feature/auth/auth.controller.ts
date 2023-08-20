@@ -30,13 +30,13 @@ import { RegistrationConfirmationCodeDto } from './dto/registration-confirmation
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { ApiCallsThrottlerGuard } from '../../guard/throttler-api-calls.guard';
 import { GetFieldError } from '../../utils';
-import { UsersQuerySqlRepository } from '../users/db/users-query.sql-repository';
+import { UsersQueryRepository } from '../users/db/users-query.repository';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
-    private readonly usersQuerySqlRepository: UsersQuerySqlRepository,
+    private readonly usersQueryRepository: UsersQueryRepository,
     private readonly usersService: UsersService,
   ) {}
 
@@ -68,8 +68,8 @@ export class AuthController {
 
   @UseGuards(AccessJwtAuthGuard)
   @Get('me')
-  async getMeView(@CurrentUserId(false) userId: string): Promise<ViewMeDto> {
-    const user = await this.usersQuerySqlRepository.getMeView(userId);
+  async getMeView(@CurrentUserId() userId: number): Promise<ViewMeDto> {
+    const user = await this.usersQueryRepository.getMeView(userId);
     if (!user) throw new UnauthorizedException('User not found');
     return user;
   }
