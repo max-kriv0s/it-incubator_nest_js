@@ -8,7 +8,6 @@ import {
   HttpStatus,
   NotFoundException,
   Param,
-  ParseIntPipe,
   Post,
   Put,
   Query,
@@ -30,6 +29,7 @@ import { UsersQuerySqlRepository } from './db/users-query.sql-repository';
 import { DeleteUserCommand } from './use-case/delete-user.usecase';
 import { ResultNotification } from '../../modules/notification';
 import { UsersQueryRepository } from './db/users-query.repository';
+import { IdIntegerValidationPipe } from '../../modules/pipes/id-integer-validation.pipe';
 
 @UseGuards(BasicAuthGuard)
 @Controller('sa/users')
@@ -66,8 +66,8 @@ export class UsersController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteUser(@Param('id', ParseIntPipe) id: number) {
-    const isDeleted = await this.commandBus.execute(new DeleteUserCommand(id));
+  async deleteUser(@Param('id', IdIntegerValidationPipe) id: string) {
+    const isDeleted = await this.commandBus.execute(new DeleteUserCommand(+id));
     if (!isDeleted) throw new NotFoundException('User not found');
     return;
   }
@@ -75,11 +75,11 @@ export class UsersController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @Put(':id/ban')
   async banUnbanUser(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id', IdIntegerValidationPipe) id: string,
     @Body() dto: BanUnbanUserDto,
   ) {
     const updateResult: ResultNotification = await this.commandBus.execute(
-      new BanUnbanUserCommand(id, dto),
+      new BanUnbanUserCommand(+id, dto),
     );
     return updateResult.getResult();
   }

@@ -72,7 +72,7 @@ window.onload = function() {
               "required": true,
               "in": "path",
               "schema": {
-                "type": "number"
+                "type": "string"
               }
             }
           ],
@@ -92,7 +92,7 @@ window.onload = function() {
               "required": true,
               "in": "path",
               "schema": {
-                "type": "number"
+                "type": "string"
               }
             }
           ],
@@ -646,7 +646,7 @@ window.onload = function() {
               "required": true,
               "in": "path",
               "schema": {
-                "type": "number"
+                "type": "string"
               }
             }
           ],

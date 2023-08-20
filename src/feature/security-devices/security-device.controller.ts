@@ -5,7 +5,6 @@ import {
   HttpCode,
   HttpStatus,
   Param,
-  ParseIntPipe,
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
@@ -15,12 +14,13 @@ import { RefreshJwtAuthGuard } from '../auth/guard/jwt-refresh.guard';
 import { refreshTokenDto } from '../auth/dto/refresh-token.dto';
 import { SecurityDevicesService } from './security-devices.service';
 import { SecurityDevicesQueryRepository } from './db/security-devices -query.repository';
+import { IdIntegerValidationPipe } from '../../modules/pipes/id-integer-validation.pipe';
 
 @Controller('security/devices')
 export class SecurityDevicesController {
   constructor(
     private readonly securityDevicesService: SecurityDevicesService,
-    private readonly securityDevicesQueryRepository: SecurityDevicesQueryRepository
+    private readonly securityDevicesQueryRepository: SecurityDevicesQueryRepository,
   ) {}
 
   @UseGuards(RefreshJwtAuthGuard)
@@ -50,12 +50,12 @@ export class SecurityDevicesController {
   @Delete(':deviceId')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteSecurityDeviceByID(
-    @Param('deviceId', ParseIntPipe) deviceId: number,
+    @Param('deviceId', IdIntegerValidationPipe) deviceId: string,
     @CurrentUser() tokenDto: refreshTokenDto,
   ) {
     const deleteResult =
       await this.securityDevicesService.deleteUserSessionByDeviceID(
-        deviceId,
+        +deviceId,
         +tokenDto.userId,
       );
 
