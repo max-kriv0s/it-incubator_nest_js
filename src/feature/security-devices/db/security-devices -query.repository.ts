@@ -1,40 +1,36 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import {
-  SecurityDevices,
-  SecurityDevicesDocument,
-  SecurityDevicesModelType,
-} from '../model/security-devices.schema';
 import { ViewSecurityDeviceDto } from '../dto/view-security-device.dto';
-import { Types } from 'mongoose';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { SecurityDevice } from '../entities/security-device.entity';
 
 @Injectable()
 export class SecurityDevicesQueryRepository {
   constructor(
-    @InjectModel(SecurityDevices.name)
-    private SecurityDevicesModel: SecurityDevicesModelType,
+    @InjectRepository(SecurityDevice)
+    private readonly securityDevicesRepository: Repository<SecurityDevice>,
   ) {}
   async getAllDevicesSessionsByUserID(
-    userId: string,
+    userId: number,
   ): Promise<ViewSecurityDeviceDto[] | null> {
-    const devicesDB = await this.SecurityDevicesModel.find({
-      userId: new Types.ObjectId(userId),
-    }).exec();
-    if (!devicesDB) return null;
+    const devices = await this.securityDevicesRepository.find({
+      where: { userId },
+    });
+    if (!devices) return null;
 
-    return devicesDB.map((device) =>
+    return devices.map((device) =>
       this.securityDevicesDBTosecurityDevicesView(device),
     );
   }
 
   securityDevicesDBTosecurityDevicesView(
-    device: SecurityDevicesDocument,
+    device: SecurityDevice,
   ): ViewSecurityDeviceDto {
     return {
       ip: device.ip,
       title: device.title,
       lastActiveDate: device.lastActiveDate.toISOString(),
-      deviceId: device._id.toString(),
+      deviceId: device.id.toString(),
     };
   }
 }
