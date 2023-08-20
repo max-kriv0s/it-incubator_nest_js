@@ -1,8 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import bcrypt from 'bcrypt';
-import { UserDocument, UserEmailConfirmation } from './model/user.schema';
-import { UserPasswordRecovery } from './dto/user-password-recovery.dto';
 import add from 'date-fns/add';
 import { v4 as uuidv4 } from 'uuid';
 import { UsersConfig } from './configuration/users.configuration';
@@ -10,7 +8,8 @@ import { EmailManagerService } from '../email-managers/email-manager.service';
 import { FieldError } from '../../dto';
 import { GetFieldError } from '../../utils';
 import { UsersSqlRepository } from './db/users.sql-repository';
-import { UserSqlDocument } from './model/user-sql.model';
+import { UsersRepository } from './db/users.repository';
+import { User } from './entities/user.entity';
 
 @Injectable()
 export class UsersService {
@@ -18,6 +17,7 @@ export class UsersService {
     private readonly usersConfig: UsersConfig,
     private readonly emailManagerService: EmailManagerService,
     private readonly usersSqlRepository: UsersSqlRepository,
+    private readonly usersRepository: UsersRepository,
   ) {}
 
   async _generatePasswordHash(password: string): Promise<string> {
@@ -32,8 +32,8 @@ export class UsersService {
   async checkCredentials(
     loginOrEmail: string,
     password: string,
-  ): Promise<string | null> {
-    const user = await this.usersSqlRepository.findByLoginOrEmail(loginOrEmail);
+  ): Promise<number | null> {
+    const user = await this.usersRepository.findByLoginOrEmail(loginOrEmail);
     if (!user) return null;
     if (user.isBanned) return null;
 
@@ -49,28 +49,24 @@ export class UsersService {
   //   return this.usersRepository.findUserById(userId);
   // }
 
-  async findUserSqlById(userId: string): Promise<UserSqlDocument | null> {
-    return this.usersSqlRepository.findUserById(userId);
+  async findUserSqlById(userId: number): Promise<User | null> {
+    return this.usersRepository.findUserById(userId);
   }
 
   async passwordRecovery(email: string): Promise<boolean> {
-    const passwordRecovery: UserPasswordRecovery = {
-      recoveryCode: uuidv4(),
-      expirationDate: add(new Date(), this.usersConfig.getCodeLifeTime()),
-    };
-
-    const user = await this.usersSqlRepository.findByLoginOrEmail(email);
+    const user = await this.usersRepository.findByLoginOrEmail(email);
     if (!user) return false;
 
-    const isUpdated = await this.usersSqlRepository.updateRecoveryCode(
-      user.id,
-      passwordRecovery,
+    user.passwordRecoveryCode = uuidv4();
+    user.passwordRecoveryExpirationDate = add(
+      new Date(),
+      this.usersConfig.getCodeLifeTime(),
     );
-    if (!isUpdated) return false;
 
+    await this.usersRepository.save(user);
     this.emailManagerService.sendPasswordRecovery(
       email,
-      passwordRecovery.recoveryCode,
+      user.passwordRecoveryCode,
     );
 
     return true;
@@ -80,65 +76,61 @@ export class UsersService {
     newPassword: string,
     recoveryCode: string,
   ): Promise<boolean> {
-    const userPasswordRecovery =
-      await this.usersSqlRepository.findUserByRecoveryCode(recoveryCode);
-    if (!userPasswordRecovery) return false;
-    if (userPasswordRecovery.passwordRecoveryExpirationDate < new Date())
-      return false;
+    const user = await this.usersRepository.findUserByRecoveryCode(
+      recoveryCode,
+    );
+    if (!user) return false;
+    if (user.passwordRecoveryExpirationDate < new Date()) return false;
 
     const newPasswordHash = await this._generatePasswordHash(newPassword);
 
-    return this.usersSqlRepository.updateUserPassword(
-      userPasswordRecovery.id,
-      newPasswordHash,
-    );
+    user.password = newPasswordHash;
+    await this.usersRepository.save(user);
+    return true;
   }
 
   async confirmRegistration(code: string): Promise<boolean> {
-    const user = await this.usersSqlRepository.findUserByCodeConfirmation(code);
+    const user = await this.usersRepository.findUserByCodeConfirmation(code);
     if (!user) return false;
     if (user.isConfirmed) return false;
     if (user.emailConfirmationExpirationDate <= new Date()) return false;
 
-    return this.usersSqlRepository.UpdateUserConfirmed(user.id);
+    user.isConfirmed = true;
+    await this.usersRepository.save(user);
+    return true;
   }
 
   async createUserForEmailConfirmation(
     userDto: CreateUserDto,
   ): Promise<FieldError | null> {
-    const userByLogin = await this.usersSqlRepository.findByLoginOrEmail(
+    const userByLogin = await this.usersRepository.findByLoginOrEmail(
       userDto.login,
     );
     if (userByLogin) return GetFieldError('user already exists', 'login');
 
-    const userByEmail = await this.usersSqlRepository.findByLoginOrEmail(
+    const userByEmail = await this.usersRepository.findByLoginOrEmail(
       userDto.email,
     );
     if (userByEmail) return GetFieldError('user already exists', 'email');
 
     const passwordHash = await this._generatePasswordHash(userDto.password);
-    const newUserId = await this.usersSqlRepository.createUser({
-      ...userDto,
-      password: passwordHash,
-    });
-    if (!newUserId) return GetFieldError('User creation error', '');
 
-    const emailConfirmation: UserEmailConfirmation = {
-      confirmationCode: uuidv4(),
-      expirationDate: add(new Date(), this.usersConfig.getCodeLifeTime()),
-      isConfirmed: false,
-    };
-
-    const isUpdated = await this.usersSqlRepository.updateEmailConfirmation(
-      newUserId,
-      emailConfirmation,
+    const newUser = new User();
+    newUser.login = userDto.login;
+    newUser.password = passwordHash;
+    newUser.email = userDto.email;
+    newUser.confirmationCode = uuidv4();
+    newUser.emailConfirmationExpirationDate = add(
+      new Date(),
+      this.usersConfig.getCodeLifeTime(),
     );
-    if (!isUpdated)
-      return GetFieldError('User update email confirmation error', '');
+    newUser.isConfirmed = false;
+
+    await this.usersRepository.createUser(newUser);
 
     this.emailManagerService.sendEmailConfirmationMessage(
       userDto.email,
-      emailConfirmation.confirmationCode,
+      newUser.confirmationCode,
     );
 
     return null;
@@ -147,27 +139,22 @@ export class UsersService {
   async resendingConfirmationCodeToUser(
     email: string,
   ): Promise<FieldError | null> {
-    const user = await this.usersSqlRepository.findByLoginOrEmail(email);
+    const user = await this.usersRepository.findByLoginOrEmail(email);
     if (!user) return GetFieldError('User not found', 'email');
 
     if (user.isConfirmed) return GetFieldError('Email confirmed', 'email');
 
-    const emailConfirmation: UserEmailConfirmation = {
-      confirmationCode: uuidv4(),
-      expirationDate: add(new Date(), this.usersConfig.getCodeLifeTime()),
-      isConfirmed: false,
-    };
-
-    const isUpdated = this.usersSqlRepository.updateEmailConfirmation(
-      user.id,
-      emailConfirmation,
+    user.confirmationCode = uuidv4();
+    user.emailConfirmationExpirationDate = add(
+      new Date(),
+      this.usersConfig.getCodeLifeTime(),
     );
-    if (!isUpdated)
-      return GetFieldError('User update email confirmation error', '');
+    user.isConfirmed = false;
+    await this.usersRepository.save(user);
 
     this.emailManagerService.sendPasswordRecoveryMessage(
       email,
-      emailConfirmation.confirmationCode,
+      user.confirmationCode,
     );
     return null;
   }
