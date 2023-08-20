@@ -27,6 +27,7 @@ export class CreateUserUseCase implements ICommandHandler<CreateUserCommand> {
     user.login = command.userDto.login;
     user.password = hashPassword;
     user.email = command.userDto.email;
+    user.isConfirmed = true;
     await this.usersRepository.createUser(user);
 
     return user.id;
