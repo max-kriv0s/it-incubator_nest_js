@@ -83,6 +83,8 @@ import { CommentLike } from './feature/comments/entities/comment-likes.entity';
 import { PostLike } from './feature/posts/entities/post-like.entity';
 import { UsersRepository } from './feature/users/db/users.repository';
 import { UsersQueryRepository } from './feature/users/db/users-query.repository';
+import { SecurityDevicesRepository } from './feature/security-devices/db/security-devices.repository';
+import { SecurityDevicesQueryRepository } from './feature/security-devices/db/security-devices -query.repository';
 
 const apiCallsAdapters = [
   ApiCallsConfig,
@@ -131,8 +133,8 @@ const postsAdapters = [
 ];
 const securityDevicesAdapters = [
   SecurityDevicesService,
-  // SecurityDevicesRepository,
-  // SecurityDevicesQueryRepository,
+  SecurityDevicesRepository,
+  SecurityDevicesQueryRepository,
   SecurityDevicesSqlRepository,
   SecurityDevicesQuerySqlRepository,
 ];
