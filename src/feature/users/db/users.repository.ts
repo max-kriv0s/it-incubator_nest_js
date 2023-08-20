@@ -24,4 +24,20 @@ export class UsersRepository {
   async save(user: User) {
     await this.usersRepository.save(user);
   }
+
+  async findByLoginOrEmail(loginOrEmail: string): Promise<User | null> {
+    return this.usersRepository.findOne({
+      where: [{ login: loginOrEmail }, { email: loginOrEmail }],
+    });
+  }
+
+  async findUserByRecoveryCode(recoveryCode: string): Promise<User | null> {
+    return this.usersRepository.findOneBy({
+      passwordRecoveryCode: recoveryCode,
+    });
+  }
+
+  async findUserByCodeConfirmation(code: string): Promise<User | null> {
+    return this.usersRepository.findOneBy({ confirmationCode: code });
+  }
 }
