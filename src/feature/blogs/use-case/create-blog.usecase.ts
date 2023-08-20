@@ -27,7 +27,7 @@ export class CreateBlogUseCase implements ICommandHandler<CreateBlogCommand> {
 
     const creationResult = new ResultNotification<string>();
 
-    const user = await this.usersService.findUserSqlById(command.userId);
+    const user = await this.usersService.findUserSqlById(+command.userId);
     if (!user) {
       creationResult.addError('User not found', ResultCodeError.NotFound);
       return creationResult;
@@ -37,7 +37,7 @@ export class CreateBlogUseCase implements ICommandHandler<CreateBlogCommand> {
       name: command.createDto.name,
       description: command.createDto.description,
       websiteUrl: command.createDto.websiteUrl,
-      ownerId: user.id,
+      ownerId: user.id.toString(),
     };
 
     const newBlog = await this.blogsSqlRepository.createBlog(data);

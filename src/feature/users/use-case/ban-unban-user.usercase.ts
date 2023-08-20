@@ -72,8 +72,6 @@ export class BanUnbanUserUseCase
 
   private async deleteAllDevicesByUsersId(userId: number, isBanned: boolean) {
     if (isBanned)
-      await this.securityDevicesService.deleteAllDevicesByUserID(
-        userId.toString(),
-      );
+      await this.securityDevicesService.deleteAllDevicesByUserID(userId);
   }
 }
