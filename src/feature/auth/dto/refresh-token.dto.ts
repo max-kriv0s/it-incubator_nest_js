@@ -1,4 +1,4 @@
 export class refreshTokenDto {
-  readonly userId: string;
-  readonly deviceId: string;
+  readonly userId: number;
+  readonly deviceId: number;
 }
