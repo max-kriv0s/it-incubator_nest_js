@@ -5,6 +5,7 @@ import { PaginatorUserSqlType, ViewUserDto } from '../dto/view-user.dto';
 import { Repository } from 'typeorm';
 import { BanStatus, QueryUserDto } from '../dto/query-user.dto';
 import { IPaginator } from '../../../dto';
+import { ViewMeDto } from '../../../feature/auth/dto/view-me.dto';
 
 @Injectable()
 export class UsersQueryRepository {
@@ -81,6 +82,17 @@ export class UsersQueryRepository {
         banDate: user.banDate ? user.banDate.toISOString() : user.banDate,
         banReason: user.banReason,
       },
+    };
+  }
+
+  async getMeView(id: number): Promise<ViewMeDto | null> {
+    const user = await this.usersRepository.findOneBy({ id });
+    if (!user) return null;
+
+    return {
+      email: user.email,
+      login: user.login,
+      userId: user.id.toString(),
     };
   }
 }
