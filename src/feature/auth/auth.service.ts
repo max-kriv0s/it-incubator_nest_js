@@ -50,8 +50,8 @@ export class AuthService {
   }
 
   async createTokens(
-    userId: string,
-    securityDevicesId: string,
+    userId: number,
+    securityDevicesId: number,
   ): Promise<TokensDto> {
     const settings = this.authConfig.getTokensSettings();
 
@@ -98,8 +98,8 @@ export class AuthService {
   }
 
   async updateUserRefreshToken(
-    userId: string,
-    deviceId: string,
+    userId: number,
+    deviceId: number,
     ip: string,
     userAgent: string,
   ): Promise<TokensDto | null> {
@@ -123,7 +123,7 @@ export class AuthService {
     return tokens;
   }
 
-  async logoutUserSessionByDeviceID(deviceId: string, userId: string) {
+  async logoutUserSessionByDeviceID(deviceId: number, userId: number) {
     return this.securityDevicesService.logoutUserSessionByDeviceID(
       deviceId,
       userId,
