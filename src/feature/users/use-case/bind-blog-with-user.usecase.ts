@@ -27,7 +27,7 @@ export class BindBlogWithUserUseCase
       return result;
     }
 
-    const user = await this.usersService.findUserSqlById(+command.userId);
+    const user = await this.usersService.findUserById(+command.userId);
     if (!user) {
       result.addError('User not found', ResultCodeError.NotFound, 'userId');
       return result;

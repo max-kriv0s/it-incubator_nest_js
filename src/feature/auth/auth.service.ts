@@ -56,7 +56,7 @@ export class AuthService {
     const settings = this.authConfig.getTokensSettings();
 
     const accessToken = await this.jwtService.signAsync(
-      { sub: userId },
+      { sub: userId.toString() },
       {
         secret: settings.JWT_SECRET_ACCESS_TOKEN,
         expiresIn: settings.JWT_ACCESS_TOKEN_EXPIRES_IN,
@@ -65,8 +65,8 @@ export class AuthService {
 
     const refreshToken = await this.jwtService.signAsync(
       {
-        sub: userId,
-        deviceId: securityDevicesId,
+        sub: userId.toString(),
+        deviceId: securityDevicesId.toString(),
       },
       {
         secret: settings.JWT_SECRET_REFRESH_TOKEN,
@@ -103,7 +103,7 @@ export class AuthService {
     ip: string,
     userAgent: string,
   ): Promise<TokensDto | null> {
-    const user = await this.usersService.findUserSqlById(userId);
+    const user = await this.usersService.findUserById(userId);
     if (!user) return null;
 
     const tokens = await this.createTokens(userId, deviceId);

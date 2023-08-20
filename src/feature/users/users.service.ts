@@ -49,7 +49,7 @@ export class UsersService {
   //   return this.usersRepository.findUserById(userId);
   // }
 
-  async findUserSqlById(userId: number): Promise<User | null> {
+  async findUserById(userId: number): Promise<User | null> {
     return this.usersRepository.findUserById(userId);
   }
 

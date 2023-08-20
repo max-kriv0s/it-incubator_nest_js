@@ -14,7 +14,7 @@ export class EmailAdapter {
   }
 
   async sendEmail(email: string, subject: string, textMessage: string) {
-    const transport = nodemailer.createTransport({
+    const transporter = nodemailer.createTransport({
       host: 'smtp.yandex.ru',
       port: 465,
       secure: true,
@@ -33,14 +33,12 @@ export class EmailAdapter {
     };
 
     // let info = await transport.sendMail(message);
-
     await new Promise((resolve, reject) => {
-      transport.sendMail(message, (err, info) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(info);
+      transporter.sendMail(message, (info: any, err: any) => {
+        if (info.response.includes('250')) {
+          resolve(true);
         }
+        reject(err);
       });
     });
   }

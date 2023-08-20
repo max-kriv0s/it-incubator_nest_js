@@ -67,7 +67,7 @@ export class SecurityDevicesService {
     userAgent: string,
   ): Promise<boolean> {
     const device = await this.securityDevicesRepository.findSessionByDeviceID(
-      dataRefreshTokenDto.deviceId,
+      +dataRefreshTokenDto.deviceId,
     );
     if (!device) return false;
 
@@ -75,7 +75,7 @@ export class SecurityDevicesService {
     device.title = this.getNameUserAgent(userAgent);
     device.lastActiveDate = dataRefreshTokenDto.issuedAd;
     device.expirationTime = dataRefreshTokenDto.expirationTime;
-    device.userId = dataRefreshTokenDto.userId;
+    device.userId = +dataRefreshTokenDto.userId;
 
     await this.securityDevicesRepository.save(device);
     return true;
@@ -91,16 +91,16 @@ export class SecurityDevicesService {
   async verifySecurityDeviceByToken(dataToken: TokenDataDto): Promise<boolean> {
     const securitySession =
       await this.securityDevicesRepository.findUserSessionByDeviceID(
-        dataToken.userId,
-        dataToken.deviceId,
+        +dataToken.userId,
+        +dataToken.deviceId,
       );
     if (!securitySession) return false;
 
     return (
       securitySession.lastActiveDate.getTime() ===
         dataToken.issuedAd.getTime() &&
-      securitySession.id === dataToken.deviceId &&
-      securitySession.userId === dataToken.userId
+      securitySession.id === +dataToken.deviceId &&
+      securitySession.userId === +dataToken.userId
     );
   }
 
