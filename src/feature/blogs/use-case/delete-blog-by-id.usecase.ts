@@ -3,22 +3,22 @@ import {
   ResultCodeError,
   ResultNotification,
 } from '../../../modules/notification';
-import { BlogsSqlRepository } from '../db/blogs.sql-repository';
+import { BlogsRepository } from '../db/blogs.repository';
 
 export class DeleteBlogByIdCommand {
-  constructor(public id: string, public userId: string) {}
+  constructor(public id: number, public userId: number) {}
 }
 
 @CommandHandler(DeleteBlogByIdCommand)
 export class DeleteBlogByIdUseCase
   implements ICommandHandler<DeleteBlogByIdCommand>
 {
-  constructor(private readonly blogsSqlRepository: BlogsSqlRepository) {}
+  constructor(private readonly blogsRepository: BlogsRepository) {}
 
   async execute(command: DeleteBlogByIdCommand): Promise<ResultNotification> {
     const deletionResult = new ResultNotification();
 
-    const blog = await this.blogsSqlRepository.findBlogById(command.id);
+    const blog = await this.blogsRepository.findBlogById(command.id);
     if (!blog) {
       deletionResult.addError('Blog not found', ResultCodeError.NotFound);
       return deletionResult;
@@ -29,7 +29,7 @@ export class DeleteBlogByIdUseCase
       return deletionResult;
     }
 
-    await this.blogsSqlRepository.deleteBlogById(command.id);
+    await this.blogsRepository.deleteBlogById(command.id);
     return deletionResult;
   }
 }
