@@ -20,18 +20,18 @@ import { UserBanBlogInputDto } from './dto/user-ban-blog-input.dto';
 import { UserBanUnbanBlogCommand } from './use-case/user-ban-unban-blog.usecase';
 import { IdIntegerValidationPipe } from '../../modules/pipes/id-integer-validation.pipe';
 import { ResultNotification } from '../../modules/notification';
-import { UsersBlogsQuerySqlRepository } from './db/users-blogs-query.sql-repository';
 import {
   PaginatorUsersBlogSql,
   PaginatorUsersBlogSqlType,
 } from './dto/users-blog-view-model.dto';
+import { UsersBlogsQueryRepository } from './db/users-blogs-query.repository';
 
 @UseGuards(BasicAuthGuard)
 @Controller('sa/blogs')
 export class UsersBlogsController {
   constructor(
     private commandBus: CommandBus,
-    private readonly usersBlogsQuerySqlRepository: UsersBlogsQuerySqlRepository,
+    private readonly usersBlogsQueryRepository: UsersBlogsQueryRepository,
   ) {}
 
   @HttpCode(HttpStatus.NO_CONTENT)
@@ -41,7 +41,7 @@ export class UsersBlogsController {
     @Body() inputDto: UserBanBlogInputDto,
   ) {
     const result = await this.commandBus.execute(
-      new UserBanUnbanBlogCommand(blogId, inputDto),
+      new UserBanUnbanBlogCommand(+blogId, inputDto),
     );
 
     if (!result)
@@ -55,7 +55,7 @@ export class UsersBlogsController {
     @Param('userId', IdValidationPipe) userId: string,
   ) {
     const result: ResultNotification = await this.commandBus.execute(
-      new BindBlogWithUserCommand(blogId, userId),
+      new BindBlogWithUserCommand(+blogId, +userId),
     );
     if (result.hasError()) {
       const error = result.getError();
@@ -71,7 +71,7 @@ export class UsersBlogsController {
       +queryParams.pageNumber,
       +queryParams.pageSize,
     );
-    return this.usersBlogsQuerySqlRepository.getAllUsersBlogs(
+    return this.usersBlogsQueryRepository.getAllUsersBlogs(
       queryParams,
       paginator,
     );

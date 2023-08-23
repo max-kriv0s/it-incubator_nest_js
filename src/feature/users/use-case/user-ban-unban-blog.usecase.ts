@@ -1,10 +1,10 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { UserBanBlogInputDto } from '../dto/user-ban-blog-input.dto';
-import { BlogsSqlRepository } from '../../../feature/blogs/db/blogs.sql-repository';
-import { PostsSqlRepository } from '../../../feature/posts/db/posts.sql-repository';
+import { BlogsRepository } from '../../../feature/blogs/db/blogs.repository';
+import { PostsRepository } from '../../../feature/posts/db/posts.repository';
 
 export class UserBanUnbanBlogCommand {
-  constructor(public blogId: string, public inputDto: UserBanBlogInputDto) {}
+  constructor(public blogId: number, public inputDto: UserBanBlogInputDto) {}
 }
 
 @CommandHandler(UserBanUnbanBlogCommand)
@@ -12,20 +12,19 @@ export class UserBanUnbanBlogUseCase
   implements ICommandHandler<UserBanUnbanBlogCommand>
 {
   constructor(
-    private readonly blogsSqlRepository: BlogsSqlRepository,
-    private readonly postsSqlRepository: PostsSqlRepository,
+    private readonly blogsRepository: BlogsRepository,
+    private readonly postsRepository: PostsRepository,
   ) {}
 
   async execute(command: UserBanUnbanBlogCommand): Promise<boolean> {
-    const blog = await this.blogsSqlRepository.findBlogById(command.blogId);
+    const blog = await this.blogsRepository.findBlogById(command.blogId);
     if (!blog) return false;
 
-    await this.blogsSqlRepository.setBanUnbaneBlog(
-      command.blogId,
-      command.inputDto.isBanned,
-    );
+    blog.isBanned = command.inputDto.isBanned;
+    blog.banDate = command.inputDto.isBanned ? new Date() : null;
+    await this.blogsRepository.save(blog);
 
-    await this.postsSqlRepository.setBanUnbanePostsByBlogId(
+    await this.postsRepository.setBanUnbanePostsByBlogId(
       command.blogId,
       command.inputDto.isBanned,
     );

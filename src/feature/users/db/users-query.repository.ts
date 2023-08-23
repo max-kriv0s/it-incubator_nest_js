@@ -25,7 +25,7 @@ export class UsersQueryRepository {
     const banStatus = queryParams.banStatus ?? BanStatus.all;
     const isBanFilter = banStatus !== BanStatus.all;
 
-    const query = await this.usersRepository.createQueryBuilder('users');
+    const query = this.usersRepository.createQueryBuilder('users');
 
     if (searchLoginTerm && searchEmailTerm) {
       query.where(

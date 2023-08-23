@@ -85,6 +85,12 @@ import { UsersRepository } from './feature/users/db/users.repository';
 import { UsersQueryRepository } from './feature/users/db/users-query.repository';
 import { SecurityDevicesRepository } from './feature/security-devices/db/security-devices.repository';
 import { SecurityDevicesQueryRepository } from './feature/security-devices/db/security-devices -query.repository';
+import { PostsRepository } from './feature/posts/db/posts.repository';
+import { UsersBlogsQueryRepository } from './feature/users/db/users-blogs-query.repository';
+import { BlogsRepository } from './feature/blogs/db/blogs.repository';
+import { CommentsRepository } from './feature/comments/db/comments.repository';
+import { LikePostsRepository } from './feature/posts/db/like-posts.repository';
+import { LikeCommentsRepository } from './feature/comments/db/like-comments.repository';
 
 const apiCallsAdapters = [
   ApiCallsConfig,
@@ -105,7 +111,7 @@ const bloggersAdapters = [
 ];
 const blogsAdapters = [
   BlogsService,
-  // BlogsRepository,
+  BlogsRepository,
   // BlogsQueryRepository,
   BlogExistsRule,
   BlogsSqlRepository,
@@ -113,19 +119,19 @@ const blogsAdapters = [
 ];
 const commentsAdapters = [
   // CommentsService,
-  // CommentsRepository,
+  CommentsRepository,
   // CommentsQueryRepository,
   // LikeCommentsService,
-  // LikeCommentsRepository,
+  LikeCommentsRepository,
   CommentsSqlRepository,
   CommentsQuerySqlRepository,
   LikeCommentsSqlRepository,
 ];
 const postsAdapters = [
   // PostsService,
-  // PostsRepository,
+  PostsRepository,
   // PostsQueryRepository,
-  // LikePostsRepository,
+  LikePostsRepository,
   // LikePostsService,
   PostsSqlRepository,
   PostsQuerySqlRepository,
@@ -143,7 +149,7 @@ const usersAdapters = [
   UsersService,
   UsersRepository,
   UsersQueryRepository,
-  // UsersBlogsQueryRepository,
+  UsersBlogsQueryRepository,
   UsersSqlRepository,
   UsersQuerySqlRepository,
   UsersBlogsQuerySqlRepository,

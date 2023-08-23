@@ -42,8 +42,8 @@ export class Blog {
   @Column({ default: false })
   isBanned: boolean;
 
-  @Column({ nullable: true })
-  banDate: Date;
+  @Column({ type: Date, nullable: true })
+  banDate: Date | null;
 
   @OneToMany(() => Post, (post) => post.blog)
   posts: Post[];

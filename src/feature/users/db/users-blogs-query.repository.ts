@@ -1,72 +1,61 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Blog } from '../../../feature/blogs/entities/blog.entity';
 import { QueryParamsAllBlogs } from '../dto/query-all-blogs.dto';
 import {
-  PaginatorUsersBlogView,
+  PaginatorUsersBlogSql,
+  PaginatorUsersBlogSqlType,
   UsersBlogViewDto,
 } from '../dto/users-blog-view-model.dto';
-import {
-  Blog,
-  BlogDocument,
-  BlogModelType,
-} from '../../blogs/model/blog.schema';
-import { InjectModel } from '@nestjs/mongoose';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class UsersBlogsQueryRepository {
-  constructor(@InjectModel(Blog.name) private BlogModel: BlogModelType) {}
+  constructor(
+    @InjectRepository(Blog) private readonly repository: Repository<Blog>,
+  ) {}
 
   async getAllUsersBlogs(
     queryParams: QueryParamsAllBlogs,
-  ): Promise<PaginatorUsersBlogView> {
+    paginator: PaginatorUsersBlogSql,
+  ): Promise<PaginatorUsersBlogSqlType> {
     const searchNameTerm: string = queryParams.searchNameTerm ?? '';
-    const pageNumber: number = queryParams.pageNumber
-      ? +queryParams.pageNumber
-      : 1;
-    const pageSize: number = queryParams.pageSize ? +queryParams.pageSize : 10;
     const sortBy: string = queryParams.sortBy ?? 'createdAt';
     const sortDirection: string = queryParams.sortDirection ?? 'desc';
-    const filter: any = {};
 
-    if (searchNameTerm) {
-      filter.name = { $regex: searchNameTerm, $options: 'i' };
-    }
+    const [userBlogs, totalCount] = await this.repository
+      .createQueryBuilder('blogs')
+      .leftJoin('blogs.owner', 'owner')
+      .addSelect('owner.login')
+      .where('blogs."name" ILIKE :searchNameTerm', {
+        searchNameTerm: `%${searchNameTerm}%`,
+      })
+      .orderBy(`blogs.${sortBy}`, sortDirection === 'desc' ? 'DESC' : 'ASC')
+      .limit(paginator.pageSize)
+      .offset(paginator.skip)
+      .getManyAndCount();
 
-    const totalCount: number = await this.BlogModel.countDocuments(filter);
-    const skip = (pageNumber - 1) * pageSize;
-    const blogs: BlogDocument[] = await this.BlogModel.find(filter, null, {
-      sort: { [sortBy]: sortDirection === 'asc' ? 1 : -1 },
-      skip: skip,
-      limit: pageSize,
-    }).exec();
-
-    return {
-      pagesCount: Math.ceil(totalCount / pageSize),
-      page: pageNumber,
-      pageSize: pageSize,
-      totalCount: totalCount,
-      items: await Promise.all(
-        blogs.map((blog) => this.usersBlogDBToUsersBlogView(blog)),
-      ),
-    };
+    const userBlogsView = userBlogs.map((blog) =>
+      this.usersBlogDBToUsersBlogView(blog),
+    );
+    return paginator.paginate(totalCount, userBlogsView);
   }
 
-  private async usersBlogDBToUsersBlogView(
-    blog: BlogDocument,
-  ): Promise<UsersBlogViewDto> {
+  private usersBlogDBToUsersBlogView(userBlog: any): UsersBlogViewDto {
     return {
-      id: blog._id.toString(),
-      name: blog.name,
-      description: blog.description,
-      websiteUrl: blog.websiteUrl,
-      createdAt: blog.createdAt.toISOString(),
-      isMembership: blog.isMembership,
+      id: userBlog.id.toString(),
+      name: userBlog.name,
+      description: userBlog.description,
+      websiteUrl: userBlog.websiteUrl,
+      createdAt: userBlog.createdAt.toISOString(),
+      isMembership: userBlog.isMembership,
       blogOwnerInfo: {
-        userId: blog.blogOwner.userId.toString(),
-        userLogin: blog.blogOwner.userLogin,
+        userId: userBlog.ownerId.toString(),
+        userLogin: userBlog.owner.login,
       },
       banInfo: {
-        isBanned: blog.isBanned,
-        banDate: blog.banDate ? blog.banDate.toISOString() : null,
+        isBanned: userBlog.isBanned,
+        banDate: userBlog.banDate ? userBlog.banDate.toISOString() : null,
       },
     };
   }
