@@ -1,12 +1,10 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { CreateBlogDto } from '../dto/create-blog.dto';
 import { validateOrRejectModel } from '../../../modules/validation';
-import { UsersService } from '../../../feature/users/users.service';
 import {
   ResultCodeError,
   ResultNotification,
 } from '../../../modules/notification';
-import { CreateBlogSqlType } from '../model/blog-sql.model';
 import { BlogsRepository } from '../db/blogs.repository';
 import { UsersRepository } from '../../../feature/users/db/users.repository';
 import { Blog } from '../entities/blog.entity';
