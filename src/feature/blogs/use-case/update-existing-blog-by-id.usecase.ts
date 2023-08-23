@@ -5,13 +5,13 @@ import {
   ResultNotification,
 } from '../../../modules/notification';
 import { validateOrRejectModel } from '../../../modules/validation';
-import { BlogsSqlRepository } from '../db/blogs.sql-repository';
+import { BlogsRepository } from '../db/blogs.repository';
 
 export class UpdateExistingBlogByIdCommand {
   constructor(
-    public id: string,
+    public id: number,
     public updateDto: UpdateBlogDto,
-    public userId: string,
+    public userId: number,
   ) {}
 }
 
@@ -19,7 +19,7 @@ export class UpdateExistingBlogByIdCommand {
 export class UpdateExistingBlogByIdUseCase
   implements ICommandHandler<UpdateExistingBlogByIdCommand>
 {
-  constructor(private readonly blogsSqlRepository: BlogsSqlRepository) {}
+  constructor(private readonly blogsRepository: BlogsRepository) {}
 
   async execute(
     command: UpdateExistingBlogByIdCommand,
@@ -28,7 +28,7 @@ export class UpdateExistingBlogByIdUseCase
 
     const updateResult = new ResultNotification();
 
-    const blog = await this.blogsSqlRepository.findBlogById(command.id);
+    const blog = await this.blogsRepository.findBlogById(command.id);
     if (!blog) {
       updateResult.addError('Blog not found', ResultCodeError.NotFound);
       return updateResult;
@@ -37,7 +37,12 @@ export class UpdateExistingBlogByIdUseCase
       updateResult.addError('Access is denied', ResultCodeError.Forbidden);
       return updateResult;
     }
-    await this.blogsSqlRepository.updateBlog(command.id, command.updateDto);
+
+    blog.name = command.updateDto.name;
+    blog.description = command.updateDto.description;
+    blog.websiteUrl = command.updateDto.websiteUrl;
+    await this.blogsRepository.save(blog);
+
     return updateResult;
   }
 }
