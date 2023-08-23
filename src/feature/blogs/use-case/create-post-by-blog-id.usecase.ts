@@ -5,14 +5,15 @@ import {
   ResultNotification,
 } from '../../../modules/notification';
 import { validateOrRejectModel } from '../../../modules/validation';
-import { BlogsSqlRepository } from '../db/blogs.sql-repository';
-import { PostsSqlRepository } from '../../../feature/posts/db/posts.sql-repository';
+import { BlogsRepository } from '../db/blogs.repository';
+import { PostsRepository } from '../../../feature/posts/db/posts.repository';
+import { Post } from '../../../feature/posts/entities/post.entity';
 
 export class CreatePostByBlogIdCommand {
   constructor(
-    public blogId: string,
+    public blogId: number,
     public createPostDto: CreateBlogPostDto,
-    public userId: string,
+    public userId: number,
   ) {}
 }
 
@@ -21,18 +22,18 @@ export class CreatePostByBlogIdUseCase
   implements ICommandHandler<CreatePostByBlogIdCommand>
 {
   constructor(
-    private readonly blogsSqlRepository: BlogsSqlRepository,
-    private readonly postsSqlRepository: PostsSqlRepository,
+    private readonly blogsRepository: BlogsRepository,
+    private readonly postsRepository: PostsRepository,
   ) {}
 
   async execute(
     command: CreatePostByBlogIdCommand,
-  ): Promise<ResultNotification<string>> {
+  ): Promise<ResultNotification<number>> {
     await validateOrRejectModel(command.createPostDto, CreateBlogPostDto);
 
-    const creationResult = new ResultNotification<string>();
+    const creationResult = new ResultNotification<number>();
 
-    const blog = await this.blogsSqlRepository.findBlogById(command.blogId);
+    const blog = await this.blogsRepository.findBlogById(command.blogId);
     if (!blog) {
       creationResult.addError('Blog not found', ResultCodeError.NotFound);
       return creationResult;
@@ -42,11 +43,14 @@ export class CreatePostByBlogIdUseCase
       creationResult.addError('Access is denied', ResultCodeError.Forbidden);
     }
 
-    const post = await this.postsSqlRepository.createPostByBlogId(
-      blog.id,
-      command.createPostDto,
-    );
-    creationResult.addData(post.id);
+    const newPost = new Post();
+    newPost.title = command.createPostDto.title;
+    newPost.content = command.createPostDto.content;
+    newPost.shortDescription = command.createPostDto.shortDescription;
+    newPost.blogId = command.blogId;
+    await this.postsRepository.createPostByBlogId(newPost);
+
+    creationResult.addData(newPost.id);
     return creationResult;
   }
 }
