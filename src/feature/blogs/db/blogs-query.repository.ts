@@ -243,12 +243,9 @@ export class BlogsQueryRepository {
 
   private postsDBToPostsView(post: PostQueryType): ViewPostDto {
     return {
-      id: post.id.toString(),
-      title: post.title,
-      shortDescription: post.shortDescription,
-      content: post.content,
       blogId: post.blogId.toString(),
       blogName: post.blogName,
+      content: post.content,
       createdAt: post.createdAt.toISOString(),
       extendedLikesInfo: {
         likesCount: +post.likesCount,
@@ -260,6 +257,9 @@ export class BlogsQueryRepository {
           login: like.login,
         })),
       },
+      id: post.id.toString(),
+      shortDescription: post.shortDescription,
+      title: post.title,
     };
   }
 }
