@@ -238,6 +238,7 @@ export class PostsQueryRepository {
         'nl."postId" = post.id',
       )
       .where('post.id IN (:...postsIds)', { postsIds })
+      .orderBy(`p.${sortBy}`, sortDirection === 'desc' ? 'DESC' : 'ASC')
       .setParameters(queryMyStatus.getParameters())
       .setParameters(queryCountLikeDislike.getParameters())
       .setParameters(queryNewestLikes.getParameters())
