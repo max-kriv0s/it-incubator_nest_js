@@ -381,7 +381,7 @@ export class BloggerQueryRepository {
       return result;
     }
 
-    const [bannedUsers, totalCount] = await this.bloggerBannedUsersRepo
+    const query = this.bloggerBannedUsersRepo
       .createQueryBuilder('bu')
       .addSelect('user.login')
       .leftJoin('bu.bannedUser', 'user')
@@ -389,10 +389,22 @@ export class BloggerQueryRepository {
       .andWhere('user.login ILIKE :searchLoginTerm', {
         searchLoginTerm: `%${searchLoginTerm}%`,
       })
-      .orderBy(`bu."${sortBy}"`, sortDirection === 'desc' ? 'DESC' : 'ASC')
       .limit(paginator.pageSize)
-      .offset(paginator.skip)
-      .getManyAndCount();
+      .offset(paginator.skip);
+
+    if (sortBy === 'login') {
+      query.orderBy(
+        `"user"."${sortBy}"`,
+        sortDirection === 'desc' ? 'DESC' : 'ASC',
+      );
+    } else {
+      query.orderBy(
+        `bu."${sortBy}"`,
+        sortDirection === 'desc' ? 'DESC' : 'ASC',
+      );
+    }
+
+    const [bannedUsers, totalCount] = await query.getManyAndCount();
 
     const bannedUsersView: ViewBloggerBannedUsersDto[] = bannedUsers.map(
       (bannedUser) => ({
