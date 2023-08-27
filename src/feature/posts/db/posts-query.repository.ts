@@ -260,7 +260,10 @@ export class PostsQueryRepository {
     if (sortBy === 'blogName') {
       query.orderBy(`blog."name"`, sortDirection === 'desc' ? 'DESC' : 'ASC');
     } else {
-      query.orderBy(`p."${sortBy}"`, sortDirection === 'desc' ? 'DESC' : 'ASC');
+      query.orderBy(
+        `post."${sortBy}"`,
+        sortDirection === 'desc' ? 'DESC' : 'ASC',
+      );
     }
 
     const postsRaw: PostQueryRawType[] = await query.getRawMany();
