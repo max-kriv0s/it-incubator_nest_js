@@ -243,8 +243,8 @@ export class BloggerQueryRepository {
       content: post.content,
       createdAt: post.createdAt.toISOString(),
       extendedLikesInfo: {
-        dislikesCount: post.dislikesCount,
-        likesCount: post.likesCount,
+        dislikesCount: +post.dislikesCount,
+        likesCount: +post.likesCount,
         myStatus: post.myStatus,
         newestLikes: post.newestLikes.map((like) => ({
           addedAt: like.addedAt.toISOString(),
