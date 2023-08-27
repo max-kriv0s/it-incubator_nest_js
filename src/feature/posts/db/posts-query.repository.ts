@@ -162,16 +162,13 @@ export class PostsQueryRepository {
 
   private postsDBToPostsView(post: PostQueryType): ViewPostDto {
     return {
-      id: post.id.toString(),
-      title: post.title,
-      shortDescription: post.shortDescription,
-      content: post.content,
       blogId: post.blogId.toString(),
       blogName: post.blogName,
+      content: post.content,
       createdAt: post.createdAt.toISOString(),
       extendedLikesInfo: {
-        likesCount: +post.likesCount,
         dislikesCount: +post.dislikesCount,
+        likesCount: +post.likesCount,
         myStatus: post.myStatus,
         newestLikes: post.newestLikes.map((like) => ({
           addedAt: like.addedAt.toISOString(),
@@ -179,6 +176,9 @@ export class PostsQueryRepository {
           login: like.login,
         })),
       },
+      id: post.id.toString(),
+      shortDescription: post.shortDescription,
+      title: post.title,
     };
   }
 
