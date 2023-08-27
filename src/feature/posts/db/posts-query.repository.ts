@@ -190,13 +190,27 @@ export class PostsQueryRepository {
     const sortBy: string = queryParams.sortBy || 'createdAt';
     const sortDirection = queryParams.sortDirection || 'desc';
 
-    const [findPosts, totalCount] = await this.postsRepo
+    const queryFindPosts = this.postsRepo
       .createQueryBuilder('p')
+      .addSelect('blog.name')
+      .leftJoin('p.blog', 'blog')
       .where('NOT p."isBanned"')
-      .orderBy(`p.${sortBy}`, sortDirection === 'desc' ? 'DESC' : 'ASC')
       .limit(paginator.pageSize)
-      .offset(paginator.skip)
-      .getManyAndCount();
+      .offset(paginator.skip);
+
+    if (sortBy === 'blogName') {
+      queryFindPosts.orderBy(
+        `blog."name"`,
+        sortDirection === 'desc' ? 'DESC' : 'ASC',
+      );
+    } else {
+      queryFindPosts.orderBy(
+        `p."${sortBy}"`,
+        sortDirection === 'desc' ? 'DESC' : 'ASC',
+      );
+    }
+
+    const [findPosts, totalCount] = await queryFindPosts.getManyAndCount();
 
     if (!findPosts.length) return paginator.paginate(totalCount, []);
     const postsIds = findPosts.map((post) => post.id);
@@ -210,7 +224,7 @@ export class PostsQueryRepository {
       queryNewestLikes,
     );
 
-    const postsRaw: PostQueryRawType[] = await this.postsRepo
+    const query = this.postsRepo
       .createQueryBuilder('post')
       .select([
         'post.id as id',
@@ -238,12 +252,18 @@ export class PostsQueryRepository {
         'nl."postId" = post.id',
       )
       .where('post.id IN (:...postsIds)', { postsIds })
-      .orderBy(`p.${sortBy}`, sortDirection === 'desc' ? 'DESC' : 'ASC')
       .setParameters(queryMyStatus.getParameters())
       .setParameters(queryCountLikeDislike.getParameters())
       .setParameters(queryNewestLikes.getParameters())
-      .setParameter('likeNone', LikeStatus.None)
-      .getRawMany();
+      .setParameter('likeNone', LikeStatus.None);
+
+    if (sortBy === 'blogName') {
+      query.orderBy(`blog."name"`, sortDirection === 'desc' ? 'DESC' : 'ASC');
+    } else {
+      query.orderBy(`p."${sortBy}"`, sortDirection === 'desc' ? 'DESC' : 'ASC');
+    }
+
+    const postsRaw: PostQueryRawType[] = await query.getRawMany();
 
     const postsView = postsRaw.map((postRaw) => {
       const post: PostQueryType = {
