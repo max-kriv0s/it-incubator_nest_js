@@ -144,7 +144,7 @@ export class PostsQueryRepository {
         'nl',
         'nl."postId" = post.id',
       )
-      .where('post.id = :id', { id })
+      .where('post.id = :id AND NOT post."isBanned"', { id })
       .setParameters(queryMyStatus.getParameters())
       .setParameters(queryCountLikeDislike.getParameters())
       .setParameters(queryNewestLikes.getParameters())
@@ -170,8 +170,8 @@ export class PostsQueryRepository {
       blogName: post.blogName,
       createdAt: post.createdAt.toISOString(),
       extendedLikesInfo: {
-        likesCount: post.likesCount,
-        dislikesCount: post.dislikesCount,
+        likesCount: +post.likesCount,
+        dislikesCount: +post.dislikesCount,
         myStatus: post.myStatus,
         newestLikes: post.newestLikes.map((like) => ({
           addedAt: like.addedAt.toISOString(),
