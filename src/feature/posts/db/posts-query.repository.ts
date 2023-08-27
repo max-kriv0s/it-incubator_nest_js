@@ -1,139 +1,258 @@
-// import { Injectable } from '@nestjs/common';
-// import {
-//   NewestLikes,
-//   Post,
-//   PostDocument,
-//   PostModelType,
-// } from '../model/post.schema';
-// import { InjectModel } from '@nestjs/mongoose';
-// import { QueryParams } from '../../../dto';
-// import { PaginatorPostView, ViewPostDto } from '../dto/view-post.dto';
-// import { LikeStatus } from '../../likes/dto/like-status';
-// import { Blog, BlogModelType } from '../../blogs/model/blog.schema';
-// import { LikePosts, LikePostsModelType } from '../model/like-posts.schema';
-// import { castToObjectId } from '../../../utils';
-// import { ViewLikeDetailsDto } from '../../likes/dto/view-like.dto';
+import { Injectable } from '@nestjs/common';
+import {
+  NewestLikesType,
+  PaginatorPostSql,
+  PaginatorPostSqlType,
+  PostQueryRawType,
+  PostQueryType,
+  ViewPostDto,
+} from '../dto/view-post.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Post } from '../entities/post.entity';
+import { Repository, SelectQueryBuilder } from 'typeorm';
+import { LikeStatus } from '../../../feature/likes/dto/like-status';
+import { PostLike } from '../entities/post-like.entity';
+import { QueryParams } from '../../../dto';
 
-// @Injectable()
-// export class PostsQueryRepository {
-//   constructor(
-//     @InjectModel(Post.name) private PostModel: PostModelType,
-//     @InjectModel(Blog.name) private BlogModel: BlogModelType,
-//     @InjectModel(LikePosts.name) private LikePostsModel: LikePostsModelType,
-//   ) {}
+@Injectable()
+export class PostsQueryRepository {
+  constructor(
+    @InjectRepository(Post) private readonly postsRepo: Repository<Post>,
+    @InjectRepository(PostLike)
+    private readonly postLikesRepo: Repository<PostLike>,
+  ) {}
 
-//   async getPosts(
-//     queryParams: QueryParams,
-//     userId?: string,
-//   ): Promise<PaginatorPostView> {
-//     const pageNumber: number = +queryParams.pageNumber || 1;
-//     const pageSize: number = +queryParams.pageSize || 10;
-//     const sortBy: string = queryParams.sortBy || 'createdAt';
-//     const sortDirection = queryParams.sortDirection || 'desc';
+  paramUserId(userId?: number) {
+    return userId ? userId : null;
+  }
 
-//     const filter = { isBanned: { $ne: true } };
+  queryCountLikeDislike(postsIds: number[]) {
+    return this.postLikesRepo
+      .createQueryBuilder('ld_count')
+      .select('ld_count.postId', 'postId')
+      .addSelect(
+        `SUM(CASE
+        WHEN ld_count.status = :like
+          THEN 1
+        ELSE 0
+        END)`,
+        'likesCount',
+      )
+      .addSelect(
+        `SUM(CASE
+        WHEN ld_count.status = :dislike
+                THEN 1
+              ELSE 0
+          END)`,
+        'dislikesCount',
+      )
+      .where(
+        'ld_count."postId" IN (:...postsIds) AND NOT ld_count."isBanned"',
+        {
+          postsIds,
+          like: LikeStatus.Like,
+          dislike: LikeStatus.Dislike,
+        },
+      )
+      .groupBy('ld_count."postId"');
+  }
 
-//     const totalCount: number = await this.PostModel.countDocuments(filter);
-//     const skip = (pageNumber - 1) * pageSize;
-//     const posts: PostDocument[] = await this.PostModel.find(filter, null, {
-//       sort: { [sortBy]: sortDirection === 'asc' ? 1 : -1 },
-//       skip: skip,
-//       limit: pageSize,
-//     }).exec();
+  queryMyStatus(postsIds: number[], userId?: number) {
+    return this.postLikesRepo
+      .createQueryBuilder('pl')
+      .select('pl.status', 'status')
+      .addSelect('pl.postId', 'postId')
+      .where('pl.postId IN (:...postsIds) and pl.userId =:userId', {
+        postsIds,
+        userId: this.paramUserId(userId),
+      });
+  }
 
-//     return {
-//       pagesCount: Math.ceil(totalCount / pageSize),
-//       page: pageNumber,
-//       pageSize: pageSize,
-//       totalCount: totalCount,
-//       items: await Promise.all(
-//         posts.map((post) => this.postDBToPostView(post, userId)),
-//       ),
-//     };
-//   }
+  queryNewestLikes(postsIds: number[], userId?: number) {
+    return this.postLikesRepo
+      .createQueryBuilder('nl')
+      .select([
+        'nl.postId as "postId"',
+        'nl.addedAt as "addedAt"',
+        'nl.userId as "userId"',
+      ])
+      .addSelect('user.login', 'login')
+      .leftJoin('nl.user', 'user')
+      .where(
+        'nl.postId IN (:...postsIds) AND nl.status = :like AND NOT nl.isBanned',
+        {
+          postsIds,
+          like: LikeStatus.Like,
+          userId: this.paramUserId(userId),
+        },
+      )
+      .orderBy('nl.addedAt', 'DESC')
+      .limit(3);
+  }
 
-//   async findPostsByBlogId(
-//     blogId: string,
-//     queryParams: QueryParams,
-//     userId?: string,
-//   ): Promise<PaginatorPostView | null> {
-//     const pageNumber: number = +queryParams.pageNumber || 1;
-//     const pageSize: number = +queryParams.pageSize || 10;
-//     const sortBy: string = queryParams.sortBy || 'createdAt';
-//     const sortDirection = queryParams.sortDirection || 'desc';
+  async newestLikesRaw(
+    postsIds: number[],
+    queryNewestLikes: SelectQueryBuilder<PostLike>,
+  ): Promise<NewestLikesType[]> {
+    return this.postsRepo
+      .createQueryBuilder('post')
+      .select('post.id')
+      .leftJoinAndSelect(
+        `(${queryNewestLikes.getQuery()})`,
+        'nl',
+        'nl."postId" = post.id',
+      )
+      .where('post.id IN (:...postsIds)', { postsIds })
+      .setParameters(queryNewestLikes.getParameters())
+      .getRawMany();
+  }
 
-//     const blog = await this.BlogModel.findById(blogId);
-//     if (!blog) return null;
+  async getPostById(id: number, userId?: number): Promise<ViewPostDto | null> {
+    const queryCountLikeDislike = this.queryCountLikeDislike([id]);
+    const queryMyStatus = this.queryMyStatus([id], userId);
+    const queryNewestLikes = this.queryNewestLikes([id], userId);
 
-//     const filter = { blogId: blog._id };
-//     const totalCount: number = await this.PostModel.countDocuments(filter);
+    const newestLikesRaw: NewestLikesType[] = await this.newestLikesRaw(
+      [id],
+      queryNewestLikes,
+    );
 
-//     const skip = (pageNumber - 1) * pageSize;
-//     const posts: PostDocument[] = await this.PostModel.find(filter, null, {
-//       sort: { [sortBy]: sortDirection === 'asc' ? 1 : -1 },
-//       skip: skip,
-//       limit: pageSize,
-//     }).exec();
+    const postRaw: PostQueryRawType | undefined = await this.postsRepo
+      .createQueryBuilder('post')
+      .select([
+        'post.id as id',
+        'post.title as title',
+        'post.shortDescription as "shortDescription"',
+        'post.content as content',
+        'post.blogId as "blogId"',
+        'post.createdAt as "createdAt"',
+      ])
+      .addSelect('blog.name', 'blogName')
+      .addSelect(`COALESCE(pl.status, :likeNone)`, 'myStatus')
+      .addSelect('COALESCE(ld_count."likesCount", 0)', 'likesCount')
+      .addSelect('COALESCE(ld_count."dislikesCount", 0)', 'dislikesCount')
+      .leftJoin('post.blog', 'blog')
+      .leftJoin(`(${queryMyStatus.getQuery()})`, 'pl', 'pl."postId" = post.id')
+      .leftJoin(
+        `(${queryCountLikeDislike.getQuery()})`,
+        'ld_count',
+        'ld_count."postId" = post.id',
+      )
+      .leftJoinAndMapMany(
+        'post.newestLikes',
+        `(${queryNewestLikes.getQuery()})`,
+        'nl',
+        'nl."postId" = post.id',
+      )
+      .where('post.id = :id', { id })
+      .setParameters(queryMyStatus.getParameters())
+      .setParameters(queryCountLikeDislike.getParameters())
+      .setParameters(queryNewestLikes.getParameters())
+      .setParameter('likeNone', LikeStatus.None)
+      .getRawOne();
 
-//     return {
-//       pagesCount: Math.ceil(totalCount / pageSize),
-//       page: pageNumber,
-//       pageSize: pageSize,
-//       totalCount: totalCount,
-//       items: await Promise.all(
-//         posts.map((post) => this.postDBToPostView(post, userId)),
-//       ),
-//     };
-//   }
+    if (!postRaw) return null;
 
-//   async getPostById(id: string, userId?: string): Promise<ViewPostDto | null> {
-//     const post = await this.PostModel.findOne({
-//       _id: castToObjectId(id),
-//       isBanned: { $ne: true },
-//     });
-//     if (!post) return null;
+    const post: PostQueryType = {
+      ...postRaw,
+      newestLikes: newestLikesRaw.filter((like) => like.postId === postRaw.id),
+    };
+    return this.postsDBToPostsView(post);
+  }
 
-//     return this.postDBToPostView(post, userId);
-//   }
+  private postsDBToPostsView(post: PostQueryType): ViewPostDto {
+    return {
+      id: post.id.toString(),
+      title: post.title,
+      shortDescription: post.shortDescription,
+      content: post.content,
+      blogId: post.blogId.toString(),
+      blogName: post.blogName,
+      createdAt: post.createdAt.toISOString(),
+      extendedLikesInfo: {
+        likesCount: post.likesCount,
+        dislikesCount: post.dislikesCount,
+        myStatus: post.myStatus,
+        newestLikes: post.newestLikes.map((like) => ({
+          addedAt: like.addedAt.toISOString(),
+          userId: like.userId.toString(),
+          login: like.login,
+        })),
+      },
+    };
+  }
 
-//   async postDBToPostView(
-//     post: PostDocument,
-//     userId?: string,
-//   ): Promise<ViewPostDto> {
-//     let statusMyLike = LikeStatus.None;
+  async getPosts(
+    queryParams: QueryParams,
+    paginator: PaginatorPostSql,
+    userId?: number,
+  ): Promise<PaginatorPostSqlType> {
+    const sortBy: string = queryParams.sortBy || 'createdAt';
+    const sortDirection = queryParams.sortDirection || 'desc';
 
-//     if (userId) {
-//       const myLike = await this.LikePostsModel.findOne({
-//         postId: post._id,
-//         userId: castToObjectId(userId),
-//       }).exec();
-//       if (myLike) statusMyLike = myLike.status;
-//     }
+    const [findPosts, totalCount] = await this.postsRepo
+      .createQueryBuilder('p')
+      .where('NOT p."isBanned"')
+      .orderBy(`p.${sortBy}`, sortDirection === 'desc' ? 'DESC' : 'ASC')
+      .limit(paginator.pageSize)
+      .offset(paginator.skip)
+      .getManyAndCount();
 
-//     return {
-//       id: post._id.toString(),
-//       title: post.title,
-//       shortDescription: post.shortDescription,
-//       content: post.content,
-//       blogId: post.blogId.toString(),
-//       blogName: post.blogName,
-//       createdAt: post.createdAt.toISOString(),
-//       extendedLikesInfo: {
-//         likesCount: post.likesCount,
-//         dislikesCount: post.dislikesCount,
-//         myStatus: statusMyLike,
-//         newestLikes: await Promise.all(
-//           post.newestLikes.map((like) => this.newestLikesToView(like)),
-//         ),
-//       },
-//     };
-//   }
+    if (!findPosts.length) return paginator.paginate(totalCount, []);
+    const postsIds = findPosts.map((post) => post.id);
 
-//   async newestLikesToView(like: NewestLikes): Promise<ViewLikeDetailsDto> {
-//     return {
-//       addedAt: like.addedAt.toISOString(),
-//       userId: like.userId,
-//       login: like.login,
-//     };
-//   }
-// }
+    const queryCountLikeDislike = this.queryCountLikeDislike(postsIds);
+    const queryMyStatus = this.queryMyStatus(postsIds, userId);
+    const queryNewestLikes = this.queryNewestLikes(postsIds, userId);
+
+    const newestLikesRaw: NewestLikesType[] = await this.newestLikesRaw(
+      postsIds,
+      queryNewestLikes,
+    );
+
+    const postsRaw: PostQueryRawType[] = await this.postsRepo
+      .createQueryBuilder('post')
+      .select([
+        'post.id as id',
+        'post.title as title',
+        'post.shortDescription as "shortDescription"',
+        'post.content as content',
+        'post.blogId as "blogId"',
+        'post.createdAt as "createdAt"',
+      ])
+      .addSelect('blog.name', 'blogName')
+      .addSelect(`COALESCE(pl.status, :likeNone)`, 'myStatus')
+      .addSelect('COALESCE(ld_count."likesCount", 0)', 'likesCount')
+      .addSelect('COALESCE(ld_count."dislikesCount", 0)', 'dislikesCount')
+      .leftJoin('post.blog', 'blog')
+      .leftJoin(`(${queryMyStatus.getQuery()})`, 'pl', 'pl."postId" = post.id')
+      .leftJoin(
+        `(${queryCountLikeDislike.getQuery()})`,
+        'ld_count',
+        'ld_count."postId" = post.id',
+      )
+      .leftJoinAndMapMany(
+        'post.newestLikes',
+        `(${queryNewestLikes.getQuery()})`,
+        'nl',
+        'nl."postId" = post.id',
+      )
+      .where('post.id IN (:...postsIds)', { postsIds })
+      .setParameters(queryMyStatus.getParameters())
+      .setParameters(queryCountLikeDislike.getParameters())
+      .setParameters(queryNewestLikes.getParameters())
+      .setParameter('likeNone', LikeStatus.None)
+      .getRawMany();
+
+    const postsView = postsRaw.map((postRaw) => {
+      const post: PostQueryType = {
+        ...postRaw,
+        newestLikes: newestLikesRaw.filter(
+          (like) => like.postId === postRaw.id,
+        ),
+      };
+      return this.postsDBToPostsView(post);
+    });
+    return paginator.paginate(totalCount, postsView);
+  }
+}

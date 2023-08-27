@@ -21,14 +21,14 @@ import {
 } from './dto/view-blogger-banned-users.dto';
 import { BloggerBanUnbanUserCommand } from './use-case/blogger-ban-unban-user.usecase';
 import { IdIntegerValidationPipe } from '../../modules/pipes/id-integer-validation.pipe';
-import { BloggerQuerySqlRepository } from './db/blogger-query.sql-repository';
+import { BloggerQueryRepository } from './db/blogger-query.repository';
 
 @UseGuards(AccessJwtAuthGuard)
 @Controller('blogger/users')
 export class BloggersUsersController {
   constructor(
     private commandBus: CommandBus,
-    private readonly bloggerQuerySqlRepository: BloggerQuerySqlRepository,
+    private readonly bloggerQueryRepository: BloggerQueryRepository,
   ) {}
 
   @HttpCode(HttpStatus.NO_CONTENT)
@@ -39,7 +39,7 @@ export class BloggersUsersController {
     @Body() banUserInputDto: BloggerBanUserInputDto,
   ) {
     const result: ResultNotification<null> = await this.commandBus.execute(
-      new BloggerBanUnbanUserCommand(userId, bannedUserId, banUserInputDto),
+      new BloggerBanUnbanUserCommand(+userId, +bannedUserId, banUserInputDto),
     );
     return result.getResult();
   }
@@ -55,9 +55,9 @@ export class BloggersUsersController {
       +queryParams.pageSize,
     );
     const result: ResultNotification<PaginatorViewBloggerBannedUsersSqlType> =
-      await this.bloggerQuerySqlRepository.getAllBannedUsersForBlog(
-        id,
-        userId,
+      await this.bloggerQueryRepository.getAllBannedUsersForBlog(
+        +id,
+        +userId,
         queryParams,
         paginator,
       );

@@ -1,6 +1,12 @@
 import { User } from '../../../feature/users/entities/user.entity';
 import { Blog } from '../../../feature/blogs/entities/blog.entity';
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity({ name: 'BloggerBannedUsers' })
 export class BloggerBannedUser {
@@ -26,9 +32,12 @@ export class BloggerBannedUser {
   @Column({ default: false })
   isBanned: boolean;
 
-  @Column({ nullable: true, default: null })
-  banDate: Date;
+  @Column({ type: Date, nullable: true, default: null })
+  banDate: Date | null;
 
-  @Column({ nullable: true, default: null })
-  banReason: string;
+  @Column({ type: String, nullable: true, default: null })
+  banReason: string | null;
+
+  @CreateDateColumn()
+  createdAt: Date;
 }

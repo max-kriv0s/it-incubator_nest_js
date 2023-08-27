@@ -7,10 +7,25 @@ import { Repository } from 'typeorm';
 export class LikeCommentsRepository {
   constructor(
     @InjectRepository(CommentLike)
-    private readonly repository: Repository<CommentLike>,
+    private readonly commentLikeRepo: Repository<CommentLike>,
   ) {}
 
   async updateBanUnban(userId: number, isBanned: boolean) {
-    await this.repository.update({ userId }, { isBanned });
+    await this.commentLikeRepo.update({ userId }, { isBanned });
+  }
+
+  async findLikeByCommentIdAndUserId(
+    commentId: number,
+    userId: number,
+  ): Promise<CommentLike | null> {
+    return this.commentLikeRepo.findOneBy({ commentId, userId });
+  }
+
+  async save(commentLike: CommentLike) {
+    await this.commentLikeRepo.save(commentLike);
+  }
+
+  async createCommentLike(commentLike: CommentLike): Promise<CommentLike> {
+    return this.commentLikeRepo.save(commentLike);
   }
 }

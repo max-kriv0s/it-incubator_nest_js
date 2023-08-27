@@ -28,3 +28,27 @@ export class PaginatorPostSql extends Paginator<ViewPostDto> {
     super(page, pageSize);
   }
 }
+
+export type PostQueryRawType = {
+  id: number;
+  title: string;
+  shortDescription: string;
+  content: string;
+  createdAt: Date;
+  blogId: number;
+  blogName: string;
+  myStatus: LikeStatus;
+  likesCount: number;
+  dislikesCount: number;
+};
+
+export type PostQueryType = PostQueryRawType & {
+  newestLikes: NewestLikesType[];
+};
+
+export type NewestLikesType = {
+  postId: number;
+  addedAt: Date;
+  userId: number;
+  login: string;
+};

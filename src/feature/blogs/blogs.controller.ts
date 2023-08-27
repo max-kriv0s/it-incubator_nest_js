@@ -11,21 +11,17 @@ import {
   PaginatorBlogSqlType,
   ViewBlogDto,
 } from './dto/view-blog.dto';
-import { BlogsService } from './blogs.service';
 import {
   PaginatorPostSql,
   PaginatorPostSqlType,
 } from '../posts/dto/view-post.dto';
 import { CurrentUserId } from '../auth/decorators/current-user-id.param.decorator';
-import { BlogsQuerySqlRepository } from './db/blogs-query.sql-repository';
 import { IdIntegerValidationPipe } from '../../modules/pipes/id-integer-validation.pipe';
+import { BlogsQueryRepository } from './db/blogs-query.repository';
 
 @Controller('blogs')
 export class BlogsController {
-  constructor(
-    private readonly blogsQuerySqlRepository: BlogsQuerySqlRepository,
-    private readonly blogsService: BlogsService,
-  ) {}
+  constructor(private readonly blogsQueryRepository: BlogsQueryRepository) {}
 
   @Get()
   async getBlogs(
@@ -35,7 +31,7 @@ export class BlogsController {
       +queryParams.pageNumber,
       +queryParams.pageSize,
     );
-    return this.blogsQuerySqlRepository.getBlogs(queryParams, paginator);
+    return this.blogsQueryRepository.getBlogs(queryParams, paginator);
   }
 
   @Get(':blogId/posts')
@@ -49,11 +45,11 @@ export class BlogsController {
       +queryParams.pageSize,
     );
 
-    const postsView = await this.blogsQuerySqlRepository.findPostsByBlogId(
-      blogId,
+    const postsView = await this.blogsQueryRepository.findPostsByBlogId(
+      +blogId,
       queryParams,
       paginator,
-      userId,
+      +userId,
     );
     if (!postsView) throw new NotFoundException('Blog not found');
     return postsView;
@@ -63,7 +59,7 @@ export class BlogsController {
   async getBlogById(
     @Param('id', IdIntegerValidationPipe) id: string,
   ): Promise<ViewBlogDto> {
-    const blogView = await this.blogsQuerySqlRepository.getBlogById(id);
+    const blogView = await this.blogsQueryRepository.getBlogById(+id);
     if (!blogView) throw new NotFoundException('Blog not found');
     return blogView;
   }

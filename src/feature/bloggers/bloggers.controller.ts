@@ -41,6 +41,7 @@ import {
   PaginatorViewBloggerCommentsDto,
 } from './dto/view-blogger-comments.dto';
 import { IdIntegerValidationPipe } from '../../modules/pipes/id-integer-validation.pipe';
+import { BloggerQueryRepository } from './db/blogger-query.repository';
 import { BloggerQuerySqlRepository } from './db/blogger-query.sql-repository';
 
 @UseGuards(AccessJwtAuthGuard)
@@ -48,6 +49,7 @@ import { BloggerQuerySqlRepository } from './db/blogger-query.sql-repository';
 export class BloggersController {
   constructor(
     private commandBus: CommandBus,
+    private readonly bloggerQueryRepository: BloggerQueryRepository,
     private readonly bloggerQuerySqlRepository: BloggerQuerySqlRepository,
   ) {}
 
@@ -59,7 +61,7 @@ export class BloggersController {
     @CurrentUserId() userId: string,
   ) {
     const updateResult: ResultNotification = await this.commandBus.execute(
-      new UpdateExistingBlogByIdCommand(id, updateDto, userId),
+      new UpdateExistingBlogByIdCommand(+id, updateDto, +userId),
     );
     if (updateResult.hasError()) updateResult.getResult();
   }
@@ -71,7 +73,7 @@ export class BloggersController {
     @CurrentUserId() userId: string,
   ) {
     const deletionResult: ResultNotification = await this.commandBus.execute(
-      new DeleteBlogByIdCommand(id, userId),
+      new DeleteBlogByIdCommand(+id, +userId),
     );
     if (deletionResult.hasError()) deletionResult.getResult();
   }
@@ -81,12 +83,12 @@ export class BloggersController {
     @Body() createDto: CreateBlogDto,
     @CurrentUserId() userId: string,
   ): Promise<ViewBloggerBlogDto> {
-    const creationResult: ResultNotification<string> =
-      await this.commandBus.execute(new CreateBlogCommand(createDto, userId));
+    const creationResult: ResultNotification<number> =
+      await this.commandBus.execute(new CreateBlogCommand(createDto, +userId));
     const blogId = creationResult.getResult();
     if (!blogId) throw new BadRequestException();
 
-    const blogView = await this.bloggerQuerySqlRepository.getBlogById(blogId);
+    const blogView = await this.bloggerQueryRepository.getBlogById(blogId);
     if (!blogView) throw new NotFoundException('Blog not found');
     return blogView;
   }
@@ -101,9 +103,9 @@ export class BloggersController {
       +queryParams.pageSize,
     );
 
-    return this.bloggerQuerySqlRepository.getBlogs(
+    return this.bloggerQueryRepository.getBlogs(
       queryParams,
-      userId,
+      +userId,
       paginator,
     );
   }
@@ -114,14 +116,14 @@ export class BloggersController {
     @Body() createPostDto: CreateBlogPostDto,
     @CurrentUserId(false) userId: string,
   ): Promise<ViewPostDto> {
-    const creationResult: ResultNotification<string> =
+    const creationResult: ResultNotification<number> =
       await this.commandBus.execute(
-        new CreatePostByBlogIdCommand(blogId, createPostDto, userId),
+        new CreatePostByBlogIdCommand(+blogId, createPostDto, +userId),
       );
     const postId = creationResult.getResult();
-    const postView = await this.bloggerQuerySqlRepository.getPostById(
+    const postView = await this.bloggerQueryRepository.getPostById(
       postId!,
-      userId,
+      +userId,
     );
     if (!postView) throw new NotFoundException('Post not found');
     return postView;
@@ -139,10 +141,10 @@ export class BloggersController {
     );
 
     const result: ResultNotification<PaginatorBloggerpostSqlViewType> =
-      await this.bloggerQuerySqlRepository.findPostsByBlogId(
-        blogId,
+      await this.bloggerQueryRepository.findPostsByBlogId(
+        +blogId,
         queryParams,
-        userId,
+        +userId,
         paginator,
       );
 
@@ -160,7 +162,7 @@ export class BloggersController {
     @CurrentUserId() userId: string,
   ) {
     const result: ResultNotification<boolean> = await this.commandBus.execute(
-      new UpdatePostByIdCommand(blogId, postId, updateDto, userId),
+      new UpdatePostByIdCommand(+blogId, +postId, updateDto, +userId),
     );
     return result.getResult();
   }
@@ -173,7 +175,7 @@ export class BloggersController {
     @CurrentUserId() userId: string,
   ) {
     const result: ResultNotification<null> = await this.commandBus.execute(
-      new DeletePostByIdCommand(blogId, postId, userId),
+      new DeletePostByIdCommand(+blogId, +postId, +userId),
     );
     return result.getResult();
   }
@@ -189,9 +191,9 @@ export class BloggersController {
       +queryParams.pageSize,
     );
 
-    return await this.bloggerQuerySqlRepository.allCommentsForAllPostsInsideBlogs(
+    return await this.bloggerQueryRepository.allCommentsForAllPostsInsideBlogs(
       queryParams,
-      userId,
+      +userId,
       paginator,
     );
   }

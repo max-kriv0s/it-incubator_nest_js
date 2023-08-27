@@ -1,49 +1,32 @@
+import { InjectRepository } from '@nestjs/typeorm';
+import { BloggerBannedUser } from '../entities/blogger-banned-user.entity';
 import { Injectable } from '@nestjs/common';
-import {
-  BloggerBannedUsers,
-  BloggerBannedUsersDocument,
-  BloggerBannedUsersModelType,
-} from '../model/blogger-banned-users.schema';
-import { InjectModel } from '@nestjs/mongoose';
-import { castToObjectId } from '../../../utils';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class BloggersRepository {
   constructor(
-    @InjectModel(BloggerBannedUsers.name)
-    private BloggerBannedUsersModel: BloggerBannedUsersModelType,
+    @InjectRepository(BloggerBannedUser)
+    private readonly bloggersRepo: Repository<BloggerBannedUser>,
   ) {}
 
   async findBannedUserByBlogIdAndUserId(
-    blogId: string,
-    userId: string,
-  ): Promise<BloggerBannedUsersDocument | null> {
-    return this.BloggerBannedUsersModel.findOne({
-      blogId: castToObjectId(blogId),
-      bannedUserId: castToObjectId(userId),
+    blogId: number,
+    userId: number,
+  ): Promise<BloggerBannedUser | null> {
+    return this.bloggersRepo.findOneBy({
+      blogId,
+      bannedUserId: userId,
     });
   }
 
   createBloggerBannedUsers(
-    userId: string,
-    userLogin: string,
-    blogId: string,
-  ): BloggerBannedUsersDocument {
-    return this.BloggerBannedUsersModel.createBannedUser(
-      userId,
-      userLogin,
-      blogId,
-      this.BloggerBannedUsersModel,
-    );
+    bannedUser: BloggerBannedUser,
+  ): Promise<BloggerBannedUser> {
+    return this.bloggersRepo.save(bannedUser);
   }
 
-  async save(
-    bannedUser: BloggerBannedUsersDocument,
-  ): Promise<BloggerBannedUsersDocument> {
-    return bannedUser.save();
-  }
-
-  async deleteBloggerBannedUsers() {
-    this.BloggerBannedUsersModel.deleteMany({});
+  async save(bannedUser: BloggerBannedUser) {
+    await this.bloggersRepo.save(bannedUser);
   }
 }

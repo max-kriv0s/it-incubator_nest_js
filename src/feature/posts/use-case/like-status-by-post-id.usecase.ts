@@ -1,13 +1,14 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { PostsSqlRepository } from '../db/posts.sql-repository';
-import { UsersSqlRepository } from '../../../feature/users/db/users.sql-repository';
-import { LikePostsSqlRepository } from '../db/like-posts.sql-repository';
 import { LikeStatus } from '../../../feature/likes/dto/like-status';
+import { PostsRepository } from '../db/posts.repository';
+import { UsersRepository } from '../../../feature/users/db/users.repository';
+import { LikePostsRepository } from '../db/like-posts.repository';
+import { PostLike } from '../entities/post-like.entity';
 
 export class LikeStatusByPostIdCommand {
   constructor(
-    public postId: string,
-    public userId: string,
+    public postId: number,
+    public userId: number,
     public likeStatus: LikeStatus,
   ) {}
 }
@@ -17,31 +18,32 @@ export class LikeStatusByPostIdUseCase
   implements ICommandHandler<LikeStatusByPostIdCommand>
 {
   constructor(
-    private readonly postsSqlRepository: PostsSqlRepository,
-    private readonly usersSqlRepository: UsersSqlRepository,
-    private readonly likePostsSqlRepository: LikePostsSqlRepository,
+    private readonly postsRepository: PostsRepository,
+    private readonly usersRepository: UsersRepository,
+    private readonly likePostsRepository: LikePostsRepository,
   ) {}
 
   async execute(command: LikeStatusByPostIdCommand): Promise<boolean> {
-    const post = await this.postsSqlRepository.findPostById(command.postId);
+    const post = await this.postsRepository.findPostById(command.postId);
     if (!post) return false;
 
-    const user = await this.usersSqlRepository.findUserById(command.userId);
+    const user = await this.usersRepository.findUserById(command.userId);
     if (!user) return false;
 
-    const like = await this.likePostsSqlRepository.findLikeByPostIdAndUserId(
+    const like = await this.likePostsRepository.findLikeByPostIdAndUserId(
       command.postId,
       command.userId,
     );
 
     if (like) {
-      await this.likePostsSqlRepository.updateLike(like.id, command.likeStatus);
+      like.status = command.likeStatus;
+      await this.likePostsRepository.save(like);
     } else {
-      await this.likePostsSqlRepository.createLike(
-        command.postId,
-        command.userId,
-        command.likeStatus,
-      );
+      const newPostLike = new PostLike();
+      newPostLike.postId = command.postId;
+      newPostLike.userId = command.userId;
+      newPostLike.status = command.likeStatus;
+      await this.likePostsRepository.createPostLike(newPostLike);
     }
 
     return true;

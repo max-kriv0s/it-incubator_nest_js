@@ -24,3 +24,18 @@ export class PaginatorCommentSql extends Paginator<ViewCommentDto> {
     super(page, pageSize);
   }
 }
+
+export type CommentQueryRawType = {
+  id: number;
+  content: string;
+  createdAt: Date;
+  userId: number;
+  userLogin: string;
+  postId: number;
+  title: string;
+  blogId: number;
+  blogName: string;
+  myStatus: LikeStatus;
+  likesCount: number;
+  dislikesCount: number;
+};

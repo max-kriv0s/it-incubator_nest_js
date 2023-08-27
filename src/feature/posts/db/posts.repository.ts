@@ -6,10 +6,26 @@ import { Repository } from 'typeorm';
 @Injectable()
 export class PostsRepository {
   constructor(
-    @InjectRepository(Post) private readonly repository: Repository<Post>,
+    @InjectRepository(Post) private readonly postsRepo: Repository<Post>,
   ) {}
 
   async setBanUnbanePostsByBlogId(blogId: number, isBanned: boolean) {
-    await this.repository.update({ blogId }, { isBanned });
+    await this.postsRepo.update({ blogId }, { isBanned });
+  }
+
+  async createPostByBlogId(post: Post): Promise<Post> {
+    return this.postsRepo.save(post);
+  }
+
+  async findPostById(id: number): Promise<Post | null> {
+    return this.postsRepo.findOneBy({ id });
+  }
+
+  async save(post: Post) {
+    await this.postsRepo.save(post);
+  }
+
+  async deletePostById(id: number) {
+    await this.postsRepo.delete({ id });
   }
 }

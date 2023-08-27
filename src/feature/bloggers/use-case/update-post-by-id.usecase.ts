@@ -5,17 +5,16 @@ import { BlogPostUpdateDto } from '../dto/blog-post-update.dto';
 import {
   ResultCodeError,
   ResultNotification,
-  ResultNotificationErrorType,
 } from '../../../modules/notification';
-import { BlogsSqlRepository } from '../../../feature/blogs/db/blogs.sql-repository';
-import { PostsSqlRepository } from '../../../feature/posts/db/posts.sql-repository';
+import { PostsRepository } from '../../../feature/posts/db/posts.repository';
+import { BlogsRepository } from '../../../feature/blogs/db/blogs.repository';
 
 export class UpdatePostByIdCommand {
   constructor(
-    public blogId: string,
-    public postId: string,
+    public blogId: number,
+    public postId: number,
     public updateDto: BlogPostUpdateDto,
-    public userId: string,
+    public userId: number,
   ) {}
 }
 
@@ -24,8 +23,8 @@ export class UpdatePostByIdUseCase
   implements ICommandHandler<UpdatePostByIdCommand>
 {
   constructor(
-    private readonly postsSqlRepository: PostsSqlRepository,
-    private readonly blogsSqlRepository: BlogsSqlRepository,
+    private readonly postsRepository: PostsRepository,
+    private readonly blogsRepository: BlogsRepository,
   ) {}
 
   async execute(
@@ -35,7 +34,7 @@ export class UpdatePostByIdUseCase
 
     const result = new ResultNotification<boolean>();
 
-    const blog = await this.blogsSqlRepository.findBlogById(command.blogId);
+    const blog = await this.blogsRepository.findBlogById(command.blogId);
     if (!blog) {
       result.addError('Blog not found', ResultCodeError.NotFound);
       return result;
@@ -45,28 +44,18 @@ export class UpdatePostByIdUseCase
       return result;
     }
 
-    const postUpdateDto: UpdatePostDto = {
-      title: command.updateDto.title,
-      shortDescription: command.updateDto.shortDescription,
-      content: command.updateDto.content,
-      blogId: command.blogId,
-    };
-
-    const post = await this.postsSqlRepository.findPostById(command.postId);
+    const post = await this.postsRepository.findPostById(command.postId);
     if (!post) {
       result.addError('Post not found', ResultCodeError.NotFound);
       return result;
     }
-    await this.postsSqlRepository.updatePost(command.postId, postUpdateDto);
-    // const resultUpdate: ResultNotification<boolean> =
-    //   await this.postsService.updatePost(command.postId, postUpdateDto);
 
-    // if (resultUpdate.hasError()) {
-    //   const error: ResultNotificationErrorType = resultUpdate.getError();
-    //   result.addError(error.message, error.code);
-    // } else {
-    //   result.addData(true);
-    // }
+    post.title = command.updateDto.title;
+    post.shortDescription = command.updateDto.shortDescription;
+    post.content = command.updateDto.content;
+    post.blogId = command.blogId;
+    await this.postsRepository.save(post);
+
     result.addData(true);
     return result;
   }

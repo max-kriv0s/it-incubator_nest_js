@@ -91,6 +91,11 @@ import { BlogsRepository } from './feature/blogs/db/blogs.repository';
 import { CommentsRepository } from './feature/comments/db/comments.repository';
 import { LikePostsRepository } from './feature/posts/db/like-posts.repository';
 import { LikeCommentsRepository } from './feature/comments/db/like-comments.repository';
+import { BloggerQueryRepository } from './feature/bloggers/db/blogger-query.repository';
+import { PostsQueryRepository } from './feature/posts/db/posts-query.repository';
+import { BloggersRepository } from './feature/bloggers/db/bloggers.repository';
+import { BlogsQueryRepository } from './feature/blogs/db/blogs-query.repository';
+import { CommentsQueryRepository } from './feature/comments/db/comments-query.repository';
 
 const apiCallsAdapters = [
   ApiCallsConfig,
@@ -104,15 +109,15 @@ const authAdapters = [
   RefreshJwtStrategy,
 ];
 const bloggersAdapters = [
-  // BloggerQueryRepository,
-  // BloggersRepository,
+  BloggerQueryRepository,
+  BloggersRepository,
   BloggerQuerySqlRepository,
   BloggersSqlRepository,
 ];
 const blogsAdapters = [
   BlogsService,
   BlogsRepository,
-  // BlogsQueryRepository,
+  BlogsQueryRepository,
   BlogExistsRule,
   BlogsSqlRepository,
   BlogsQuerySqlRepository,
@@ -120,7 +125,7 @@ const blogsAdapters = [
 const commentsAdapters = [
   // CommentsService,
   CommentsRepository,
-  // CommentsQueryRepository,
+  CommentsQueryRepository,
   // LikeCommentsService,
   LikeCommentsRepository,
   CommentsSqlRepository,
@@ -130,7 +135,7 @@ const commentsAdapters = [
 const postsAdapters = [
   // PostsService,
   PostsRepository,
-  // PostsQueryRepository,
+  PostsQueryRepository,
   LikePostsRepository,
   // LikePostsService,
   PostsSqlRepository,

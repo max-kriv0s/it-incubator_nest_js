@@ -3,14 +3,14 @@ import {
   ResultCodeError,
   ResultNotification,
 } from '../../../modules/notification';
-import { BlogsSqlRepository } from '../../../feature/blogs/db/blogs.sql-repository';
-import { PostsSqlRepository } from '../../../feature/posts/db/posts.sql-repository';
+import { BlogsRepository } from '../../../feature/blogs/db/blogs.repository';
+import { PostsRepository } from '../../../feature/posts/db/posts.repository';
 
 export class DeletePostByIdCommand {
   constructor(
-    public blogId: string,
-    public postId: string,
-    public userId: string,
+    public blogId: number,
+    public postId: number,
+    public userId: number,
   ) {}
 }
 
@@ -19,8 +19,8 @@ export class DeletePostByIdUseCase
   implements ICommandHandler<DeletePostByIdCommand>
 {
   constructor(
-    private readonly postsSqlRepository: PostsSqlRepository,
-    private readonly blogsSqlRepository: BlogsSqlRepository,
+    private readonly postsRepository: PostsRepository,
+    private readonly blogsRepository: BlogsRepository,
   ) {}
 
   async execute(
@@ -28,7 +28,7 @@ export class DeletePostByIdUseCase
   ): Promise<ResultNotification<null>> {
     const result = new ResultNotification<null>();
 
-    const blog = await this.blogsSqlRepository.findBlogById(command.blogId);
+    const blog = await this.blogsRepository.findBlogById(command.blogId);
     if (!blog) {
       result.addError('Blog not found', ResultCodeError.NotFound);
       return result;
@@ -38,7 +38,7 @@ export class DeletePostByIdUseCase
       return result;
     }
 
-    await this.postsSqlRepository.deletePostById(command.postId);
+    await this.postsRepository.deletePostById(command.postId);
     return result;
   }
 }

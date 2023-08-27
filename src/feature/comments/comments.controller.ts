@@ -15,17 +15,17 @@ import { UpdateCommentDto } from './dto/update-comment.dto';
 import { CurrentUserId } from '../auth/decorators/current-user-id.param.decorator';
 import { LikeInputDto } from '../likes/dto/like-input.dto';
 import { IdIntegerValidationPipe } from '../../modules/pipes/id-integer-validation.pipe';
-import { CommentsQuerySqlRepository } from './db/comments-query.sql-repository';
 import { ResultNotification } from '../../modules/notification';
 import { CommandBus } from '@nestjs/cqrs';
 import { DeleteCommentbyIdCommand } from './use-case/delete-comment-by-id.usecase';
 import { UpdateCommentByIdCommand } from './use-case/update-comment-by-id.usecase';
 import { SetLikeStatusByCommentIdCommand } from './use-case/set-like-status-by-comment-id.usecase';
+import { CommentsQueryRepository } from './db/comments-query.repository';
 
 @Controller('comments')
 export class CommentsController {
   constructor(
-    private readonly commentsQuerySqlRepository: CommentsQuerySqlRepository,
+    private readonly commentsQueryRepository: CommentsQueryRepository,
     private readonly commandBus: CommandBus,
   ) {}
 
@@ -34,9 +34,9 @@ export class CommentsController {
     @Param('id', IdIntegerValidationPipe) id: string,
     @CurrentUserId(false) userId: string,
   ) {
-    const comment = await this.commentsQuerySqlRepository.getCommentViewById(
-      id,
-      userId,
+    const comment = await this.commentsQueryRepository.getCommentViewById(
+      +id,
+      +userId,
     );
     if (!comment) throw new NotFoundException();
 
@@ -51,7 +51,7 @@ export class CommentsController {
     @CurrentUserId() userId: string,
   ) {
     const result: ResultNotification = await this.commandBus.execute(
-      new DeleteCommentbyIdCommand(commentId, userId),
+      new DeleteCommentbyIdCommand(+commentId, +userId),
     );
     return result.getResult();
   }
@@ -65,7 +65,7 @@ export class CommentsController {
     @CurrentUserId() userId: string,
   ) {
     const result: ResultNotification = await this.commandBus.execute(
-      new UpdateCommentByIdCommand(commentId, commentDto, userId),
+      new UpdateCommentByIdCommand(+commentId, commentDto, +userId),
     );
     return result.getResult();
   }
@@ -79,7 +79,7 @@ export class CommentsController {
     @CurrentUserId() userId: string,
   ) {
     const commentСhanged = await this.commandBus.execute(
-      new SetLikeStatusByCommentIdCommand(commentId, userId, dto.likeStatus),
+      new SetLikeStatusByCommentIdCommand(+commentId, +userId, dto.likeStatus),
     );
 
     if (!commentСhanged) throw new NotFoundException('Comment not found');

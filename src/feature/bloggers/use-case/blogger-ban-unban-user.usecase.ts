@@ -5,14 +5,15 @@ import {
   ResultNotification,
 } from '../../../modules/notification';
 import { validateOrRejectModel } from '../../../modules/validation';
-import { UsersSqlRepository } from '../../../feature/users/db/users.sql-repository';
-import { BlogsSqlRepository } from '../../../feature/blogs/db/blogs.sql-repository';
-import { BloggersSqlRepository } from '../db/bloggers.sql-repository';
+import { BlogsRepository } from 'src/feature/blogs/db/blogs.repository';
+import { UsersRepository } from 'src/feature/users/db/users.repository';
+import { BloggersRepository } from '../db/bloggers.repository';
+import { BloggerBannedUser } from '../entities/blogger-banned-user.entity';
 
 export class BloggerBanUnbanUserCommand {
   constructor(
-    public userId: string,
-    public bannedUserId: string,
+    public userId: number,
+    public bannedUserId: number,
     public banUserInputDto: BloggerBanUserInputDto,
   ) {}
 }
@@ -22,9 +23,9 @@ export class BloggerBanUnbanUserUseCase
   implements ICommandHandler<BloggerBanUnbanUserCommand>
 {
   constructor(
-    private readonly blogsSqlRepository: BlogsSqlRepository,
-    private readonly usersSqlRepository: UsersSqlRepository,
-    private readonly bloggersSqlRepository: BloggersSqlRepository,
+    private readonly blogsRepository: BlogsRepository,
+    private readonly usersRepository: UsersRepository,
+    private readonly bloggersRepository: BloggersRepository,
   ) {}
 
   async execute(
@@ -37,8 +38,8 @@ export class BloggerBanUnbanUserUseCase
 
     const result = new ResultNotification<null>();
 
-    const blog = await this.blogsSqlRepository.findBlogById(
-      command.banUserInputDto.blogId,
+    const blog = await this.blogsRepository.findBlogById(
+      +command.banUserInputDto.blogId,
     );
     if (!blog) {
       result.addError('Blog not found', ResultCodeError.NotFound, 'blogId');
@@ -49,7 +50,7 @@ export class BloggerBanUnbanUserUseCase
       return result;
     }
 
-    const userForBan = await this.usersSqlRepository.findUserById(
+    const userForBan = await this.usersRepository.findUserById(
       command.bannedUserId,
     );
     if (!userForBan) {
@@ -58,22 +59,32 @@ export class BloggerBanUnbanUserUseCase
     }
 
     let bannedUser =
-      await this.bloggersSqlRepository.findBannedUserByBlogIdAndUserId(
-        command.banUserInputDto.blogId,
+      await this.bloggersRepository.findBannedUserByBlogIdAndUserId(
+        +command.banUserInputDto.blogId,
         command.bannedUserId,
       );
 
+    const isBanned = command.banUserInputDto.isBanned;
+    const banDate = isBanned ? new Date() : null;
+    const banReason = isBanned ? command.banUserInputDto.banReason : null;
+
+    const isNewBannedUser = !bannedUser;
     if (!bannedUser) {
-      bannedUser = await this.bloggersSqlRepository.createBloggerBannedUsers(
-        command.bannedUserId,
-        blog.id,
-      );
+      bannedUser = new BloggerBannedUser();
+      bannedUser.blogId = blog.id;
+      bannedUser.bannedUserId = command.bannedUserId;
     }
 
-    await this.bloggersSqlRepository.updateBannedUser(
-      bannedUser.id,
-      command.banUserInputDto,
-    );
+    bannedUser.isBanned = isBanned;
+    bannedUser.banDate = banDate;
+    bannedUser.banReason = banReason;
+
+    if (isNewBannedUser) {
+      await this.bloggersRepository.createBloggerBannedUsers(bannedUser);
+    } else {
+      await this.bloggersRepository.save(bannedUser);
+    }
+
     return result;
   }
 }
