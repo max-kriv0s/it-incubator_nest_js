@@ -129,8 +129,8 @@ export class PostsQueryRepository {
       ])
       .addSelect('blog.name', 'blogName')
       .addSelect(`COALESCE(pl.status, :likeNone)`, 'myStatus')
-      .addSelect('COALESCE(ld_count."likesCount", 0)', 'likesCount')
-      .addSelect('COALESCE(ld_count."dislikesCount", 0)', 'dislikesCount')
+      .addSelect('COALESCE(ld_count."likesCount", 0)::int', 'likesCount')
+      .addSelect('COALESCE(ld_count."dislikesCount", 0)::int', 'dislikesCount')
       .leftJoin('post.blog', 'blog')
       .leftJoin(`(${queryMyStatus.getQuery()})`, 'pl', 'pl."postId" = post.id')
       .leftJoin(
@@ -167,8 +167,8 @@ export class PostsQueryRepository {
       content: post.content,
       createdAt: post.createdAt.toISOString(),
       extendedLikesInfo: {
-        dislikesCount: +post.dislikesCount,
-        likesCount: +post.likesCount,
+        dislikesCount: post.dislikesCount,
+        likesCount: post.likesCount,
         myStatus: post.myStatus,
         newestLikes: post.newestLikes.map((like) => ({
           addedAt: like.addedAt.toISOString(),
