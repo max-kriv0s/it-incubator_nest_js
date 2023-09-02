@@ -50,7 +50,9 @@ import { BloggerBanUnbanUserUseCase } from './feature/bloggers/use-case/blogger-
 import { UserBanUnbanBlogUseCase } from './feature/users/use-case/user-ban-unban-blog.usecase';
 import { BloggersUsersController } from './feature/bloggers/bloggers-users.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import TYPE_ORM_CONFIGURATION from './configuration/typeorm-service.configuration';
+import TYPE_ORM_CONFIGURATION, {
+  TypeOrmServiceConfiguration,
+} from './configuration/typeorm-service.configuration';
 import { UsersSqlRepository } from './feature/users/db/users.sql-repository';
 import { CreateUserUseCase } from './feature/users/use-case/create-user.usecase';
 import { UsersQuerySqlRepository } from './feature/users/db/users-query.sql-repository';
@@ -103,6 +105,7 @@ import { CreateQuestionUseCase } from './feature/questions/use-case/create-quest
 import { QuestionDeleteUseCase } from './feature/questions/use-case/question-delete.usecase';
 import { QuestionUpdateUseCase } from './feature/questions/use-case/question-update.usecase';
 import { QuestionsQueryRepository } from './feature/questions/db/questions-query.repository';
+import { QuestionPublishUnpublishUseCase } from './feature/questions/use-case/question-publish-unpublish.usecase';
 
 const apiCallsAdapters = [
   ApiCallsConfig,
@@ -192,6 +195,7 @@ const useCases = [
   CreateQuestionUseCase,
   QuestionDeleteUseCase,
   QuestionUpdateUseCase,
+  QuestionPublishUnpublishUseCase,
 ];
 
 const QuestionsAdapters = [QuestionsRepository, QuestionsQueryRepository];
@@ -242,7 +246,6 @@ const QuestionsAdapters = [QuestionsRepository, QuestionsQueryRepository];
       CommentLike,
       PostLike,
       Question,
-      Answer,
     ]),
   ],
   controllers: [
