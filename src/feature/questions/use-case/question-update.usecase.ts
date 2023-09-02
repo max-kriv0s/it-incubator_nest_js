@@ -1,7 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { QuestionsRepository } from '../db/questions.repository';
 import { QuestionUpdateDto } from '../dto/question-update.dto';
-import { validateOrRejectModel } from 'src/modules/validation';
+import { validateOrRejectModel } from '../../../modules/validation';
 
 export class QuestionUpdateCommand {
   constructor(public id: number, public dto: QuestionUpdateDto) {}
