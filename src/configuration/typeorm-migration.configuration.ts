@@ -1,7 +1,5 @@
 import { DataSource, DataSourceOptions } from 'typeorm';
-import TYPE_ORM_CONFIGURATION, {
-  TYPE_ORM_CONFIG,
-} from './typeorm-service.configuration';
+import TYPE_ORM_CONFIG from './typeorm-service.configuration';
 
 // @ts-ignore
 const DATA_SOUCE_CONFIGURATION: DataSourceOptions = {

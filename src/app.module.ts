@@ -50,7 +50,8 @@ import { BloggerBanUnbanUserUseCase } from './feature/bloggers/use-case/blogger-
 import { UserBanUnbanBlogUseCase } from './feature/users/use-case/user-ban-unban-blog.usecase';
 import { BloggersUsersController } from './feature/bloggers/bloggers-users.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import TYPE_ORM_CONFIGURATION, {
+import {
+  TYPE_ORM_CONFIGURATION,
   TypeOrmServiceConfiguration,
 } from './configuration/typeorm-service.configuration';
 import { UsersSqlRepository } from './feature/users/db/users.sql-repository';

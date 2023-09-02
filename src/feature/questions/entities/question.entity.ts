@@ -23,6 +23,6 @@ export class Question {
   @CreateDateColumn()
   createdAt: Date;
 
-  @UpdateDateColumn()
-  updatedAt: Date;
+  @UpdateDateColumn({ type: Date, nullable: true })
+  updatedAt: Date | null;
 }

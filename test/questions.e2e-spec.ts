@@ -57,7 +57,7 @@ describe('QuestionsController (e2e) test', () => {
         correctAnswers: mockQuestion.correctAnswers,
         published: false,
         createdAt: expect.any(String),
-        updatedAt: expect.any(String),
+        updatedAt: null,
       });
 
       return body;
@@ -284,7 +284,24 @@ describe('QuestionsController (e2e) test', () => {
         page: 1,
         pageSize: 10,
         totalCount: 2,
-        items: [question2, question1],
+        items: [
+          {
+            body: question2.body,
+            correctAnswers: question2.correctAnswers,
+            createdAt: question2.createdAt,
+            id: question2.id,
+            published: question2.published,
+            updatedAt: question2.updatedAt,
+          },
+          {
+            body: question1.body,
+            correctAnswers: question1.correctAnswers,
+            createdAt: question1.createdAt,
+            id: question1.id,
+            published: question1.published,
+            updatedAt: question1.updatedAt,
+          },
+        ],
       });
     });
 
@@ -300,7 +317,16 @@ describe('QuestionsController (e2e) test', () => {
         page: 1,
         pageSize: 1,
         totalCount: 2,
-        items: [question2],
+        items: [
+          {
+            body: question2.body,
+            correctAnswers: question2.correctAnswers,
+            createdAt: question2.createdAt,
+            id: question2.id,
+            published: question2.published,
+            updatedAt: question2.updatedAt,
+          },
+        ],
       });
     });
 
@@ -316,7 +342,16 @@ describe('QuestionsController (e2e) test', () => {
         page: 2,
         pageSize: 1,
         totalCount: 2,
-        items: [question1],
+        items: [
+          {
+            body: question1.body,
+            correctAnswers: question1.correctAnswers,
+            createdAt: question1.createdAt,
+            id: question1.id,
+            published: question1.published,
+            updatedAt: question1.updatedAt,
+          },
+        ],
       });
     });
 
@@ -332,7 +367,16 @@ describe('QuestionsController (e2e) test', () => {
         page: 1,
         pageSize: 10,
         totalCount: 1,
-        items: [question1],
+        items: [
+          {
+            body: question1.body,
+            correctAnswers: question1.correctAnswers,
+            createdAt: question1.createdAt,
+            id: question1.id,
+            published: question1.published,
+            updatedAt: question1.updatedAt,
+          },
+        ],
       });
     });
 
@@ -348,7 +392,24 @@ describe('QuestionsController (e2e) test', () => {
         page: 1,
         pageSize: 10,
         totalCount: 2,
-        items: [question1, question2],
+        items: [
+          {
+            body: question1.body,
+            correctAnswers: question1.correctAnswers,
+            createdAt: question1.createdAt,
+            id: question1.id,
+            published: question1.published,
+            updatedAt: question1.updatedAt,
+          },
+          {
+            body: question2.body,
+            correctAnswers: question2.correctAnswers,
+            createdAt: question2.createdAt,
+            id: question2.id,
+            published: question2.published,
+            updatedAt: question2.updatedAt,
+          },
+        ],
       });
     });
   });
@@ -398,11 +459,11 @@ describe('QuestionsController (e2e) test', () => {
       expect(body.items.length).toBe(1);
 
       expect(body.items[0]).toEqual({
-        id: question1.id,
         body: mockBody.body,
         correctAnswers: mockBody.correctAnswers,
-        published: question1.published,
         createdAt: question1.createdAt,
+        id: question1.id,
+        published: question1.published,
         updatedAt: expect.any(String),
       });
 
@@ -561,7 +622,10 @@ describe('QuestionsController (e2e) test', () => {
       expect(body.items.length).toBe(1);
 
       expect(body.items[0]).toEqual({
-        ...question1,
+        body: question1.body,
+        correctAnswers: question1.correctAnswers,
+        createdAt: question1.createdAt,
+        id: question1.id,
         published: true,
         updatedAt: expect.any(String),
       });
@@ -588,7 +652,10 @@ describe('QuestionsController (e2e) test', () => {
       expect(body.items.length).toBe(1);
 
       expect(body.items[0]).toEqual({
-        ...question1,
+        body: question1.body,
+        correctAnswers: question1.correctAnswers,
+        createdAt: question1.createdAt,
+        id: question1.id,
         published: false,
         updatedAt: expect.any(String),
       });

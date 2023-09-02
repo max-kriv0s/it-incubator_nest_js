@@ -6,7 +6,7 @@ export class QuestionViewDto {
   correctAnswers: string[];
   published: boolean;
   createdAt: string;
-  updatedAt: string;
+  updatedAt: string | null;
 }
 
 export type PaginatorQuestionViewType = PaginatorType<QuestionViewDto>;

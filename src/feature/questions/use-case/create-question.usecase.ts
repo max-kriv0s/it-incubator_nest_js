@@ -20,6 +20,7 @@ export class CreateQuestionUseCase
     const question = new Question();
     question.body = command.dto.body;
     question.correctAnswers = command.dto.correctAnswers;
+    question.updatedAt = null;
     await this.questionsRepository.save(question);
 
     return question.id;

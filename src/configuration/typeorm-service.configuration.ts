@@ -44,7 +44,7 @@ export const TYPE_ORM_CONFIG = {
 };
 
 // @ts-ignore
-const TYPE_ORM_CONFIGURATION: TypeOrmModuleOptions = {
+export const TYPE_ORM_CONFIGURATION: TypeOrmModuleOptions = {
   ...TYPE_ORM_CONFIG,
   autoLoadEntities: false,
   // synchronize: false,
@@ -53,4 +53,4 @@ const TYPE_ORM_CONFIGURATION: TypeOrmModuleOptions = {
   // entities:[]
 };
 
-export default TYPE_ORM_CONFIGURATION;
+export default TYPE_ORM_CONFIG;

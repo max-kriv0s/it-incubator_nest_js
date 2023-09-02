@@ -33,7 +33,7 @@ export class TestingService {
       DECLARE
       statements CURSOR FOR
         SELECT tablename FROM pg_tables
-        WHERE tableowner = username AND schemaname = 'public';
+        WHERE tableowner = username AND schemaname = 'public' AND NOT tablename = 'migrations';
 
       BEGIN
         FOR stmt IN statements LOOP
