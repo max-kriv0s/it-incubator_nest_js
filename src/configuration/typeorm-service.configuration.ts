@@ -1,23 +1,53 @@
-import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { TypeOrmModuleOptions, TypeOrmOptionsFactory } from '@nestjs/typeorm';
+// import { Injectable } from '@nestjs/common';
+// import { ConfigService } from '@nestjs/config';
+// import { TypeOrmModuleOptions, TypeOrmOptionsFactory } from '@nestjs/typeorm';
 
-@Injectable()
-export class TypeOrmServiceConfiguration implements TypeOrmOptionsFactory {
-  constructor(private readonly configService: ConfigService) {}
+import { TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { config } from 'dotenv';
+config();
 
-  createTypeOrmOptions(): TypeOrmModuleOptions | Promise<TypeOrmModuleOptions> {
-    return {
-      type: 'postgres',
-      host: process.env.TYPE_ORM_HOST,
-      port: Number(process.env.TYPE_ORM_PORT),
-      username: process.env.TYPE_ORM_USERNAME,
-      password: process.env.TYPE_ORM_PASSWORD,
-      database: process.env.TYPE_ORM_DATABASE,
-      autoLoadEntities: true,
-      synchronize: true,
-      ssl: process.env.TYPE_ORM_TYPE_SERVER === 'local' ? false : true,
-      logging: ['error'],
-    };
-  }
-}
+// @Injectable()
+// export class TypeOrmServiceConfiguration implements TypeOrmOptionsFactory {
+//   constructor(private readonly configService: ConfigService) {}
+
+//   createTypeOrmOptions(): TypeOrmModuleOptions | Promise<TypeOrmModuleOptions> {
+//     return {
+//       type: 'postgres',
+//       host: process.env.TYPE_ORM_HOST,
+//       port: Number(process.env.TYPE_ORM_PORT),
+//       username: process.env.TYPE_ORM_USERNAME,
+//       password: process.env.TYPE_ORM_PASSWORD,
+//       database: process.env.TYPE_ORM_DATABASE,
+//       autoLoadEntities: false,
+//       synchronize: false,
+//       ssl: process.env.TYPE_ORM_TYPE_SERVER === 'local' ? false : true,
+//       logging: ['error'],
+//     };
+//   }
+// }
+
+export const TYPE_ORM_CONFIG = {
+  type: 'postgres',
+  host: process.env.TYPE_ORM_HOST,
+  port: Number(process.env.TYPE_ORM_PORT),
+  username: process.env.TYPE_ORM_USERNAME,
+  password: process.env.TYPE_ORM_PASSWORD,
+  database: process.env.TYPE_ORM_DATABASE,
+  synchronize: false,
+  ssl: process.env.TYPE_ORM_TYPE_SERVER === 'local' ? false : true,
+  logging: ['error'],
+  entities: ['src/**/*.entity.ts'],
+  migrations: ['src/migrations/*.ts'],
+};
+
+// @ts-ignore
+const TYPE_ORM_CONFIGURATION: TypeOrmModuleOptions = {
+  ...TYPE_ORM_CONFIG,
+  autoLoadEntities: false,
+  // synchronize: false,
+  // ssl: process.env.TYPE_ORM_TYPE_SERVER === 'local' ? false : true,
+  // logging: ['error'],
+  // entities:[]
+};
+
+export default TYPE_ORM_CONFIGURATION;

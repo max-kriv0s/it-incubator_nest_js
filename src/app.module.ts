@@ -50,7 +50,7 @@ import { BloggerBanUnbanUserUseCase } from './feature/bloggers/use-case/blogger-
 import { UserBanUnbanBlogUseCase } from './feature/users/use-case/user-ban-unban-blog.usecase';
 import { BloggersUsersController } from './feature/bloggers/bloggers-users.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { TypeOrmServiceConfiguration } from './configuration/typeorm-service.configuration';
+import TYPE_ORM_CONFIGURATION from './configuration/typeorm-service.configuration';
 import { UsersSqlRepository } from './feature/users/db/users.sql-repository';
 import { CreateUserUseCase } from './feature/users/use-case/create-user.usecase';
 import { UsersQuerySqlRepository } from './feature/users/db/users-query.sql-repository';
@@ -96,6 +96,13 @@ import { PostsQueryRepository } from './feature/posts/db/posts-query.repository'
 import { BloggersRepository } from './feature/bloggers/db/bloggers.repository';
 import { BlogsQueryRepository } from './feature/blogs/db/blogs-query.repository';
 import { CommentsQueryRepository } from './feature/comments/db/comments-query.repository';
+import { Question } from './feature/questions/entities/question.entity';
+import { QuestionsRepository } from './feature/questions/db/questions.repository';
+import { QuestionsController } from './feature/questions/questions.controller';
+import { CreateQuestionUseCase } from './feature/questions/use-case/create-question.usecase';
+import { QuestionDeleteUseCase } from './feature/questions/use-case/question-delete.usecase';
+import { QuestionUpdateUseCase } from './feature/questions/use-case/question-update.usecase';
+import { QuestionsQueryRepository } from './feature/questions/db/questions-query.repository';
 
 const apiCallsAdapters = [
   ApiCallsConfig,
@@ -182,7 +189,12 @@ const useCases = [
   DeleteCommentbyIdUseCase,
   UpdateCommentByIdUseCase,
   SetLikeStatusByCommentIdUseCase,
+  CreateQuestionUseCase,
+  QuestionDeleteUseCase,
+  QuestionUpdateUseCase,
 ];
+
+const QuestionsAdapters = [QuestionsRepository, QuestionsQueryRepository];
 
 @Module({
   imports: [
@@ -216,9 +228,10 @@ const useCases = [
       useClass: ThrottlerConfigService,
     }),
     CqrsModule,
-    TypeOrmModule.forRootAsync({
-      useClass: TypeOrmServiceConfiguration,
-    }),
+    TypeOrmModule.forRoot(TYPE_ORM_CONFIGURATION),
+    // TypeOrmModule.forRootAsync({
+    //   useClass: TypeOrmServiceConfiguration,
+    // }),
     TypeOrmModule.forFeature([
       User,
       Blog,
@@ -228,6 +241,8 @@ const useCases = [
       BloggerBannedUser,
       CommentLike,
       PostLike,
+      Question,
+      Answer,
     ]),
   ],
   controllers: [
@@ -242,6 +257,7 @@ const useCases = [
     SecurityDevicesController,
     BloggersController,
     BloggersUsersController,
+    QuestionsController,
   ],
   providers: [
     AppService,
@@ -255,6 +271,7 @@ const useCases = [
     ...postsAdapters,
     ...securityDevicesAdapters,
     ...usersAdapters,
+    ...QuestionsAdapters,
     EmailManagerService,
     EmailConfig,
     EmailAdapter,
