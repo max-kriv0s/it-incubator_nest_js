@@ -17,7 +17,7 @@ export class Question {
   @Column('json')
   correctAnswers: string[];
 
-  @Column()
+  @Column({ default: false })
   published: boolean;
 
   @CreateDateColumn()
