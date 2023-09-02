@@ -21,7 +21,7 @@ import {
   PaginatorQuestionView,
   QuestionViewDto,
 } from './dto/view-question.dto';
-import { IdIntegerValidationPipe } from 'src/modules/pipes/id-integer-validation.pipe';
+import { IdIntegerValidationPipe } from '../../modules/pipes/id-integer-validation.pipe';
 import { QuestionDeleteCommand } from './use-case/question-delete.usecase';
 import { QUESTION_NOT_FOUND_ERROR } from './constants/questions.constants';
 import { QuestionUpdateDto } from './dto/question-update.dto';

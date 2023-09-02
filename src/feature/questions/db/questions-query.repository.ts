@@ -40,7 +40,7 @@ export class QuestionsQueryRepository {
     }
 
     const [questions, totalCount] = await query
-      .orderBy(`users.${sortBy}`, sortDirection === 'desc' ? 'DESC' : 'ASC')
+      .orderBy(`q.${sortBy}`, sortDirection === 'desc' ? 'DESC' : 'ASC')
       .limit(paginator.pageSize)
       .offset(paginator.skip)
       .getManyAndCount();

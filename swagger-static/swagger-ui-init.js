@@ -907,6 +907,114 @@ window.onload = function() {
             }
           }
         }
+      },
+      "/sa/quiz/questions": {
+        "get": {
+          "operationId": "QuestionsController_getQuestions",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": ""
+            }
+          }
+        },
+        "post": {
+          "operationId": "QuestionsController_createQuestion",
+          "parameters": [],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateQuestionDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": ""
+            }
+          }
+        }
+      },
+      "/sa/quiz/questions/{id}": {
+        "delete": {
+          "operationId": "QuestionsController_deleteQuestion",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": ""
+            }
+          }
+        },
+        "put": {
+          "operationId": "QuestionsController_updateQuestion",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuestionUpdateDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "204": {
+              "description": ""
+            }
+          }
+        }
+      },
+      "/sa/quiz/questions/{id}/publish": {
+        "put": {
+          "operationId": "QuestionsController_publishUnpublishQuestion",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuestionPublishDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "204": {
+              "description": ""
+            }
+          }
+        }
       }
     },
     "info": {
@@ -981,6 +1089,18 @@ window.onload = function() {
           "properties": {}
         },
         "BloggerBanUserInputDto": {
+          "type": "object",
+          "properties": {}
+        },
+        "CreateQuestionDto": {
+          "type": "object",
+          "properties": {}
+        },
+        "QuestionUpdateDto": {
+          "type": "object",
+          "properties": {}
+        },
+        "QuestionPublishDto": {
           "type": "object",
           "properties": {}
         }

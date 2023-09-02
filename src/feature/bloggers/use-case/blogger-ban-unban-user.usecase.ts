@@ -5,8 +5,8 @@ import {
   ResultNotification,
 } from '../../../modules/notification';
 import { validateOrRejectModel } from '../../../modules/validation';
-import { BlogsRepository } from 'src/feature/blogs/db/blogs.repository';
-import { UsersRepository } from 'src/feature/users/db/users.repository';
+import { BlogsRepository } from '../../../feature/blogs/db/blogs.repository';
+import { UsersRepository } from '../../../feature/users/db/users.repository';
 import { BloggersRepository } from '../db/bloggers.repository';
 import { BloggerBannedUser } from '../entities/blogger-banned-user.entity';
 
