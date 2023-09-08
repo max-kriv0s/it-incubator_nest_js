@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { TypeOrmModuleOptions, TypeOrmOptionsFactory } from '@nestjs/typeorm';
 
 import { config } from 'dotenv';
+import { PostgresConnectionOptions } from 'typeorm/driver/postgres/PostgresConnectionOptions';
 config();
 
 @Injectable()
@@ -28,7 +29,7 @@ export class TypeOrmServiceConfiguration implements TypeOrmOptionsFactory {
   }
 }
 
-export const TYPE_ORM_CONFIG = {
+export const TYPE_ORM_CONFIG: PostgresConnectionOptions = {
   type: 'postgres',
   host: process.env.TYPE_ORM_HOST,
   port: Number(process.env.TYPE_ORM_PORT),
@@ -43,7 +44,6 @@ export const TYPE_ORM_CONFIG = {
   migrations: [__dirname + '/../migrations/*.ts'],
 };
 
-// @ts-ignore
 export const TYPE_ORM_CONFIGURATION: TypeOrmModuleOptions = {
   ...TYPE_ORM_CONFIG,
   autoLoadEntities: false,
