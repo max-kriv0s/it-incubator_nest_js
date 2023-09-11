@@ -112,6 +112,7 @@ import { PairQuizGameRepository } from './feature/pair-quiz-game/db/pair-quiz-ga
 import { CreatePairQuizGameUseCase } from './feature/pair-quiz-game/use-case/create-pair-quiz-game.usecase';
 import { PairQuizGameProgressRepository } from './feature/pair-quiz-game/db/pair-quiz-game-progress.repository';
 import { AnswerPairQuizGameUseCase } from './feature/pair-quiz-game/use-case/answer-pair-quiz-game.usecase';
+import { PairQuizGameProgressQueryRepository } from './feature/pair-quiz-game/db/pair-quiz-game-progress-query.repository';
 
 const apiCallsAdapters = [
   ApiCallsConfig,
@@ -180,6 +181,7 @@ const PairQuizGameAdapters = [
   PairQuizGameRepository,
   PairQuizGameQueryRepository,
   PairQuizGameProgressRepository,
+  PairQuizGameProgressQueryRepository,
 ];
 const QuestionsAdapters = [QuestionsRepository, QuestionsQueryRepository];
 const useCases = [

@@ -39,6 +39,7 @@ export const TYPE_ORM_CONFIG: PostgresConnectionOptions = {
   synchronize: false,
   ssl: process.env.TYPE_ORM_TYPE_SERVER === 'local' ? false : true,
   logging: ['error'],
+  // logging: true,
   // entities: ['../*.entity.ts'],
   entities: [__dirname + '/../**/*.entity.{js,ts}'],
   migrations: [__dirname + '/../migrations/*.ts'],

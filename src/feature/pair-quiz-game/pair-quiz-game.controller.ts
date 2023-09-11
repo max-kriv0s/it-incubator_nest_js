@@ -20,6 +20,8 @@ import { ResultNotification } from '../../modules/notification';
 import { AnswerDto } from './dto/answer.dto';
 import { AnswerPairQuizGameCommand } from './use-case/answer-pair-quiz-game.usecase';
 import { IdIntegerValidationPipeBadRequest } from '../../modules/pipes/id-integer-validation-bad-request.pipe';
+import { PairQuizGameProgressViewDto } from './dto/pair-quiz-game-progress-view.dto';
+import { PairQuizGameProgressQueryRepository } from './db/pair-quiz-game-progress-query.repository';
 
 @Controller('pair-game-quiz/pairs')
 @UseGuards(AccessJwtAuthGuard)
@@ -27,6 +29,7 @@ export class PairQuizGameController {
   constructor(
     private commandBus: CommandBus,
     private readonly pairQuizGameQueryRepository: PairQuizGameQueryRepository,
+    private readonly pairQuizGameProgressQueryRepository: PairQuizGameProgressQueryRepository,
   ) {}
 
   @Post('connection')
@@ -78,11 +81,17 @@ export class PairQuizGameController {
   async myCurrentAnswers(
     @CurrentUserId() userId: string,
     @Body() answerDto: AnswerDto,
-  ) {
-    const result: boolean = await this.commandBus.execute(
+  ): Promise<PairQuizGameProgressViewDto> {
+    const questionId: number = await this.commandBus.execute(
       new AnswerPairQuizGameCommand(answerDto.answer, +userId),
     );
 
-    if (!result) throw new ForbiddenException();
+    if (!questionId) throw new ForbiddenException();
+    const questionView =
+      await this.pairQuizGameProgressQueryRepository.findQuestionById(
+        questionId,
+      );
+    if (!questionView) throw new NotFoundException();
+    return questionView;
   }
 }

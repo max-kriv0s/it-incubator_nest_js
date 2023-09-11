@@ -25,12 +25,12 @@ export class AnswerPairQuizGameUseCase
     private readonly pairQuizGameProgressRepository: PairQuizGameProgressRepository,
   ) {}
 
-  async execute(command: AnswerPairQuizGameCommand): Promise<boolean> {
+  async execute(command: AnswerPairQuizGameCommand): Promise<number | null> {
     const question =
       await this.pairQuizGameProgressRepository.findUnansweredQuestionByUserId(
         command.userId,
       );
-    if (!question) return false;
+    if (!question) return null;
 
     if (question.question.correctAnswers.includes(command.answer)) {
       question.answerStatus = AnswerStatus.Correct;
@@ -73,14 +73,14 @@ export class AnswerPairQuizGameUseCase
       }
 
       await queryRunner.commitTransaction();
-      return true;
+      return question.id;
     } catch (error) {
       await queryRunner.rollbackTransaction();
     } finally {
       await queryRunner.release();
     }
 
-    return false;
+    return null;
   }
 
   private async addBonusPoint(
