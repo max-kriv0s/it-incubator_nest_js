@@ -14,17 +14,20 @@ export class IdIntegerValidationPipeTest implements PipeTransform {
       return value;
     }
 
-    if (
-      value[value.length - 1] === ',' &&
-      Number.isInteger(Number(value.slice(0, -1)))
-    ) {
+    // if (
+    //   value[value.length - 1] === ',' &&
+    //   Number.isInteger(Number(value.slice(0, -1)))
+    // ) {
+    //   throw new BadRequestException([
+    //     GetFieldError('Not true ID format', 'id'),
+    //   ]);
+    // }
+
+    if (!Number.isInteger(Number(value))) {
+      // throw new NotFoundException([GetFieldError('Not true ID format', 'id')]);
       throw new BadRequestException([
         GetFieldError('Not true ID format', 'id'),
       ]);
-    }
-
-    if (!Number.isInteger(Number(value))) {
-      throw new NotFoundException([GetFieldError('Not true ID format', 'id')]);
     }
     return value;
   }
