@@ -22,4 +22,13 @@ export class QuestionsRepository {
   async findById(id: number): Promise<Question | null> {
     return this.questionsRepo.findOneBy({ id });
   }
+
+  async randomQuestions(count: number): Promise<Question[]> {
+    return this.questionsRepo
+      .createQueryBuilder('q')
+      .where('q.published = :published', { published: true })
+      .orderBy('RANDOM()')
+      .limit(count)
+      .getMany();
+  }
 }
