@@ -17,8 +17,8 @@ export class PairQuizGameRepository {
   async findOpenGameByUserId(userId: number): Promise<PairQuizGame | null> {
     return this.pairQuizGameRepo
       .createQueryBuilder('game')
-      .where('game.status = :statusFinished', {
-        statusFinished: GameStatus.Active,
+      .where('game.status != :statusFinished', {
+        statusFinished: GameStatus.Finished,
       })
       .andWhere(
         '(game."firstPlayerId" = :userId OR game."secondPlayerId" = :userId)',
