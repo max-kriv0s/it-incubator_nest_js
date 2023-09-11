@@ -24,7 +24,9 @@ export class IdIntegerValidationPipeTest implements PipeTransform {
     // }
 
     if (!Number.isInteger(Number(value))) {
-      // throw new NotFoundException([GetFieldError('Not true ID format', 'id')]);
+      throw new NotFoundException([GetFieldError('Not true ID format', 'id')]);
+    }
+    if (value.length >= 8) {
       throw new BadRequestException([
         GetFieldError('Not true ID format', 'id'),
       ]);
