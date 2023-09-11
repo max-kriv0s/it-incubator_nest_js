@@ -50,10 +50,7 @@ import { BloggerBanUnbanUserUseCase } from './feature/bloggers/use-case/blogger-
 import { UserBanUnbanBlogUseCase } from './feature/users/use-case/user-ban-unban-blog.usecase';
 import { BloggersUsersController } from './feature/bloggers/bloggers-users.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import {
-  TYPE_ORM_CONFIGURATION,
-  TypeOrmServiceConfiguration,
-} from './configuration/typeorm-service.configuration';
+import { TYPE_ORM_CONFIGURATION } from './configuration/typeorm-service.configuration';
 import { UsersSqlRepository } from './feature/users/db/users.sql-repository';
 import { CreateUserUseCase } from './feature/users/use-case/create-user.usecase';
 import { UsersQuerySqlRepository } from './feature/users/db/users-query.sql-repository';
@@ -107,6 +104,14 @@ import { QuestionDeleteUseCase } from './feature/questions/use-case/question-del
 import { QuestionUpdateUseCase } from './feature/questions/use-case/question-update.usecase';
 import { QuestionsQueryRepository } from './feature/questions/db/questions-query.repository';
 import { QuestionPublishUnpublishUseCase } from './feature/questions/use-case/question-publish-unpublish.usecase';
+import { PairQuizGame } from './feature/pair-quiz-game/entities/pair-quiz-game.entity';
+import { PairQuizGameProgress } from './feature/pair-quiz-game/entities/pair-quiz-game-progress.entity';
+import { PairQuizGameController } from './feature/pair-quiz-game/pair-quiz-game.controller';
+import { PairQuizGameQueryRepository } from './feature/pair-quiz-game/db/pair-quiz-game-query.repository';
+import { PairQuizGameRepository } from './feature/pair-quiz-game/db/pair-quiz-game.repository';
+import { CreatePairQuizGameUseCase } from './feature/pair-quiz-game/use-case/create-pair-quiz-game.usecase';
+import { PairQuizGameProgressRepository } from './feature/pair-quiz-game/db/pair-quiz-game-progress.repository';
+import { AnswerPairQuizGameUseCase } from './feature/pair-quiz-game/use-case/answer-pair-quiz-game.usecase';
 
 const apiCallsAdapters = [
   ApiCallsConfig,
@@ -171,7 +176,12 @@ const usersAdapters = [
   UsersBlogsQuerySqlRepository,
   LikeStatusByPostIdUseCase,
 ];
-
+const PairQuizGameAdapters = [
+  PairQuizGameRepository,
+  PairQuizGameQueryRepository,
+  PairQuizGameProgressRepository,
+];
+const QuestionsAdapters = [QuestionsRepository, QuestionsQueryRepository];
 const useCases = [
   CreateBlogUseCase,
   DeletePostByIdUseCase,
@@ -197,9 +207,9 @@ const useCases = [
   QuestionDeleteUseCase,
   QuestionUpdateUseCase,
   QuestionPublishUnpublishUseCase,
+  CreatePairQuizGameUseCase,
+  AnswerPairQuizGameUseCase,
 ];
-
-const QuestionsAdapters = [QuestionsRepository, QuestionsQueryRepository];
 
 @Module({
   imports: [
@@ -247,6 +257,8 @@ const QuestionsAdapters = [QuestionsRepository, QuestionsQueryRepository];
       CommentLike,
       PostLike,
       Question,
+      PairQuizGame,
+      PairQuizGameProgress,
     ]),
   ],
   controllers: [
@@ -262,6 +274,7 @@ const QuestionsAdapters = [QuestionsRepository, QuestionsQueryRepository];
     BloggersController,
     BloggersUsersController,
     QuestionsController,
+    PairQuizGameController,
   ],
   providers: [
     AppService,
@@ -276,6 +289,7 @@ const QuestionsAdapters = [QuestionsRepository, QuestionsQueryRepository];
     ...securityDevicesAdapters,
     ...usersAdapters,
     ...QuestionsAdapters,
+    ...PairQuizGameAdapters,
     EmailManagerService,
     EmailConfig,
     EmailAdapter,
