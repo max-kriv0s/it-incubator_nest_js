@@ -22,7 +22,6 @@ import { AnswerPairQuizGameCommand } from './use-case/answer-pair-quiz-game.usec
 import { PairQuizGameProgressViewDto } from './dto/pair-quiz-game-progress-view.dto';
 import { PairQuizGameProgressQueryRepository } from './db/pair-quiz-game-progress-query.repository';
 import { IdIntegerValidationPipe } from '../../modules/pipes/id-integer-validation.pipe';
-import { IdIntegerValidationPipeBadRequest } from '../../modules/pipes/id-integer-validation-bag-request.pipe';
 
 @Controller('pair-game-quiz/pairs')
 @UseGuards(AccessJwtAuthGuard)
@@ -66,7 +65,7 @@ export class PairQuizGameController {
 
   @Get(':id')
   async findGameById(
-    @Param('id', IdIntegerValidationPipeBadRequest) id: string,
+    @Param('id', IdIntegerValidationPipe) id: string,
     @CurrentUserId() userId: string,
   ): Promise<PairQuizGameViewDto> {
     const result: ResultNotification<PairQuizGameViewDto> =
