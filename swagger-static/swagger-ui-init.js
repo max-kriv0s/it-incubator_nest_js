@@ -1015,6 +1015,69 @@ window.onload = function() {
             }
           }
         }
+      },
+      "/pair-game-quiz/pairs/connection": {
+        "post": {
+          "operationId": "PairQuizGameController_connectionGame",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": ""
+            }
+          }
+        }
+      },
+      "/pair-game-quiz/pairs/my-current": {
+        "get": {
+          "operationId": "PairQuizGameController_myCurrentGame",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": ""
+            }
+          }
+        }
+      },
+      "/pair-game-quiz/pairs/{id}": {
+        "get": {
+          "operationId": "PairQuizGameController_findGameById",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": ""
+            }
+          }
+        }
+      },
+      "/pair-game-quiz/pairs/my-current/answers": {
+        "post": {
+          "operationId": "PairQuizGameController_myCurrentAnswers",
+          "parameters": [],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnswerDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": ""
+            }
+          }
+        }
       }
     },
     "info": {
@@ -1101,6 +1164,10 @@ window.onload = function() {
           "properties": {}
         },
         "QuestionPublishDto": {
+          "type": "object",
+          "properties": {}
+        },
+        "AnswerDto": {
           "type": "object",
           "properties": {}
         }
