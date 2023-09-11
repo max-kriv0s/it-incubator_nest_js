@@ -16,10 +16,10 @@ import { CommandBus } from '@nestjs/cqrs';
 import { PairQuizGameViewDto } from './dto/pair-quiz-game-view.dto';
 import { PairQuizGameQueryRepository } from './db/pair-quiz-game-query.repository';
 import { CreatePairQuizGameCommand } from './use-case/create-pair-quiz-game.usecase';
-import { IdIntegerValidationPipe } from '../../modules/pipes/id-integer-validation.pipe';
 import { ResultNotification } from '../../modules/notification';
 import { AnswerDto } from './dto/answer.dto';
 import { AnswerPairQuizGameCommand } from './use-case/answer-pair-quiz-game.usecase';
+import { IdIntegerValidationPipeBadRequest } from '../../modules/pipes/id-integer-validation-bad-request.pipe';
 
 @Controller('pair-game-quiz/pairs')
 @UseGuards(AccessJwtAuthGuard)
@@ -62,7 +62,7 @@ export class PairQuizGameController {
 
   @Get(':id')
   async findGameById(
-    @Param('id', IdIntegerValidationPipe) id: string,
+    @Param('id', IdIntegerValidationPipeBadRequest) id: string,
     @CurrentUserId() userId: string,
   ): Promise<PairQuizGameViewDto> {
     const result: ResultNotification<PairQuizGameViewDto> =
