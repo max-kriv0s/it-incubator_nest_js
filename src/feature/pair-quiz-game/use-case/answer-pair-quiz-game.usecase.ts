@@ -73,7 +73,7 @@ export class AnswerPairQuizGameUseCase
       }
 
       await queryRunner.commitTransaction();
-      return question.questionId;
+      return question.id;
     } catch (error) {
       await queryRunner.rollbackTransaction();
     } finally {

@@ -18,7 +18,7 @@ export class PairQuizGameProgressQueryRepository {
     });
     if (!question) return null;
     return {
-      questionId: question.id.toString(),
+      questionId: question.questionId.toString(),
       answerStatus: question.answerStatus,
       addedAt: question.addedAt!.toISOString(),
     };
