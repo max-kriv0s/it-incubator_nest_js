@@ -83,7 +83,7 @@ export class PairQuizGameQueryRepository {
   }
 
   convertToView(infoGame: PairQuizGame): PairQuizGameViewDto {
-    const question: Pick<Question, 'id' | 'body'>[] = [];
+    const question: { id: string; body: string }[] = [];
 
     const firstPlayerAnswers: Answer[] = [];
     let firstPlayerScore = 0;
@@ -102,7 +102,7 @@ export class PairQuizGameQueryRepository {
       if (userProgress.userId === infoGame.firstPlayerId) {
         if (answer.answerStatus) firstPlayerAnswers.push(answer);
         question.push({
-          id: userProgress.question.id,
+          id: userProgress.question.id.toString(),
           body: userProgress.question.body,
         });
         firstPlayerScore += userProgress.score + userProgress.bonus_score;

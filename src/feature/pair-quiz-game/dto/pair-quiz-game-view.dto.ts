@@ -21,7 +21,7 @@ export class PairQuizGameViewDto {
   id: string;
   firstPlayerProgress: PlayerProgress;
   secondPlayerProgress: PlayerProgress | null;
-  questions: Pick<Question, 'id' | 'body'>[] | null;
+  questions: { id: string; body: string }[] | null;
   status: GameStatus;
   pairCreatedDate: string;
   startGameDate: string | null;
