@@ -2,6 +2,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { GameStatus, PairQuizGame } from '../entities/pair-quiz-game.entity';
 import { EntityManager, Not, Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
+import { PairQuizGameProgress } from '../entities/pair-quiz-game-progress.entity';
 
 @Injectable()
 export class PairQuizGameRepository {
@@ -42,19 +43,19 @@ export class PairQuizGameRepository {
     userId: number,
     manager: EntityManager,
   ): Promise<PairQuizGame | null> {
-    return manager.findOne(PairQuizGame, {
-      where: [
-        { firstPlayerId: userId, status: Not(GameStatus.Finished) },
-        { secondPlayerId: userId, status: Not(GameStatus.Finished) },
-      ],
-      relations: {
-        gameProgress: true,
-      },
-      order: {
-        gameProgress: {
-          questionNumber: 'ASC',
-        },
-      },
-    });
+    return manager
+      .getRepository(PairQuizGame)
+      .createQueryBuilder('game')
+      .setLock('pessimistic_write')
+      .leftJoinAndSelect(PairQuizGameProgress, 'gp', 'game.id = gp.id')
+      .where('game."status" != :gameStatusFinished', {
+        gameStatusFinished: GameStatus.Finished,
+      })
+      .andWhere(
+        `game."firstPlayerId" = :userId OR game."secondPlayerId" = :userId`,
+        { userId },
+      )
+      .orderBy('gp.questionNumber', 'ASC')
+      .getOne();
   }
 }
