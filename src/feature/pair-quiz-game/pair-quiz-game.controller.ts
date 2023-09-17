@@ -22,8 +22,9 @@ import { AnswerPairQuizGameCommand } from './use-case/answer-pair-quiz-game.usec
 import { PairQuizGameProgressViewDto } from './dto/pair-quiz-game-progress-view.dto';
 import { PairQuizGameProgressQueryRepository } from './db/pair-quiz-game-progress-query.repository';
 import { IdIntegerValidationPipeTest } from '../../modules/pipes/id-integer-validation.pipe-test.pipe';
+import { PairQuizGameStatisticViewDto } from './dto/pair-quiz-game-statistic-view.dto';
 
-@Controller('pair-game-quiz/pairs')
+@Controller('pair-game-quiz')
 @UseGuards(AccessJwtAuthGuard)
 export class PairQuizGameController {
   constructor(
@@ -32,7 +33,7 @@ export class PairQuizGameController {
     private readonly pairQuizGameProgressQueryRepository: PairQuizGameProgressQueryRepository,
   ) {}
 
-  @Post('connection')
+  @Post('pairs/connection')
   @HttpCode(HttpStatus.OK)
   async connectionGame(
     @CurrentUserId() userId: string,
@@ -52,7 +53,7 @@ export class PairQuizGameController {
     return infoGameView;
   }
 
-  @Get('my-current')
+  @Get('pairs/my-current')
   async myCurrentGame(
     @CurrentUserId() userId: string,
   ): Promise<PairQuizGameViewDto> {
@@ -63,7 +64,14 @@ export class PairQuizGameController {
     return gameView;
   }
 
-  @Get(':id')
+  @Get('users/my-statistic')
+  async userGameStatistics(
+    @CurrentUserId() userId: string,
+  ): Promise<PairQuizGameStatisticViewDto> {
+    return this.pairQuizGameProgressQueryRepository.userGameStatistics(+userId);
+  }
+
+  @Get('pairs/:id')
   async findGameById(
     @Param('id', IdIntegerValidationPipeTest) id: string,
     @CurrentUserId() userId: string,
@@ -76,7 +84,7 @@ export class PairQuizGameController {
     return infoGameView;
   }
 
-  @Post('my-current/answers')
+  @Post('pairs/my-current/answers')
   @HttpCode(HttpStatus.OK)
   async myCurrentAnswers(
     @CurrentUserId() userId: string,

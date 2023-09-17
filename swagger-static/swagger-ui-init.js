@@ -1038,6 +1038,17 @@ window.onload = function() {
           }
         }
       },
+      "/pair-game-quiz/users/my-statistic": {
+        "get": {
+          "operationId": "PairQuizGameController_userGameStatistics",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": ""
+            }
+          }
+        }
+      },
       "/pair-game-quiz/pairs/{id}": {
         "get": {
           "operationId": "PairQuizGameController_findGameById",

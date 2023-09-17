@@ -12,6 +12,7 @@ import {
   ResultNotification,
 } from '../../../modules/notification';
 import { Question } from 'src/feature/questions/entities/question.entity';
+import { PairQuizGameStatisticViewDto } from '../dto/pair-quiz-game-statistic-view.dto';
 
 @Injectable()
 export class PairQuizGameQueryRepository {
