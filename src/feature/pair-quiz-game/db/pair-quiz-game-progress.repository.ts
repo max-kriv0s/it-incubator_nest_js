@@ -49,4 +49,11 @@ export class PairQuizGameProgressRepository {
   ): Promise<PairQuizGameProgress | null> {
     return manager.findOneBy(PairQuizGameProgress, { id });
   }
+
+  async findByGameId(gameId: number, manager: EntityManager) {
+    return manager.find(PairQuizGameProgress, {
+      where: { gameId },
+      order: { questionNumber: 'ASC' },
+    });
+  }
 }

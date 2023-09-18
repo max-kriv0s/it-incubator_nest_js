@@ -1,6 +1,9 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { PairQuizGameRepository } from '../db/pair-quiz-game.repository';
-import { AnswerStatus } from '../entities/pair-quiz-game-progress.entity';
+import {
+  AnswerStatus,
+  PairQuizGameProgress,
+} from '../entities/pair-quiz-game-progress.entity';
 import { PairQuizGameProgressRepository } from '../db/pair-quiz-game-progress.repository';
 import { GameStatus, PairQuizGame } from '../entities/pair-quiz-game.entity';
 import { DataSource, EntityManager } from 'typeorm';
@@ -52,10 +55,16 @@ export class AnswerPairQuizGameUseCase
         queryRunner.manager,
       );
       if (!myCurrentGame) throw new Error('Game not found');
-      const countAnswers = myCurrentGame.gameProgress.length / 2;
+
+      const gameProgress =
+        await this.pairQuizGameProgressRepository.findByGameId(
+          myCurrentGame.id,
+          queryRunner.manager,
+        );
+      const countAnswers = gameProgress.length / 2;
 
       const gameOver =
-        myCurrentGame.gameProgress.filter(
+        gameProgress.filter(
           (question) =>
             question.questionNumber === countAnswers && question.answerStatus,
         ).length === 2;
@@ -67,6 +76,7 @@ export class AnswerPairQuizGameUseCase
 
         await this.addBonusPoint(
           myCurrentGame,
+          gameProgress,
           countAnswers,
           queryRunner.manager,
         );
@@ -85,6 +95,7 @@ export class AnswerPairQuizGameUseCase
 
   private async addBonusPoint(
     myCurrentGame: PairQuizGame,
+    gameProgress: PairQuizGameProgress[],
     countAnswers: number,
     manager: EntityManager,
   ) {
@@ -100,7 +111,7 @@ export class AnswerPairQuizGameUseCase
       idLastQuestion: null,
     };
 
-    for (const question of myCurrentGame.gameProgress) {
+    for (const question of gameProgress) {
       const playerInfo =
         question.userId === myCurrentGame.firstPlayerId
           ? firstPlayer

@@ -43,19 +43,21 @@ export class PairQuizGameRepository {
     userId: number,
     manager: EntityManager,
   ): Promise<PairQuizGame | null> {
-    return manager
-      .getRepository(PairQuizGame)
-      .createQueryBuilder('game')
-      .setLock('pessimistic_write')
-      .leftJoinAndSelect(PairQuizGameProgress, 'gp', 'game.id = gp.id')
-      .where('game."status" != :gameStatusFinished', {
-        gameStatusFinished: GameStatus.Finished,
-      })
-      .andWhere(
-        `game."firstPlayerId" = :userId OR game."secondPlayerId" = :userId`,
-        { userId },
-      )
-      .orderBy('gp.questionNumber', 'ASC')
-      .getOne();
+    return (
+      manager
+        .getRepository(PairQuizGame)
+        .createQueryBuilder('game')
+        .setLock('pessimistic_write')
+        // .leftJoinAndSelect('game.gameProgress', 'gameProgress')
+        .where('game."status" = :gameStatusActive', {
+          gameStatusActive: GameStatus.Active,
+        })
+        .andWhere(
+          `(game."firstPlayerId" = :userId OR game."secondPlayerId" = :userId)`,
+          { userId },
+        )
+        // .orderBy('gameProgress.questionNumber', 'ASC')
+        .getOne()
+    );
   }
 }
