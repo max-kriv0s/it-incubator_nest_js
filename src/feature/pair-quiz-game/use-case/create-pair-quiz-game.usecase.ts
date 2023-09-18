@@ -40,7 +40,7 @@ export class CreatePairQuizGameUseCase
       } else {
         activeGame.secondPlayerId = command.userId;
         activeGame.status = GameStatus.Active;
-        activeGame.startGame = new Date();
+        activeGame.startGameDate = new Date();
         await queryRunner.manager.save(activeGame);
 
         await this.addQuestionsForGame(activeGame, queryRunner.manager);

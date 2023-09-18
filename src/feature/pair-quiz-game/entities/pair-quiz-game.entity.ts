@@ -40,13 +40,13 @@ export class PairQuizGame {
   status: GameStatus;
 
   @CreateDateColumn()
-  pairCreateDate: Date;
+  pairCreatedDate: Date;
 
   @Column({ type: Date, nullable: true })
-  startGame: Date | null;
+  startGameDate: Date | null;
 
   @Column({ type: Date, nullable: true })
-  finishGame: Date | null;
+  finishGameDate: Date | null;
 
   @OneToMany(() => PairQuizGameProgress, (gameProgree) => gameProgree.game)
   gameProgress: PairQuizGameProgress[];

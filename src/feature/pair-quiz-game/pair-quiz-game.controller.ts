@@ -8,12 +8,16 @@ import {
   NotFoundException,
   Param,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { AccessJwtAuthGuard } from '../auth/guard/jwt.guard';
 import { CurrentUserId } from '../auth/decorators/current-user-id.param.decorator';
 import { CommandBus } from '@nestjs/cqrs';
-import { PairQuizGameViewDto } from './dto/pair-quiz-game-view.dto';
+import {
+  PaginatorPairQuizGame,
+  PairQuizGameViewDto,
+} from './dto/pair-quiz-game-view.dto';
 import { PairQuizGameQueryRepository } from './db/pair-quiz-game-query.repository';
 import { CreatePairQuizGameCommand } from './use-case/create-pair-quiz-game.usecase';
 import { ResultNotification } from '../../modules/notification';
@@ -23,6 +27,7 @@ import { PairQuizGameProgressViewDto } from './dto/pair-quiz-game-progress-view.
 import { PairQuizGameProgressQueryRepository } from './db/pair-quiz-game-progress-query.repository';
 import { IdIntegerValidationPipeTest } from '../../modules/pipes/id-integer-validation.pipe-test.pipe';
 import { PairQuizGameStatisticViewDto } from './dto/pair-quiz-game-statistic-view.dto';
+import { PairQuizGameQueryParams } from '../bloggers/dto/pair-quiz-game-query-params.dto';
 
 @Controller('pair-game-quiz')
 @UseGuards(AccessJwtAuthGuard)
@@ -69,6 +74,22 @@ export class PairQuizGameController {
     @CurrentUserId() userId: string,
   ): Promise<PairQuizGameStatisticViewDto> {
     return this.pairQuizGameProgressQueryRepository.userGameStatistics(+userId);
+  }
+
+  @Get('pairs/my')
+  async getAllMyGames(
+    @Query() queryParams: PairQuizGameQueryParams,
+    @CurrentUserId() userId: string,
+  ) {
+    const paginator = new PaginatorPairQuizGame(
+      +queryParams.pageNumber,
+      +queryParams.pageSize,
+    );
+    return this.pairQuizGameQueryRepository.getAllMyGames(
+      queryParams,
+      +userId,
+      paginator,
+    );
   }
 
   @Get('pairs/:id')

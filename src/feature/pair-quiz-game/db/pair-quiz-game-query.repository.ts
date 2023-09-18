@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Not, Repository } from 'typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { DataSource, Not, Repository, SelectQueryBuilder } from 'typeorm';
 import { GameStatus, PairQuizGame } from '../entities/pair-quiz-game.entity';
 import {
   Answer,
+  PaginatorPairQuizGameViewType,
   PairQuizGameViewDto,
   PlayerProgress,
 } from '../dto/pair-quiz-game-view.dto';
@@ -11,8 +12,10 @@ import {
   ResultCodeError,
   ResultNotification,
 } from '../../../modules/notification';
-import { Question } from 'src/feature/questions/entities/question.entity';
-import { PairQuizGameStatisticViewDto } from '../dto/pair-quiz-game-statistic-view.dto';
+import { PairQuizGameQueryParams } from '../../../feature/bloggers/dto/pair-quiz-game-query-params.dto';
+import { IPaginator } from '../../../dto';
+import { User } from '../../../feature/users/entities/user.entity';
+import { PairQuizGameProgress } from '../entities/pair-quiz-game-progress.entity';
 
 @Injectable()
 export class PairQuizGameQueryRepository {
@@ -83,6 +86,115 @@ export class PairQuizGameQueryRepository {
     return this.convertToView(infoGame);
   }
 
+  async getAllMyGames(
+    queryParams: PairQuizGameQueryParams,
+    userId: number,
+    paginator: IPaginator<PairQuizGameViewDto>,
+  ): Promise<PaginatorPairQuizGameViewType> {
+    const sortBy: string = queryParams.sortBy ?? 'pairCreatedDate';
+    const sortDirection: string = queryParams.sortDirection ?? 'desc';
+
+    // const orderBy = {};
+    // if (sortBy && sortBy !== 'pairCreatedDate') {
+    //   orderBy[sortBy] = sortDirection;
+    // }
+
+    // if (sortBy === 'pairCreatedDate') {
+    //   orderBy['pairCreatedDate'] = sortDirection;
+    // } else {
+    //   orderBy['pairCreatedDate'] = 'desc';
+    // }
+
+    // orderBy['gameProgress'] = { questionNumber: 'ASC' };
+
+    // const [infoGames, totalCount] =
+    //   await this.pairQuizGameRepository.findAndCount({
+    //     where: [{ firstPlayerId: userId }, { secondPlayerId: userId }],
+    //     relations: {
+    //       firstPlayer: true,
+    //       secondPlayer: true,
+    //       gameProgress: {
+    //         question: true,
+    //       },
+    //     },
+    //     order: orderBy,
+    //     take: paginator.pageSize,
+    //     skip: paginator.skip,
+    //   });
+
+    const gamesQuery = this.pairQuizGameRepository
+      .createQueryBuilder('game')
+      .select('game.id')
+      .where(
+        'game."firstPlayerId" = :userId OR game."secondPlayerId" = :userId',
+        { userId },
+      )
+      .take(paginator.pageSize)
+      .offset(paginator.skip);
+
+    this.addSortingToQueryAllMyGames(gamesQuery, sortBy, sortDirection);
+    // if (sortBy !== 'pairCreatedDate') {
+    //   gamesQuery.addOrderBy(
+    //     `game."${sortBy}"`,
+    //     sortDirection === 'desc' ? 'DESC' : 'ASC',
+    //   );
+    // }
+
+    // if (sortBy === 'pairCreatedDate') {
+    //   gamesQuery.addOrderBy(
+    //     `game."pairCreatedDate"`,
+    //     sortDirection === 'desc' ? 'DESC' : 'ASC',
+    //   );
+    // } else {
+    //   gamesQuery.addOrderBy(`game."pairCreatedDate"`, 'DESC');
+    // }
+
+    const [games, totalCount] = await gamesQuery.getManyAndCount();
+
+    const query = this.pairQuizGameRepository
+      .createQueryBuilder('game')
+      .addSelect(['firstPlayer.id', 'firstPlayer.login'])
+      .addSelect(['secondPlayer.id', 'secondPlayer.login'])
+      .leftJoin('game.firstPlayer', 'firstPlayer')
+      .leftJoin('game.secondPlayer', 'secondPlayer')
+      .leftJoinAndSelect('game.gameProgress', 'gameProgress')
+      .leftJoinAndSelect('gameProgress.question', 'question')
+      // .where(
+      //   'game."firstPlayerId" = :userId OR game."secondPlayerId" = :userId',
+      //   { userId },
+      // )
+      .where('game.id IN (:...ids)', { ids: games.map((game) => game.id) })
+      .addOrderBy(`"gameProgress"."questionNumber"`, 'ASC');
+
+    this.addSortingToQueryAllMyGames(query, sortBy, sortDirection);
+
+    const infoGames = await query.getMany();
+    const gamesView = infoGames.map((game) => this.convertToView(game));
+    return paginator.paginate(totalCount, gamesView);
+  }
+
+  addSortingToQueryAllMyGames(
+    query: SelectQueryBuilder<PairQuizGame>,
+    sortBy: string,
+    sortDirection: string,
+  ) {
+    if (sortBy !== 'pairCreatedDate') {
+      query.addOrderBy(
+        `game."${sortBy}"`,
+        sortDirection === 'desc' ? 'DESC' : 'ASC',
+      );
+    }
+
+    if (sortBy === 'pairCreatedDate') {
+      query.addOrderBy(
+        `game."pairCreatedDate"`,
+        sortDirection === 'desc' ? 'DESC' : 'ASC',
+      );
+    } else {
+      query.addOrderBy(`game."pairCreatedDate"`, 'DESC');
+    }
+  }
+
   convertToView(infoGame: PairQuizGame): PairQuizGameViewDto {
     const question: { id: string; body: string }[] = [];
 
@@ -141,12 +253,12 @@ export class PairQuizGameQueryRepository {
       secondPlayerProgress: secondPlayerProgress,
       questions: question.length ? question : null,
       status: infoGame.status,
-      pairCreatedDate: infoGame.pairCreateDate.toISOString(),
-      startGameDate: infoGame.startGame
-        ? infoGame.startGame.toISOString()
+      pairCreatedDate: infoGame.pairCreatedDate.toISOString(),
+      startGameDate: infoGame.startGameDate
+        ? infoGame.startGameDate.toISOString()
         : null,
-      finishGameDate: infoGame.finishGame
-        ? infoGame.finishGame.toISOString()
+      finishGameDate: infoGame.finishGameDate
+        ? infoGame.finishGameDate.toISOString()
         : null,
     };
   }

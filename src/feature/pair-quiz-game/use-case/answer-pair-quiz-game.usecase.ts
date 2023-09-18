@@ -61,7 +61,7 @@ export class AnswerPairQuizGameUseCase
         ).length === 2;
 
       if (gameOver) {
-        myCurrentGame.finishGame = new Date();
+        myCurrentGame.finishGameDate = new Date();
         myCurrentGame.status = GameStatus.Finished;
         await queryRunner.manager.save(myCurrentGame);
 

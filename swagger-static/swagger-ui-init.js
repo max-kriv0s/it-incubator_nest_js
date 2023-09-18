@@ -1049,6 +1049,17 @@ window.onload = function() {
           }
         }
       },
+      "/pair-game-quiz/pairs/my": {
+        "get": {
+          "operationId": "PairQuizGameController_getAllMyGames",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": ""
+            }
+          }
+        }
+      },
       "/pair-game-quiz/pairs/{id}": {
         "get": {
           "operationId": "PairQuizGameController_findGameById",

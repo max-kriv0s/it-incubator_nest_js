@@ -1,4 +1,4 @@
-import { Question } from '../../../feature/questions/entities/question.entity';
+import { Paginator, PaginatorType } from '../../../dto';
 import { AnswerStatus } from '../entities/pair-quiz-game-progress.entity';
 import { GameStatus } from '../entities/pair-quiz-game.entity';
 
@@ -26,4 +26,11 @@ export class PairQuizGameViewDto {
   pairCreatedDate: string;
   startGameDate: string | null;
   finishGameDate: string | null;
+}
+
+export type PaginatorPairQuizGameViewType = PaginatorType<PairQuizGameViewDto>;
+export class PaginatorPairQuizGame extends Paginator<PairQuizGameViewDto> {
+  constructor(page: number, pageSize: number) {
+    super(page, pageSize);
+  }
 }
