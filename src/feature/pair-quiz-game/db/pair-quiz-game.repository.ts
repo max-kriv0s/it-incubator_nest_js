@@ -47,7 +47,7 @@ export class PairQuizGameRepository {
       manager
         .getRepository(PairQuizGame)
         .createQueryBuilder('game')
-        .setLock('pessimistic_write')
+        .setLock('pessimistic_write', undefined, ['game'])
         // .leftJoinAndSelect('game.gameProgress', 'gameProgress')
         .where('game."status" = :gameStatusActive', {
           gameStatusActive: GameStatus.Active,

@@ -129,7 +129,7 @@ export class PairQuizGameQueryRepository {
         'game."firstPlayerId" = :userId OR game."secondPlayerId" = :userId',
         { userId },
       )
-      .take(paginator.pageSize)
+      .limit(paginator.pageSize)
       .offset(paginator.skip);
 
     this.addSortingToQueryAllMyGames(gamesQuery, sortBy, sortDirection);
