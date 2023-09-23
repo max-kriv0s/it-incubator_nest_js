@@ -198,12 +198,12 @@ export class PairQuizGameProgressQueryRepository {
     const playersTopView: PairQuizGameUsersTopView[] =
       playerGameStatisticsRaw.map((player) => {
         return {
-          sumScore: player.sumScore,
-          avgScores: player.avgScores,
           gamesCount: player.gamesCount,
           winsCount: player.winsCount,
           lossesCount: player.lossesCount,
           drawsCount: player.drawsCount,
+          sumScore: player.sumScore,
+          avgScores: player.avgScores,
           player: {
             id: player.userId.toString(),
             login: player.login,
