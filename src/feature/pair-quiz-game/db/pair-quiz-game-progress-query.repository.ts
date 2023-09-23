@@ -167,7 +167,7 @@ export class PairQuizGameProgressQueryRepository {
             ELSE 0
           END
         )::int as "drawsCount",
-          ROUND(SUM(ug."score") / COUNT(ug."gameId"), 2)::int as "avgScores"
+          ROUND(SUM(ug."score") / COUNT(ug."gameId"), 2)::float as "avgScores"
         `,
       )
       .from(`user_games`, 'ug')
