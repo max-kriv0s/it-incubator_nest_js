@@ -3,7 +3,14 @@ import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { PairQuizGameProgress } from '../entities/pair-quiz-game-progress.entity';
 import { PairQuizGameProgressViewDto } from '../dto/pair-quiz-game-progress-view.dto';
-import { PairQuizGameStatisticViewDto } from '../dto/pair-quiz-game-statistic-view.dto';
+import {
+  PaginatorPairQuizGameUsersTopViewType,
+  PairQuizGameStatisticViewDto,
+  PairQuizGameUsersTopView,
+} from '../dto/pair-quiz-game-statistic-view.dto';
+import { IPaginator } from '../../../dto';
+import { PairQuizGameUsersTopQueryParams } from '../dto/pair-quiz-game-query-params.dto';
+import { User } from '../../../feature/users/entities/user.entity';
 
 @Injectable()
 export class PairQuizGameProgressQueryRepository {
@@ -92,5 +99,118 @@ export class PairQuizGameProgressQueryRepository {
     gameStatisticView.avgScores = avgScore;
 
     return gameStatisticView;
+  }
+
+  async getUsersTop(
+    queryParams: PairQuizGameUsersTopQueryParams,
+    paginator: IPaginator<PairQuizGameUsersTopView>,
+  ): Promise<PaginatorPairQuizGameUsersTopViewType> {
+    const sort: string | string[] = queryParams.sort ?? [
+      'avgScores desc',
+      'sumScore desc',
+    ];
+
+    const playersCount = await this.pairQuizGameProgressRepository
+      .createQueryBuilder('p')
+      .select('p."userId"')
+      .distinct(true)
+      .getRawMany();
+
+    const totalCount = playersCount.length;
+
+    const query = this.dataSource
+      .createQueryBuilder()
+      .addCommonTableExpression(
+        `SELECT 
+        "gameId", 
+        "userId",
+        SUM(score + bonus_score) as score
+      FROM public."PairQuizGameProgress"
+      WHERE "userId" IN (:...playersIds)
+      GROUP BY "gameId", "userId"
+    `,
+        'user_games',
+      )
+      .addCommonTableExpression(
+        `SELECT 
+        "gameId", 
+        "userId",
+        SUM(score + bonus_score) as score
+      FROM public."PairQuizGameProgress"
+      WHERE "gameId" IN (SELECT "gameId" FROM user_games)
+      GROUP BY "gameId", "userId"`,
+        'second_user_score',
+      )
+      .select(
+        `ug."userId" as "userId",
+        COUNT(ug."gameId")::int as "gamesCount",
+        user.login as login,
+        SUM(ug."score")::int as "sumScore",
+        SUM(
+          CASE
+            WHEN ug."score" > u2."score"
+              THEN 1
+            ELSE 0
+          END
+        )::int as "winsCount",
+        SUM(
+          CASE
+            WHEN ug."score" < u2."score"
+              THEN 1
+            ELSE 0
+          END
+        )::int as "lossesCount",
+        SUM(
+          CASE
+            WHEN ug."score" = u2."score"
+              THEN 1
+            ELSE 0
+          END
+        )::int as "drawsCount",
+          ROUND(SUM(ug."score") / COUNT(ug."gameId"), 2)::int as "avgScores"
+        `,
+      )
+      .from(`user_games`, 'ug')
+      .leftJoin(
+        'second_user_score',
+        'u2',
+        'ug."gameId" = u2."gameId" AND ug."userId" != u2."userId"',
+      )
+      .leftJoin(User, 'user', 'ug."userId" = user.id')
+      .groupBy('ug."userId", user.login')
+      .limit(paginator.pageSize)
+      .offset(paginator.skip)
+      .setParameter(
+        'playersIds',
+        playersCount.map((player) => player.userId),
+      );
+
+    for (const el of sort) {
+      const [nameField, sortDirection] = el.split(' ');
+      query.addOrderBy(
+        `"${nameField}"`,
+        sortDirection === 'asc' ? 'ASC' : 'DESC',
+      );
+    }
+
+    const playerGameStatisticsRaw = await query.getRawMany();
+
+    const playersTopView: PairQuizGameUsersTopView[] =
+      playerGameStatisticsRaw.map((player) => {
+        return {
+          sumScore: player.sumScore,
+          avgScores: player.avgScores,
+          gamesCount: player.gamesCount,
+          winsCount: player.winsCount,
+          lossesCount: player.lossesCount,
+          drawsCount: player.drawsCount,
+          player: {
+            id: player.userId.toString(),
+            login: player.login,
+          },
+        };
+      });
+
+    return paginator.paginate(totalCount, playersTopView);
   }
 }

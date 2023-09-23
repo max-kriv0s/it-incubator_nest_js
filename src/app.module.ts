@@ -188,7 +188,7 @@ const QuestionsAdapters = [QuestionsRepository, QuestionsQueryRepository];
 const useCases = [
   CreateBlogUseCase,
   DeletePostByIdUseCase,
-  UpdatePostByIdUseCase,PairQuizGameUsersController
+  UpdatePostByIdUseCase,
   CreatePostByBlogIdUseCase,
   DeleteBlogByIdUseCase,
   UpdateExistingBlogByIdUseCase,
@@ -262,7 +262,6 @@ const useCases = [
       Question,
       PairQuizGame,
       PairQuizGameProgress,
-      PairQuizGameUsersController,
     ]),
   ],
   controllers: [
@@ -279,6 +278,7 @@ const useCases = [
     BloggersUsersController,
     QuestionsController,
     PairQuizGameController,
+    PairQuizGameUsersController,
   ],
   providers: [
     AppService,

@@ -16,6 +16,7 @@ import { CurrentUserId } from '../auth/decorators/current-user-id.param.decorato
 import { CommandBus } from '@nestjs/cqrs';
 import {
   PaginatorPairQuizGame,
+  PaginatorPairQuizGameViewType,
   PairQuizGameViewDto,
 } from './dto/pair-quiz-game-view.dto';
 import { PairQuizGameQueryRepository } from './db/pair-quiz-game-query.repository';
@@ -26,7 +27,7 @@ import { AnswerPairQuizGameCommand } from './use-case/answer-pair-quiz-game.usec
 import { PairQuizGameProgressViewDto } from './dto/pair-quiz-game-progress-view.dto';
 import { PairQuizGameProgressQueryRepository } from './db/pair-quiz-game-progress-query.repository';
 import { IdIntegerValidationPipeTest } from '../../modules/pipes/id-integer-validation.pipe-test.pipe';
-import { PairQuizGameQueryParams } from '../bloggers/dto/pair-quiz-game-query-params.dto';
+import { PairQuizGameQueryParams } from './dto/pair-quiz-game-query-params.dto';
 
 @Controller('pair-game-quiz/pairs')
 @UseGuards(AccessJwtAuthGuard)
@@ -72,7 +73,7 @@ export class PairQuizGameController {
   async getAllMyGames(
     @Query() queryParams: PairQuizGameQueryParams,
     @CurrentUserId() userId: string,
-  ) {
+  ): Promise<PaginatorPairQuizGameViewType> {
     const paginator = new PaginatorPairQuizGame(
       +queryParams.pageNumber,
       +queryParams.pageSize,

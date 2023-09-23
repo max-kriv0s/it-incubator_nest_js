@@ -2,7 +2,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { GameStatus, PairQuizGame } from '../entities/pair-quiz-game.entity';
 import { EntityManager, Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
-import { PairQuizGameProgress } from '../entities/pair-quiz-game-progress.entity';
 
 @Injectable()
 export class PairQuizGameRepository {

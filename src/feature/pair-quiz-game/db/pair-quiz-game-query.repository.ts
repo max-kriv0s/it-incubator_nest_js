@@ -12,7 +12,7 @@ import {
   ResultCodeError,
   ResultNotification,
 } from '../../../modules/notification';
-import { PairQuizGameQueryParams } from '../../../feature/bloggers/dto/pair-quiz-game-query-params.dto';
+import { PairQuizGameQueryParams } from '../dto/pair-quiz-game-query-params.dto';
 import { IPaginator } from '../../../dto';
 import { User } from '../../../feature/users/entities/user.entity';
 import { PairQuizGameProgress } from '../entities/pair-quiz-game-progress.entity';

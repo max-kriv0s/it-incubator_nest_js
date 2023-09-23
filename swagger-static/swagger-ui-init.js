@@ -1038,17 +1038,6 @@ window.onload = function() {
           }
         }
       },
-      "/pair-game-quiz/users/my-statistic": {
-        "get": {
-          "operationId": "PairQuizGameController_userGameStatistics",
-          "parameters": [],
-          "responses": {
-            "200": {
-              "description": ""
-            }
-          }
-        }
-      },
       "/pair-game-quiz/pairs/my": {
         "get": {
           "operationId": "PairQuizGameController_getAllMyGames",
@@ -1094,6 +1083,28 @@ window.onload = function() {
               }
             }
           },
+          "responses": {
+            "200": {
+              "description": ""
+            }
+          }
+        }
+      },
+      "/pair-game-quiz/users/my-statistic": {
+        "get": {
+          "operationId": "PairQuizGameUsersController_userGameStatistics",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": ""
+            }
+          }
+        }
+      },
+      "/pair-game-quiz/users/top": {
+        "get": {
+          "operationId": "PairQuizGameUsersController_getUsersTop",
+          "parameters": [],
           "responses": {
             "200": {
               "description": ""
