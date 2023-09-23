@@ -113,6 +113,7 @@ import { CreatePairQuizGameUseCase } from './feature/pair-quiz-game/use-case/cre
 import { PairQuizGameProgressRepository } from './feature/pair-quiz-game/db/pair-quiz-game-progress.repository';
 import { AnswerPairQuizGameUseCase } from './feature/pair-quiz-game/use-case/answer-pair-quiz-game.usecase';
 import { PairQuizGameProgressQueryRepository } from './feature/pair-quiz-game/db/pair-quiz-game-progress-query.repository';
+import { PairQuizGameUsersController } from './feature/pair-quiz-game/pair-quiz-game-users.controller';
 
 const apiCallsAdapters = [
   ApiCallsConfig,
@@ -187,7 +188,7 @@ const QuestionsAdapters = [QuestionsRepository, QuestionsQueryRepository];
 const useCases = [
   CreateBlogUseCase,
   DeletePostByIdUseCase,
-  UpdatePostByIdUseCase,
+  UpdatePostByIdUseCase,PairQuizGameUsersController
   CreatePostByBlogIdUseCase,
   DeleteBlogByIdUseCase,
   UpdateExistingBlogByIdUseCase,
@@ -261,6 +262,7 @@ const useCases = [
       Question,
       PairQuizGame,
       PairQuizGameProgress,
+      PairQuizGameUsersController,
     ]),
   ],
   controllers: [

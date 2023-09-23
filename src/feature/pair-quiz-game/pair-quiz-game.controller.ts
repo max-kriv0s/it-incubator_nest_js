@@ -26,10 +26,9 @@ import { AnswerPairQuizGameCommand } from './use-case/answer-pair-quiz-game.usec
 import { PairQuizGameProgressViewDto } from './dto/pair-quiz-game-progress-view.dto';
 import { PairQuizGameProgressQueryRepository } from './db/pair-quiz-game-progress-query.repository';
 import { IdIntegerValidationPipeTest } from '../../modules/pipes/id-integer-validation.pipe-test.pipe';
-import { PairQuizGameStatisticViewDto } from './dto/pair-quiz-game-statistic-view.dto';
 import { PairQuizGameQueryParams } from '../bloggers/dto/pair-quiz-game-query-params.dto';
 
-@Controller('pair-game-quiz')
+@Controller('pair-game-quiz/pairs')
 @UseGuards(AccessJwtAuthGuard)
 export class PairQuizGameController {
   constructor(
@@ -38,7 +37,7 @@ export class PairQuizGameController {
     private readonly pairQuizGameProgressQueryRepository: PairQuizGameProgressQueryRepository,
   ) {}
 
-  @Post('pairs/connection')
+  @Post('connection')
   @HttpCode(HttpStatus.OK)
   async connectionGame(
     @CurrentUserId() userId: string,
@@ -58,7 +57,7 @@ export class PairQuizGameController {
     return infoGameView;
   }
 
-  @Get('pairs/my-current')
+  @Get('my-current')
   async myCurrentGame(
     @CurrentUserId() userId: string,
   ): Promise<PairQuizGameViewDto> {
@@ -69,14 +68,7 @@ export class PairQuizGameController {
     return gameView;
   }
 
-  @Get('users/my-statistic')
-  async userGameStatistics(
-    @CurrentUserId() userId: string,
-  ): Promise<PairQuizGameStatisticViewDto> {
-    return this.pairQuizGameProgressQueryRepository.userGameStatistics(+userId);
-  }
-
-  @Get('pairs/my')
+  @Get('my')
   async getAllMyGames(
     @Query() queryParams: PairQuizGameQueryParams,
     @CurrentUserId() userId: string,
@@ -92,7 +84,7 @@ export class PairQuizGameController {
     );
   }
 
-  @Get('pairs/:id')
+  @Get(':id')
   async findGameById(
     @Param('id', IdIntegerValidationPipeTest) id: string,
     @CurrentUserId() userId: string,
@@ -105,7 +97,7 @@ export class PairQuizGameController {
     return infoGameView;
   }
 
-  @Post('pairs/my-current/answers')
+  @Post('my-current/answers')
   @HttpCode(HttpStatus.OK)
   async myCurrentAnswers(
     @CurrentUserId() userId: string,
