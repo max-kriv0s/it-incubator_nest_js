@@ -69,8 +69,7 @@ export class CreatePairQuizGameUseCase
     manager: EntityManager,
   ) {
     const randomQuestions = await this.questionsRepository.randomQuestions(5);
-    const questionsFirstPlayer: CreateGameQuestionDto[] = [];
-    const questionsSecondPlayer: CreateGameQuestionDto[] = [];
+    const questionsPlayers: CreateGameQuestionDto[] = [];
 
     let questionNumber = 1;
     for (const question of randomQuestions) {
@@ -86,17 +85,12 @@ export class CreatePairQuizGameUseCase
         questionId: question.id,
         questionNumber: questionNumber,
       };
-      questionsFirstPlayer.push(questionFirstPlayer);
-      questionsSecondPlayer.push(questionSecondPlayer);
+      questionsPlayers.push(questionFirstPlayer);
+      questionsPlayers.push(questionSecondPlayer);
       questionNumber += 1;
     }
-
     await this.pairQuizGameProgressRepository.addQuestionsForGameByUserId(
-      questionsFirstPlayer,
-      manager,
-    );
-    await this.pairQuizGameProgressRepository.addQuestionsForGameByUserId(
-      questionsSecondPlayer,
+      questionsPlayers,
       manager,
     );
   }
