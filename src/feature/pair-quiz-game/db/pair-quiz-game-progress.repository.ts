@@ -50,8 +50,8 @@ export class PairQuizGameProgressRepository {
     return manager.findOneBy(PairQuizGameProgress, { id });
   }
 
-  async findByGameId(gameId: number, manager: EntityManager) {
-    return manager.find(PairQuizGameProgress, {
+  async findByGameId(gameId: number) {
+    return this.pairQuizGameProgressRepo.find({
       where: { gameId },
       order: { questionNumber: 'ASC' },
     });

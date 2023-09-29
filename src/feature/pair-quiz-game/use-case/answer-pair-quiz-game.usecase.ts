@@ -7,6 +7,8 @@ import {
 import { PairQuizGameProgressRepository } from '../db/pair-quiz-game-progress.repository';
 import { GameStatus, PairQuizGame } from '../entities/pair-quiz-game.entity';
 import { DataSource, EntityManager } from 'typeorm';
+import { SchedulerRegistry } from '@nestjs/schedule';
+import { Logger } from '@nestjs/common';
 
 type PlayerInfo = {
   score: number;
@@ -26,40 +28,40 @@ export class AnswerPairQuizGameUseCase
     private readonly dataSource: DataSource,
     private readonly pairQuizGameRepository: PairQuizGameRepository,
     private readonly pairQuizGameProgressRepository: PairQuizGameProgressRepository,
+    private readonly schedulerRegistry: SchedulerRegistry,
   ) {}
 
   async execute(command: AnswerPairQuizGameCommand): Promise<number | null> {
-    const question =
-      await this.pairQuizGameProgressRepository.findUnansweredQuestionByUserId(
-        command.userId,
-      );
-    if (!question) return null;
-
-    if (question.question.correctAnswers.includes(command.answer)) {
-      question.answerStatus = AnswerStatus.Correct;
-      question.score += 1;
-    } else {
-      question.answerStatus = AnswerStatus.Incorrect;
-    }
-    question.addedAt = new Date();
-
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
-      await queryRunner.manager.save(question);
-
       const myCurrentGame = await this.pairQuizGameRepository.findMyCurrentGame(
         command.userId,
         queryRunner.manager,
       );
+      // TODO необходимо возвращать резулт нотификатион и прерывать транзакцию
       if (!myCurrentGame) throw new Error('Game not found');
+
+      const questionAtempt =
+        await this.pairQuizGameProgressRepository.findUnansweredQuestionByUserId(
+          command.userId,
+        );
+      if (!questionAtempt) return null;
+
+      if (questionAtempt.question.correctAnswers.includes(command.answer)) {
+        questionAtempt.answerStatus = AnswerStatus.Correct;
+        questionAtempt.score += 1;
+      } else {
+        questionAtempt.answerStatus = AnswerStatus.Incorrect;
+      }
+      questionAtempt.addedAt = new Date();
+      await queryRunner.manager.save(questionAtempt);
 
       const gameProgress =
         await this.pairQuizGameProgressRepository.findByGameId(
           myCurrentGame.id,
-          queryRunner.manager,
         );
       const countAnswers = gameProgress.length / 2;
 
@@ -70,6 +72,7 @@ export class AnswerPairQuizGameUseCase
         ).length === 2;
 
       if (gameOver) {
+        queryRunner;
         myCurrentGame.finishGameDate = new Date();
         myCurrentGame.status = GameStatus.Finished;
         await queryRunner.manager.save(myCurrentGame);
@@ -80,12 +83,20 @@ export class AnswerPairQuizGameUseCase
           countAnswers,
           queryRunner.manager,
         );
+      } else if (questionAtempt.questionNumber === countAnswers) {
+        this.startTheGameEndTimer(
+          myCurrentGame.id,
+          myCurrentGame.firstPlayerId === command.userId
+            ? myCurrentGame.secondPlayerId!
+            : myCurrentGame.firstPlayerId,
+        );
       }
 
       await queryRunner.commitTransaction();
-      return question.id;
+      return questionAtempt.id;
     } catch (error) {
       await queryRunner.rollbackTransaction();
+      // TODO сделать через класс резулт нотиф
     } finally {
       await queryRunner.release();
     }
@@ -139,6 +150,68 @@ export class AnswerPairQuizGameUseCase
         gameProgress.bonus_score += 1;
         await manager.save(gameProgress);
       }
+    }
+  }
+
+  private async startTheGameEndTimer(gameId: number, userId: number) {
+    const milliseconds = 10000;
+    const callback = () => {
+      // TODO правильно ли тут сделано или можно было проще передать функцию с параметрами в callback
+      this.completeTheGameAndAddBonusPoint(gameId, userId);
+    };
+    const timeout = setTimeout(callback, milliseconds);
+    this.schedulerRegistry.addTimeout(gameId.toString(), timeout);
+  }
+
+  async completeTheGameAndAddBonusPoint(gameId: number, userId: number) {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      const myCurrentGame = await this.pairQuizGameRepository.findMyCurrentGame(
+        userId,
+        queryRunner.manager,
+      );
+      if (!myCurrentGame) throw new Error('Failed to complete the game');
+
+      if (myCurrentGame.status !== GameStatus.Finished) {
+        myCurrentGame.finishGameDate = new Date();
+        myCurrentGame.status = GameStatus.Finished;
+        await queryRunner.manager.save(myCurrentGame);
+
+        const gameProgress =
+          await this.pairQuizGameProgressRepository.findByGameId(
+            myCurrentGame.id,
+          );
+
+        for (const questionsAsked of gameProgress) {
+          if (
+            questionsAsked.userId === userId &&
+            !questionsAsked.answerStatus
+          ) {
+            questionsAsked.answerStatus = AnswerStatus.Incorrect;
+            questionsAsked.addedAt = new Date();
+            await queryRunner.manager.save(questionsAsked);
+          }
+        }
+
+        const countAnswers = gameProgress.length / 2;
+
+        await this.addBonusPoint(
+          myCurrentGame,
+          gameProgress,
+          countAnswers,
+          queryRunner.manager,
+        );
+      }
+
+      await queryRunner.commitTransaction();
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      Logger.error(error);
+    } finally {
+      await queryRunner.release();
     }
   }
 }

@@ -213,7 +213,10 @@ export class PairQuizGameQueryRepository {
           : null,
       };
       if (userProgress.userId === infoGame.firstPlayerId) {
-        if (answer.answerStatus) firstPlayerAnswers.push(answer);
+        if (answer.answerStatus) {
+          firstPlayerAnswers.push(answer);
+        }
+
         question.push({
           id: userProgress.question.id.toString(),
           body: userProgress.question.body,

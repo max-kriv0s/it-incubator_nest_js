@@ -114,6 +114,7 @@ import { PairQuizGameProgressRepository } from './feature/pair-quiz-game/db/pair
 import { AnswerPairQuizGameUseCase } from './feature/pair-quiz-game/use-case/answer-pair-quiz-game.usecase';
 import { PairQuizGameProgressQueryRepository } from './feature/pair-quiz-game/db/pair-quiz-game-progress-query.repository';
 import { PairQuizGameUsersController } from './feature/pair-quiz-game/pair-quiz-game-users.controller';
+import { ScheduleModule } from '@nestjs/schedule';
 
 const apiCallsAdapters = [
   ApiCallsConfig,
@@ -263,6 +264,7 @@ const useCases = [
       PairQuizGame,
       PairQuizGameProgress,
     ]),
+    ScheduleModule.forRoot(),
   ],
   controllers: [
     AppController,

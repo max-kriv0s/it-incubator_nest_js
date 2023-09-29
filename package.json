@@ -18,7 +18,6 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-
     "typeorm": "typeorm-ts-node-commonjs",
     "migration:generate": "yarn run typeorm migration:generate -d src/configuration/typeorm-migration.configuration.ts src/migrations/auto",
     "migration:run": "yarn run typeorm migration:run -d src/configuration/typeorm-migration.configuration.ts"
@@ -32,6 +31,7 @@
     "@nestjs/mongoose": "^10.0.0",
     "@nestjs/passport": "^10.0.0",
     "@nestjs/platform-express": "^9.0.0",
+    "@nestjs/schedule": "^3.0.4",
     "@nestjs/serve-static": "^4.0.0",
     "@nestjs/swagger": "^7.0.3",
     "@nestjs/throttler": "^4.1.0",
