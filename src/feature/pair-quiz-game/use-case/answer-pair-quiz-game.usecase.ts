@@ -154,7 +154,7 @@ export class AnswerPairQuizGameUseCase
   }
 
   private async startTheGameEndTimer(gameId: number, userId: number) {
-    const milliseconds = 10000;
+    const milliseconds = 9000;
     const callback = () => {
       // TODO правильно ли тут сделано или можно было проще передать функцию с параметрами в callback
       this.completeTheGameAndAddBonusPoint(gameId, userId);
