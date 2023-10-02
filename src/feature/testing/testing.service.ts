@@ -29,7 +29,11 @@ export class TestingService {
   async deleteAllData() {
     const userNameDB = this.configService.get('TYPE_ORM_USERNAME', 'postgres');
     await this.dataSource.query(
-      `CREATE OR REPLACE FUNCTION truncate_tables(username IN VARCHAR) RETURNS void AS $$
+      `
+      BEGIN;
+      SELECT pg_advisory_xact_lock(2142616474639426746);
+      
+      CREATE OR REPLACE FUNCTION truncate_tables(username IN VARCHAR) RETURNS void AS $$
       DECLARE
       statements CURSOR FOR
         SELECT tablename FROM pg_tables
@@ -42,7 +46,10 @@ export class TestingService {
       END;
       $$ LANGUAGE plpgsql;
 
-      SELECT truncate_tables('${userNameDB}')`,
+      SELECT truncate_tables('${userNameDB}');
+      
+      COMMIT;
+      `,
     );
   }
 }

@@ -117,6 +117,9 @@ export class PairQuizGameProgressQueryRepository {
       .getRawMany();
 
     const totalCount = playersCount.length;
+    if (totalCount === 0) {
+      return paginator.paginate(totalCount, []);
+    }
 
     const query = this.dataSource
       .createQueryBuilder()

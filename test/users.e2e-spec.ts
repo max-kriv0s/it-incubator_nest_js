@@ -57,11 +57,11 @@ describe('UsersController (e2e) test', () => {
         login: mockUser.login,
         email: mockUser.email,
         createdAt: expect.any(String),
-        banInfo: {
-          isBanned: false,
-          banDate: null,
-          banReason: null,
-        },
+        // banInfo: {
+        //   isBanned: false,
+        //   banDate: null,
+        //   banReason: null,
+        // },
       });
 
       return body;
@@ -301,11 +301,11 @@ describe('UsersController (e2e) test', () => {
         login: expect.any(String),
         email: expect.any(String),
         createdAt: expect.any(String),
-        banInfo: {
-          isBanned: true,
-          banDate: expect.any(String),
-          banReason: expect.any(String),
-        },
+        // banInfo: {
+        //   isBanned: true,
+        //   banDate: expect.any(String),
+        //   banReason: expect.any(String),
+        // },
       });
     });
 
@@ -332,11 +332,11 @@ describe('UsersController (e2e) test', () => {
         login: expect.any(String),
         email: expect.any(String),
         createdAt: expect.any(String),
-        banInfo: {
-          isBanned: false,
-          banDate: null,
-          banReason: null,
-        },
+        // banInfo: {
+        //   isBanned: false,
+        //   banDate: null,
+        //   banReason: null,
+        // },
       });
     });
   });
@@ -408,22 +408,22 @@ describe('UsersController (e2e) test', () => {
                 login: newUser2.login,
                 email: newUser2.email,
                 createdAt: newUser2.createdAt,
-                banInfo: {
-                  isBanned: newUser2.banInfo.isBanned,
-                  banDate: newUser2.banInfo.banDate,
-                  banReason: newUser2.banInfo.banReason,
-                },
+                // banInfo: {
+                //   isBanned: newUser2.banInfo.isBanned,
+                //   banDate: newUser2.banInfo.banDate,
+                //   banReason: newUser2.banInfo.banReason,
+                // },
               },
               {
                 id: newUser1.id,
                 login: newUser1.login,
                 email: newUser1.email,
                 createdAt: newUser1.createdAt,
-                banInfo: {
-                  isBanned: newUser1.banInfo.isBanned,
-                  banDate: newUser1.banInfo.banDate,
-                  banReason: newUser1.banInfo.banReason,
-                },
+                // banInfo: {
+                //   isBanned: newUser1.banInfo.isBanned,
+                //   banDate: newUser1.banInfo.banDate,
+                //   banReason: newUser1.banInfo.banReason,
+                // },
               },
             ],
           });

@@ -2,7 +2,7 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { PairQuizGameRepository } from '../db/pair-quiz-game.repository';
 import { GameStatus, PairQuizGame } from '../entities/pair-quiz-game.entity';
 import { PairQuizGameProgressRepository } from '../db/pair-quiz-game-progress.repository';
-import { QuestionsRepository } from 'src/feature/questions/db/questions.repository';
+import { QuestionsRepository } from '../../../feature/questions/db/questions.repository';
 import { CreateGameQuestionDto } from '../dto/create-game-question.dto';
 import { DataSource, EntityManager } from 'typeorm';
 
