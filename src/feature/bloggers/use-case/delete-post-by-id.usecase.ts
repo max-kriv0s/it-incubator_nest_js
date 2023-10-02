@@ -38,7 +38,14 @@ export class DeletePostByIdUseCase
       return result;
     }
 
-    await this.postsRepository.deletePostById(command.postId);
+    const countOfDeleted = await this.postsRepository.deletePostById(
+      command.postId,
+    );
+
+    if (!countOfDeleted) {
+      result.addError('Post not found', ResultCodeError.NotFound);
+    }
+
     return result;
   }
 }

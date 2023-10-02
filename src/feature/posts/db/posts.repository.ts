@@ -25,7 +25,8 @@ export class PostsRepository {
     await this.postsRepo.save(post);
   }
 
-  async deletePostById(id: number) {
-    await this.postsRepo.delete({ id });
+  async deletePostById(id: number): Promise<number | null | undefined> {
+    const result = await this.postsRepo.delete({ id });
+    return result.affected;
   }
 }
