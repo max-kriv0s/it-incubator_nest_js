@@ -34,7 +34,7 @@ describe('PairQuizGame (e2e) test', () => {
     ).toString('base64');
 
   const PGQ_PAIRS_URL = '/pair-game-quiz/pairs';
-  const PGQ_USERS_URL = '/pair-game-quiz/users';
+  // const PGQ_USERS_URL = '/pair-game-quiz/users';
   const USERS_URL = '/sa/users';
   const LOGIN_URL = '/auth/login';
   const QUESTIONS_URL = '/sa/quiz/questions';

@@ -56,4 +56,24 @@ export class PairQuizGameProgressRepository {
       order: { questionNumber: 'ASC' },
     });
   }
+
+  async findOpenGamesToComplete(): Promise<{ id: number; userId: number }[]> {
+    const milliseconds = 9000;
+    const currentDate = new Date();
+    currentDate.setTime(currentDate.getTime() - milliseconds);
+
+    return this.pairQuizGameProgressRepo
+      .createQueryBuilder('gp')
+      .select('gp."gameId"', 'gameId')
+      .addSelect('gp."userId"', 'userId')
+      .leftJoin('gp.game', 'game')
+      .where('gp."questionNumber" = :questionNumber', { questionNumber: 5 })
+      .andWhere('game.status != :statusFinished', {
+        statusFinished: GameStatus.Finished,
+      })
+      .andWhere('gp."addedAt" IS NOT NULL AND gp."addedAt" > :currentDate', {
+        currentDate,
+      })
+      .getRawMany();
+  }
 }

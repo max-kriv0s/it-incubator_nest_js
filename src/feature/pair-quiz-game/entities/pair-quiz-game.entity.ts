@@ -50,4 +50,9 @@ export class PairQuizGame {
 
   @OneToMany(() => PairQuizGameProgress, (gameProgree) => gameProgree.game)
   gameProgress: PairQuizGameProgress[];
+
+  finishGame() {
+    this.finishGameDate = new Date();
+    this.status = GameStatus.Finished;
+  }
 }

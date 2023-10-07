@@ -104,14 +104,15 @@ export class PairQuizGameController {
     @CurrentUserId() userId: string,
     @Body() answerDto: AnswerDto,
   ): Promise<PairQuizGameProgressViewDto> {
-    const questionId: number = await this.commandBus.execute(
+    const result: ResultNotification<number> = await this.commandBus.execute(
       new AnswerPairQuizGameCommand(answerDto.answer, +userId),
     );
 
-    if (!questionId) throw new ForbiddenException();
+    const questionId = result.getResult();
+
     const questionView =
       await this.pairQuizGameProgressQueryRepository.findQuestionById(
-        questionId,
+        questionId!,
       );
     if (!questionView) throw new NotFoundException();
     return questionView;
