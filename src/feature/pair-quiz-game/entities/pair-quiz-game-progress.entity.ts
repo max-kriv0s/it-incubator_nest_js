@@ -56,4 +56,14 @@ export class PairQuizGameProgress {
 
   @Column({ default: 0 })
   bonus_score: number;
+
+  addAnswer(answer: string) {
+    if (this.question.correctAnswers.includes(answer)) {
+      this.answerStatus = AnswerStatus.Correct;
+      this.score += 1;
+    } else {
+      this.answerStatus = AnswerStatus.Incorrect;
+    }
+    this.addedAt = new Date();
+  }
 }

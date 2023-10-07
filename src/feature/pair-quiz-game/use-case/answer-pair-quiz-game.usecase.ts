@@ -50,13 +50,16 @@ export class AnswerPairQuizGameUseCase
         );
       if (!questionAtempt) return null;
 
-      if (questionAtempt.question.correctAnswers.includes(command.answer)) {
-        questionAtempt.answerStatus = AnswerStatus.Correct;
-        questionAtempt.score += 1;
-      } else {
-        questionAtempt.answerStatus = AnswerStatus.Incorrect;
-      }
-      questionAtempt.addedAt = new Date();
+      questionAtempt.addAnswer(command.answer);
+      // // 
+      // if (questionAtempt.question.correctAnswers.includes(command.answer)) {
+      //   questionAtempt.answerStatus = AnswerStatus.Correct;
+      //   questionAtempt.score += 1;
+      // } else {
+      //   questionAtempt.answerStatus = AnswerStatus.Incorrect;
+      // }
+      // questionAtempt.addedAt = new Date();
+
       await queryRunner.manager.save(questionAtempt);
 
       const gameProgress =
@@ -176,8 +179,8 @@ export class AnswerPairQuizGameUseCase
       if (!myCurrentGame) throw new Error('Failed to complete the game');
 
       if (myCurrentGame.status !== GameStatus.Finished) {
-        myCurrentGame.finishGameDate = new Date();
-        myCurrentGame.status = GameStatus.Finished;
+          myCurrentGame.finishGameDate = new Date();
+          myCurrentGame.status = GameStatus.Finished;
         await queryRunner.manager.save(myCurrentGame);
 
         const gameProgress =
