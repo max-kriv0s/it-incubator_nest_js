@@ -60,10 +60,10 @@ export class UsersBlogsQuerySqlRepository {
         userId: blog.ownerId.toString(),
         userLogin: blog.ownerLogin,
       },
-      // banInfo: {
-      //   isBanned: blog.isBanned,
-      //   banDate: blog.banDate ? blog.banDate.toISOString() : null,
-      // },
+      banInfo: {
+        isBanned: blog.isBanned,
+        banDate: blog.banDate ? blog.banDate.toISOString() : null,
+      },
     };
   }
 }
