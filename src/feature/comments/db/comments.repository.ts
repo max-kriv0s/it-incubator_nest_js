@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Comment } from '../entities/comment.entity';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 
 @Injectable()
 export class CommentsRepository {
@@ -10,8 +10,16 @@ export class CommentsRepository {
     private readonly commentsRepo: Repository<Comment>,
   ) {}
 
-  async updateBanUnban(userId: number, isBanned: boolean) {
-    await this.commentsRepo.update({ userId }, { isBanned });
+  async updateBanUnban(
+    userId: number,
+    isBanned: boolean,
+    manager?: EntityManager,
+  ) {
+    if (manager) {
+      await manager.update(Comment, { userId }, { isBanned });
+    } else {
+      await this.commentsRepo.update({ userId }, { isBanned });
+    }
   }
 
   async findCommentById(id: number): Promise<Comment | null> {

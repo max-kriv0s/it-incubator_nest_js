@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PostLike } from '../entities/post-like.entity';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 
 @Injectable()
 export class LikePostsRepository {
@@ -10,8 +10,16 @@ export class LikePostsRepository {
     private readonly postLikesRepo: Repository<PostLike>,
   ) {}
 
-  async updateBanUnban(userId: number, isBanned: boolean) {
-    await this.postLikesRepo.update({ userId }, { isBanned });
+  async updateBanUnban(
+    userId: number,
+    isBanned: boolean,
+    manager?: EntityManager,
+  ) {
+    if (manager) {
+      await manager.update(PostLike, { userId }, { isBanned });
+    } else {
+      await this.postLikesRepo.update({ userId }, { isBanned });
+    }
   }
 
   async findLikeByPostIdAndUserId(

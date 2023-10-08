@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { SecurityDevice } from '../entities/security-device.entity';
-import { Not, Repository } from 'typeorm';
+import { EntityManager, Not, Repository } from 'typeorm';
 
 @Injectable()
 export class SecurityDevicesRepository {
@@ -14,8 +14,12 @@ export class SecurityDevicesRepository {
     await this.securityDevicesRepository.delete({ userId, id: Not(deviceId) });
   }
 
-  async deleteAllDevicesByUserID(userId: number) {
-    await this.securityDevicesRepository.delete({ userId });
+  async deleteAllDevicesByUserID(userId: number, manager?: EntityManager) {
+    if (manager) {
+      await manager.delete(SecurityDevice, { userId });
+    } else {
+      await this.securityDevicesRepository.delete({ userId });
+    }
   }
 
   async deleteUserSessionByDeviceID(deviceId: number, userId: number) {

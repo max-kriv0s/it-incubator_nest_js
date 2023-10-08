@@ -6,6 +6,7 @@ import {
 } from '../../modules/notification';
 import { SecurityDevicesRepository } from './db/security-devices.repository';
 import { SecurityDevice } from './entities/security-device.entity';
+import { EntityManager } from 'typeorm';
 
 @Injectable()
 export class SecurityDevicesService {
@@ -104,7 +105,10 @@ export class SecurityDevicesService {
     );
   }
 
-  async deleteAllDevicesByUserID(userId: number) {
-    await this.securityDevicesRepository.deleteAllDevicesByUserID(userId);
+  async deleteAllDevicesByUserID(userId: number, manager?: EntityManager) {
+    await this.securityDevicesRepository.deleteAllDevicesByUserID(
+      userId,
+      manager,
+    );
   }
 }

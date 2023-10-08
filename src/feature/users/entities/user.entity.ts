@@ -50,8 +50,8 @@ export class User {
   @Column({ type: Date, nullable: true })
   banDate: Date | null;
 
-  @Column({ nullable: true })
-  banReason: string;
+  @Column({ type: String, nullable: true })
+  banReason: string | null;
 
   @OneToMany(() => Blog, (blog) => blog.owner)
   blogs: Blog[];
@@ -70,4 +70,10 @@ export class User {
 
   @OneToMany(() => CommentLike, (like) => like.user)
   commentLikes: CommentLike[];
+
+  banUnban(isBanned: boolean, banReason: string) {
+    this.isBanned = isBanned;
+    this.banDate = isBanned ? new Date() : null;
+    this.banReason = isBanned ? banReason : null;
+  }
 }

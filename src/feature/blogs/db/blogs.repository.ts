@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Blog } from '../entities/blog.entity';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 
 @Injectable()
 export class BlogsRepository {
@@ -21,9 +21,18 @@ export class BlogsRepository {
     await this.blogsRepo.save(blog);
   }
 
-  async setBanUnbaneBlogByOwnerId(ownerId: number, isBanned: boolean) {
+  async setBanUnbaneBlogByOwnerId(
+    ownerId: number,
+    isBanned: boolean,
+    manager?: EntityManager,
+  ) {
     const banDate = isBanned ? new Date() : null;
-    await this.blogsRepo.update({ ownerId }, { isBanned, banDate });
+
+    if (manager) {
+      await manager.update(Blog, { ownerId }, { isBanned, banDate });
+    } else {
+      await this.blogsRepo.update({ ownerId }, { isBanned, banDate });
+    }
   }
 
   async deleteBlogById(id: number) {

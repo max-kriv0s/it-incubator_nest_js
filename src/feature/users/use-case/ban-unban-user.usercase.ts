@@ -10,6 +10,8 @@ import { BlogsRepository } from '../../../feature/blogs/db/blogs.repository';
 import { CommentsRepository } from '../../../feature/comments/db/comments.repository';
 import { LikePostsRepository } from '../../../feature/posts/db/like-posts.repository';
 import { LikeCommentsRepository } from '../../../feature/comments/db/like-comments.repository';
+import { DataSource, EntityManager } from 'typeorm';
+import { TransactionDecorator } from '../../../decorators/transaction.decorator';
 
 export class BanUnbanUserCommand {
   constructor(public userId: number, public dto: BanUnbanUserDto) {}
@@ -26,46 +28,68 @@ export class BanUnbanUserUseCase
     private readonly commentsRepository: CommentsRepository,
     private readonly likePostsRepository: LikePostsRepository,
     private readonly likeCommentsRepository: LikeCommentsRepository,
+    private readonly dataSource: DataSource,
   ) {}
 
   async execute(command: BanUnbanUserCommand): Promise<ResultNotification> {
-    const updateResult = new ResultNotification();
-    const user = await this.usersRepository.findUserById(command.userId);
-    if (!user) {
-      updateResult.addError('User not found', ResultCodeError.NotFound);
-      return updateResult;
-    }
+    const transactionDecorator = new TransactionDecorator(this.dataSource);
 
-    user.isBanned = command.dto.isBanned;
-    user.banDate = command.dto.isBanned ? new Date() : null;
-    user.banReason = command.dto.isBanned ? command.dto.banReason : null;
+    return transactionDecorator.doOperation(
+      command,
+      async (command, manager) => {
+        const updateResult = new ResultNotification();
 
-    await this.usersRepository.save(user);
-    await this.deleteAllDevicesByUsersId(command.userId, command.dto.isBanned);
+        const user = await this.usersRepository.findUserById(command.userId);
+        if (!user) {
+          updateResult.addError('User not found', ResultCodeError.NotFound);
+          return updateResult;
+        }
+        user.banUnban(command.dto.isBanned, command.dto.banReason);
+        await manager.save(user);
 
-    await this.blogsRepository.setBanUnbaneBlogByOwnerId(
-      command.userId,
-      command.dto.isBanned,
+        await this.deleteAllDevicesByUsersId(
+          command.userId,
+          command.dto.isBanned,
+          manager,
+        );
+
+        await this.blogsRepository.setBanUnbaneBlogByOwnerId(
+          command.userId,
+          command.dto.isBanned,
+          manager,
+        );
+
+        await this.commentsRepository.updateBanUnban(
+          command.userId,
+          command.dto.isBanned,
+          manager,
+        );
+
+        await this.likePostsRepository.updateBanUnban(
+          command.userId,
+          command.dto.isBanned,
+          manager,
+        );
+        await this.likeCommentsRepository.updateBanUnban(
+          command.userId,
+          command.dto.isBanned,
+          manager,
+        );
+        return updateResult;
+      },
     );
-
-    await this.commentsRepository.updateBanUnban(
-      command.userId,
-      command.dto.isBanned,
-    );
-
-    await this.likePostsRepository.updateBanUnban(
-      command.userId,
-      command.dto.isBanned,
-    );
-    await this.likeCommentsRepository.updateBanUnban(
-      command.userId,
-      command.dto.isBanned,
-    );
-    return updateResult;
   }
 
-  private async deleteAllDevicesByUsersId(userId: number, isBanned: boolean) {
-    if (isBanned)
-      await this.securityDevicesService.deleteAllDevicesByUserID(userId);
+  private async deleteAllDevicesByUsersId(
+    userId: number,
+    isBanned: boolean,
+    manager: EntityManager,
+  ) {
+    if (isBanned) {
+      await this.securityDevicesService.deleteAllDevicesByUserID(
+        userId,
+        manager,
+      );
+    }
   }
 }

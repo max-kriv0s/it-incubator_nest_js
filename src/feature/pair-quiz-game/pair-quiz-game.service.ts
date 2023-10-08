@@ -82,48 +82,55 @@ export class PairQuizGameService {
       await this.pairQuizGameProgressRepository.findOpenGamesToComplete();
 
     for (const game of openGames) {
-      await transactionDecorator.doOperation(game, async (game, manager) => {
-        const res = new ResultNotification();
+      const resultTransaction = await transactionDecorator.doOperation(
+        game,
+        async (game, manager) => {
+          const res = new ResultNotification();
 
-        const openGame = await this.pairQuizGameRepository.findMyCurrentGame(
-          game.userId,
-          manager,
-        );
-        if (!openGame) {
-          res.addError('Failed to complete the game', 5000);
-          return res;
-        }
-
-        if (openGame.status !== GameStatus.Finished) {
-          openGame.finishGame();
-          await manager.save(openGame);
-
-          const gameProgress =
-            await this.pairQuizGameProgressRepository.findByGameId(game.id);
-
-          for (const questionsAsked of gameProgress) {
-            if (
-              questionsAsked.userId !== game.userId &&
-              !questionsAsked.answerStatus
-            ) {
-              questionsAsked.answerStatus = AnswerStatus.Incorrect;
-              questionsAsked.addedAt = new Date();
-              await manager.save(questionsAsked);
-            }
-          }
-
-          const countAnswers = gameProgress.length / 2;
-
-          await this.addBonusPoint(
-            openGame,
-            gameProgress,
-            countAnswers,
+          const openGame = await this.pairQuizGameRepository.findMyCurrentGame(
+            game.userId,
             manager,
           );
-        }
+          if (!openGame) {
+            res.addError('Failed to complete the game', 5000);
+            return res;
+          }
 
-        return res;
-      });
+          if (openGame.status !== GameStatus.Finished) {
+            openGame.finishGame();
+            await manager.save(openGame);
+
+            const gameProgress =
+              await this.pairQuizGameProgressRepository.findByGameId(game.id);
+
+            for (const questionsAsked of gameProgress) {
+              if (
+                questionsAsked.userId !== game.userId &&
+                !questionsAsked.answerStatus
+              ) {
+                questionsAsked.answerStatus = AnswerStatus.Incorrect;
+                questionsAsked.addedAt = new Date();
+                await manager.save(questionsAsked);
+              }
+            }
+
+            const countAnswers = gameProgress.length / 2;
+
+            await this.addBonusPoint(
+              openGame,
+              gameProgress,
+              countAnswers,
+              manager,
+            );
+          }
+
+          return res;
+        },
+      );
+
+      if (resultTransaction.hasError()) {
+        console.error(resultTransaction.getError());
+      }
     }
   }
 }
