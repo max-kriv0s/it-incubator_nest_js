@@ -236,8 +236,8 @@ export class PostsQueryRepository {
       ])
       .addSelect('blog.name', 'blogName')
       .addSelect(`COALESCE(pl.status, :likeNone)`, 'myStatus')
-      .addSelect('COALESCE(ld_count."likesCount", 0)', 'likesCount')
-      .addSelect('COALESCE(ld_count."dislikesCount", 0)', 'dislikesCount')
+      .addSelect('COALESCE(ld_count."likesCount", 0)::int', 'likesCount')
+      .addSelect('COALESCE(ld_count."dislikesCount", 0)::int', 'dislikesCount')
       .leftJoin('post.blog', 'blog')
       .leftJoin(`(${queryMyStatus.getQuery()})`, 'pl', 'pl."postId" = post.id')
       .leftJoin(

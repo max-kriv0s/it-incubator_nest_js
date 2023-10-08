@@ -18,7 +18,7 @@ export class UsersBlogViewDto {
   readonly createdAt: string;
   readonly isMembership: boolean;
   readonly blogOwnerInfo: UsersBlogOwnerInfoViewModel;
-  // readonly banInfo: UsersBlogBanInfo;
+  readonly banInfo: UsersBlogBanInfo;
 }
 
 export class PaginatorUsersBlogView extends OldPaginator<UsersBlogViewDto> {}
