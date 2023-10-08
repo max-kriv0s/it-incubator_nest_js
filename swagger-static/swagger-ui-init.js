@@ -96,16 +96,6 @@ window.onload = function() {
               }
             }
           ],
-          "requestBody": {
-            "required": true,
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BanUnbanUserDto"
-                }
-              }
-            }
-          },
           "responses": {
             "204": {
               "description": ""
@@ -1129,10 +1119,6 @@ window.onload = function() {
     "components": {
       "schemas": {
         "CreateUserDto": {
-          "type": "object",
-          "properties": {}
-        },
-        "BanUnbanUserDto": {
           "type": "object",
           "properties": {}
         },
