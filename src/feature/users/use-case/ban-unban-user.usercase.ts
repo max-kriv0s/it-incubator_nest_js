@@ -1,9 +1,5 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import {
-  BanUnbanUserDto,
-  IsBannedEnum,
-  QueryBanUnbanUserDto,
-} from '../dto/ban-unban-user.dto';
+import { BanUnbanUserDto } from '../dto/ban-unban-user.dto';
 import {
   ResultCodeError,
   ResultNotification,
@@ -18,7 +14,7 @@ import { DataSource, EntityManager } from 'typeorm';
 import { TransactionDecorator } from '../../../decorators/transaction.decorator';
 
 export class BanUnbanUserCommand {
-  constructor(public userId: number, public dto: QueryBanUnbanUserDto) {}
+  constructor(public userId: number, public dto: BanUnbanUserDto) {}
 }
 
 @CommandHandler(BanUnbanUserCommand)
@@ -43,39 +39,40 @@ export class BanUnbanUserUseCase
       async (command, manager) => {
         const updateResult = new ResultNotification();
 
-        const isBanned =
-          command.dto.isBanned === IsBannedEnum.true ? true : false;
-
         const user = await this.usersRepository.findUserById(command.userId);
         if (!user) {
           updateResult.addError('User not found', ResultCodeError.NotFound);
           return updateResult;
         }
-        user.banUnban(isBanned, command.dto.banReason);
+        user.banUnban(command.dto.isBanned, command.dto.banReason);
         await manager.save(user);
 
-        await this.deleteAllDevicesByUsersId(command.userId, isBanned, manager);
+        await this.deleteAllDevicesByUsersId(
+          command.userId,
+          command.dto.isBanned,
+          manager,
+        );
 
         await this.blogsRepository.setBanUnbaneBlogByOwnerId(
           command.userId,
-          isBanned,
+          command.dto.isBanned,
           manager,
         );
 
         await this.commentsRepository.updateBanUnban(
           command.userId,
-          isBanned,
+          command.dto.isBanned,
           manager,
         );
 
         await this.likePostsRepository.updateBanUnban(
           command.userId,
-          isBanned,
+          command.dto.isBanned,
           manager,
         );
         await this.likeCommentsRepository.updateBanUnban(
           command.userId,
-          isBanned,
+          command.dto.isBanned,
           manager,
         );
         return updateResult;

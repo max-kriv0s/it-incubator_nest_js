@@ -22,7 +22,7 @@ import {
 import { CreateUserDto } from './dto/create-user.dto';
 import { BasicAuthGuard } from '../../feature/auth/guard/basic-auth.guard';
 import { CommandBus } from '@nestjs/cqrs';
-import { BanUnbanUserDto, QueryBanUnbanUserDto } from './dto/ban-unban-user.dto';
+import { BanUnbanUserDto } from './dto/ban-unban-user.dto';
 import { BanUnbanUserCommand } from './use-case/ban-unban-user.usercase';
 import { CreateUserCommand } from './use-case/create-user.usecase';
 import { UsersQuerySqlRepository } from './db/users-query.sql-repository';
@@ -76,11 +76,11 @@ export class UsersController {
   @Put(':id/ban')
   async banUnbanUser(
     @Param('id', IdIntegerValidationPipe) id: string,
-    // @Body() dto: BanUnbanUserDto,
-    @Query() banQuery: QueryBanUnbanUserDto,
+    @Body() dto: BanUnbanUserDto,
+    // @Query() banQuery: QueryBanUnbanUserDto,
   ) {
     const updateResult: ResultNotification = await this.commandBus.execute(
-      new BanUnbanUserCommand(+id, banQuery),
+      new BanUnbanUserCommand(+id, dto),
     );
     return updateResult.getResult();
   }
