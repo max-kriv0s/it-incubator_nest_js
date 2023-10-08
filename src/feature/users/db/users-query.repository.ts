@@ -77,11 +77,11 @@ export class UsersQueryRepository {
       email: user.email,
       id: user.id.toString(),
       login: user.login,
-      // banInfo: {
-      //   isBanned: user.isBanned,
-      //   banDate: user.banDate ? user.banDate.toISOString() : user.banDate,
-      //   banReason: user.banReason,
-      // },
+      banInfo: {
+        isBanned: user.isBanned,
+        banDate: user.banDate ? user.banDate.toISOString() : user.banDate,
+        banReason: user.banReason,
+      },
     };
   }
 
