@@ -83,7 +83,10 @@ export class BloggerQuerySqlRepository {
       websiteUrl: blog.websiteUrl,
       createdAt: blog.createdAt.toISOString(),
       isMembership: blog.isMembership,
-      images: {},
+      images: {
+        wallpaper: null,
+        main: [],
+      },
     };
   }
 

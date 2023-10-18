@@ -6,6 +6,6 @@ export class PhotoSizeView {
 }
 
 export class BlogImageView {
-  wallpaper?: PhotoSizeView;
-  main?: PhotoSizeView[];
+  wallpaper: PhotoSizeView | null;
+  main: PhotoSizeView[];
 }

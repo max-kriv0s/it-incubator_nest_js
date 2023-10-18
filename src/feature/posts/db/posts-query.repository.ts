@@ -186,6 +186,7 @@ export class PostsQueryRepository {
         })),
       },
       id: post.id.toString(),
+      images: this.convertPostImagesToView(post.photos),
       shortDescription: post.shortDescription,
       title: post.title,
     };

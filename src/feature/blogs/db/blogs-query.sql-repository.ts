@@ -67,6 +67,7 @@ export class BlogsQuerySqlRepository {
       websiteUrl: blog.websiteUrl,
       createdAt: blog.createdAt.toISOString(),
       isMembership: blog.isMembership,
+      images: { main: [], wallpaper: null },
     };
   }
 
@@ -187,6 +188,7 @@ export class BlogsQuerySqlRepository {
             myStatus: postRaw.myStatusLike,
             newestLikes: [],
           },
+          images: { main: [] },
         };
         result.push(post);
         addedPosts[postRaw.id] = post;

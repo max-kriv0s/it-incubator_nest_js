@@ -84,7 +84,7 @@ export class UploadMainSquareImageForBlogUseCase
       return result;
     }
 
-    if (metadata.width! > 156 || metadata.height! > 156) {
+    if (!(metadata.width! === 156 && metadata.height! === 156)) {
       result.addError('Invalid file', ResultCodeError.BadRequest, 'file');
       return result;
     }

@@ -184,6 +184,7 @@ export class PostsQuerySqlRepository {
             myStatus: postRaw.myStatusLike,
             newestLikes: [],
           },
+          images: { main: [] },
         };
         result.push(post);
         addedPosts[postRaw.id] = post;

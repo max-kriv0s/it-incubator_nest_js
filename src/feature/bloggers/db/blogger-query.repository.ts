@@ -97,13 +97,13 @@ export class BloggerQueryRepository {
 
   blogDBToBlogView(blog: Blog): ViewBloggerBlogDto {
     return {
-      id: blog.id.toString(),
-      name: blog.name,
-      description: blog.description,
-      websiteUrl: blog.websiteUrl,
       createdAt: blog.createdAt.toISOString(),
-      isMembership: blog.isMembership,
+      description: blog.description,
+      id: blog.id.toString(),
       images: this.blogsQueryRepository.convertblogImageToView(blog.photos),
+      isMembership: blog.isMembership,
+      name: blog.name,
+      websiteUrl: blog.websiteUrl,
     };
   }
 

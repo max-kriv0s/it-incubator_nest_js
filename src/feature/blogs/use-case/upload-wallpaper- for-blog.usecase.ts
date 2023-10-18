@@ -84,7 +84,7 @@ export class UploadWallpaperForBlogUseCase
       return result;
     }
 
-    if (metadata.width! > 1028 || metadata.height! > 312) {
+    if (!(metadata.width! === 1028 && metadata.height! === 312)) {
       result.addError('Invalid file', ResultCodeError.BadRequest, 'file');
       return result;
     }

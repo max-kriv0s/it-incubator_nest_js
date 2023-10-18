@@ -57,6 +57,7 @@ import { ImageInputDto } from '../../modules/dto/image-input.dto';
 import { UploadMainSquareImageForBlogCommand } from '../blogs/use-case/upload-main-square-image-for-blog.usecase';
 import { UploadMainImageForPostCommand } from '../posts/use-case/upload-main-iImage-for-post';
 import { PostsQueryRepository } from '../posts/db/posts-query.repository';
+import { PostImageView } from '../posts/dto/post-image-view.dto';
 
 @UseGuards(AccessJwtAuthGuard)
 @Controller('blogger/blogs')
@@ -266,6 +267,12 @@ export class BloggersController {
       mimetype: mainFile.mimetype,
     };
 
+    if (!mainFile.mimetype.includes('image')) {
+      throw new BadRequestException([
+        { message: 'incorrect format', field: 'file' },
+      ]);
+    }
+
     const result: ResultNotification = await this.commandBus.execute(
       new UploadMainSquareImageForBlogCommand(+userId, +blogId, imageInput),
     );
@@ -290,12 +297,18 @@ export class BloggersController {
     @CurrentUserId() userId: string,
     @Param('blogId', IdIntegerValidationPipe) blogId: string,
     @Param('postId', IdIntegerValidationPipe) postId: string,
-  ): Promise<BlogImageView> {
+  ): Promise<PostImageView> {
     const imageInput: ImageInputDto = {
       originalName: mainFile.originalname,
       buffer: mainFile.buffer,
       mimetype: mainFile.mimetype,
     };
+
+    if (!mainFile.mimetype.includes('image')) {
+      throw new BadRequestException([
+        { message: 'incorrect format', field: 'file' },
+      ]);
+    }
 
     const result: ResultNotification = await this.commandBus.execute(
       new UploadMainImageForPostCommand(+userId, +blogId, +postId, imageInput),

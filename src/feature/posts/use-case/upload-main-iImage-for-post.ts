@@ -10,6 +10,7 @@ import { PostImagesRepository } from '../db/post-images.repository';
 import { SizePhotoEnum } from '../../../modules/enums/size-photo.enum';
 import { PostPhotosEntity } from '../entities/post-photos.entity';
 import { BlogsRepository } from '../../../feature/blogs/db/blogs.repository';
+import { PostsRepository } from '../db/posts.repository';
 
 export class UploadMainImageForPostCommand {
   constructor(
@@ -28,6 +29,7 @@ export class UploadMainImageForPostUseCase
     private readonly s3StorageAdapter: S3StorageAdapter,
     private readonly blogsRepository: BlogsRepository,
     private readonly postImagesRepository: PostImagesRepository,
+    private readonly postsRepository: PostsRepository,
   ) {}
 
   async execute(
@@ -50,19 +52,40 @@ export class UploadMainImageForPostUseCase
       return result;
     }
 
-    await this.savePostImage(command, metadata, SizePhotoEnum.original);
+    const post = await this.postsRepository.findPostById(command.postId);
+    if (!post) {
+      result.addError('Post not found', ResultCodeError.NotFound);
+      return result;
+    }
+
+    await this.savePostImage(
+      command.postId,
+      command.imageInputDto.buffer,
+      metadata,
+      SizePhotoEnum.original,
+    );
 
     const middleBuffer = await sharp(command.imageInputDto.buffer)
-      .resize({ width: 300, height: 180, fit: 'contain' })
+      .resize({ width: 300, height: 180 })
       .toBuffer();
     metadata = await sharp(middleBuffer).metadata();
-    await this.savePostImage(command, metadata, SizePhotoEnum.middle);
+    await this.savePostImage(
+      command.postId,
+      middleBuffer,
+      metadata,
+      SizePhotoEnum.middle,
+    );
 
     const smallBuffer = await sharp(command.imageInputDto.buffer)
-      .resize({ width: 149, height: 96, fit: 'contain' })
+      .resize({ width: 149, height: 96 })
       .toBuffer();
     metadata = await sharp(smallBuffer).metadata();
-    await this.savePostImage(command, metadata, SizePhotoEnum.small);
+    await this.savePostImage(
+      command.postId,
+      smallBuffer,
+      metadata,
+      SizePhotoEnum.small,
+    );
 
     return result;
   }
@@ -74,33 +97,34 @@ export class UploadMainImageForPostUseCase
       return result;
     }
 
-    if (metadata.width! > 940 || metadata.height! > 432) {
+    if (!(metadata.width! === 940 && metadata.height! === 432)) {
       result.addError('Invalid file', ResultCodeError.BadRequest, 'file');
       return result;
     }
   }
 
   private async savePostImage(
-    command: UploadMainImageForPostCommand,
+    postId: number,
+    buffer: Buffer,
     metadata: sharp.Metadata,
     imageSize: SizePhotoEnum,
   ) {
     const resultSavedCloud = await this.s3StorageAdapter.savePostImage(
-      command.postId,
+      postId,
       metadata.format!,
-      command.imageInputDto.buffer,
+      buffer,
       imageSize,
     );
 
     let image = await this.postImagesRepository.findImageByPostIdAndSizeImage(
-      command.postId,
+      postId,
       imageSize,
     );
     if (!image) {
       image = new PostPhotosEntity();
     }
 
-    image.postId = command.postId;
+    image.postId = postId;
     image.url = resultSavedCloud.url;
     image.width = metadata.width!;
     image.height = metadata.height!;

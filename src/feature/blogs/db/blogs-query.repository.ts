@@ -24,6 +24,7 @@ import { BlogImageView, PhotoSizeView } from '../dto/blog-image-view.dto';
 import { BlogFileTypeEnum } from '../enums/blog-file-type.enum';
 import { S3StorageAdapter } from '../../../infrastructure/adapters/s3-storage.adapter';
 import { PostPhotosEntity } from '../../../feature/posts/entities/post-photos.entity';
+import { PostsQueryRepository } from '../../../feature/posts/db/posts-query.repository';
 
 @Injectable()
 export class BlogsQueryRepository {
@@ -37,6 +38,7 @@ export class BlogsQueryRepository {
     private readonly s3StorageAdapter: S3StorageAdapter,
     @InjectRepository(PostPhotosEntity)
     private readonly postPhotosRepo: Repository<PostPhotosEntity>,
+    private readonly postsQueryRepository: PostsQueryRepository,
   ) {}
 
   async getBlogs(
@@ -52,6 +54,7 @@ export class BlogsQueryRepository {
       .where('NOT b."isBanned" AND b."name" ILIKE :searchNameTerm', {
         searchNameTerm: `%${searchNameTerm}%`,
       })
+      .leftJoinAndSelect('b.photos', 'photos')
       .orderBy(`b.${sortBy}`, sortDirection === 'desc' ? 'DESC' : 'ASC')
       .limit(paginator.pageSize)
       .offset(paginator.skip)
@@ -67,6 +70,7 @@ export class BlogsQueryRepository {
         id,
         isBanned: false,
       },
+      relations: { photos: true },
     });
     if (!blog) return null;
     return this.blogDBToBlogView(blog);
@@ -74,12 +78,13 @@ export class BlogsQueryRepository {
 
   private blogDBToBlogView(blog: Blog): ViewBlogDto {
     return {
-      id: blog.id.toString(),
-      name: blog.name,
-      description: blog.description,
-      websiteUrl: blog.websiteUrl,
       createdAt: blog.createdAt.toISOString(),
+      description: blog.description,
+      id: blog.id.toString(),
+      images: this.convertblogImageToView(blog.photos),
       isMembership: blog.isMembership,
+      websiteUrl: blog.websiteUrl,
+      name: blog.name,
     };
   }
 
@@ -273,6 +278,7 @@ export class BlogsQueryRepository {
         })),
       },
       id: post.id.toString(),
+      images: this.postsQueryRepository.convertPostImagesToView(post.photos),
       shortDescription: post.shortDescription,
       title: post.title,
     };
@@ -284,7 +290,7 @@ export class BlogsQueryRepository {
   }
 
   convertblogImageToView(blogImages: BlogPhotosEntity[]): BlogImageView {
-    const view = {};
+    const view: BlogImageView = { wallpaper: null, main: [] };
     for (const image of blogImages) {
       const imageView: PhotoSizeView = {
         url: this.s3StorageAdapter.getUrlFile(image.url),
@@ -293,14 +299,10 @@ export class BlogsQueryRepository {
         fileSize: image.fileSize,
       };
       if (image.fileType === BlogFileTypeEnum.wallpaper) {
-        view['wallpaper'] = imageView;
+        view.wallpaper = imageView;
       }
       if (image.fileType === BlogFileTypeEnum.main) {
-        if (!view.hasOwnProperty('main')) {
-          view['main'] = [];
-        }
-
-        view['main'].push(imageView);
+        view.main.push(imageView);
       }
     }
 

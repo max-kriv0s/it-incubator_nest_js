@@ -1,4 +1,5 @@
 import { OldPaginator, Paginator, PaginatorType } from '../../../dto';
+import { BlogImageView } from './blog-image-view.dto';
 
 export class ViewBlogDto {
   readonly id: string;
@@ -7,6 +8,7 @@ export class ViewBlogDto {
   readonly websiteUrl: string;
   readonly createdAt: string;
   readonly isMembership: boolean;
+  readonly images: BlogImageView;
 }
 
 export class PaginatorBlogView extends OldPaginator<ViewBlogDto> {}

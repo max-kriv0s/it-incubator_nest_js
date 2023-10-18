@@ -2,6 +2,7 @@ import { OldPaginator, Paginator, PaginatorType } from '../../../dto';
 import { LikeStatus } from '../../likes/dto/like-status';
 import { ViewLikeDetailsDto } from '../../likes/dto/view-like.dto';
 import { PostPhotosEntity } from '../entities/post-photos.entity';
+import { PostImageView } from './post-image-view.dto';
 
 export class ExtendedLikesInfoViewDto {
   readonly likesCount: number;
@@ -19,6 +20,7 @@ export class ViewPostDto {
   readonly blogName: string;
   readonly createdAt: string;
   readonly extendedLikesInfo: ExtendedLikesInfoViewDto;
+  readonly images: PostImageView;
 }
 
 export class PaginatorPostView extends OldPaginator<ViewPostDto> {}
