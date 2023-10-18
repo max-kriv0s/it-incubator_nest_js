@@ -7,7 +7,7 @@ import {
   ViewBlogDto,
 } from '../dto/view-blog.dto';
 import { Blog } from '../entities/blog.entity';
-import { Repository, SelectQueryBuilder } from 'typeorm';
+import { In, Repository, SelectQueryBuilder } from 'typeorm';
 import {
   NewestLikesType,
   PaginatorPostSql,
@@ -23,6 +23,7 @@ import { BlogPhotosEntity } from '../entities/blog-photo.entity';
 import { BlogImageView, PhotoSizeView } from '../dto/blog-image-view.dto';
 import { BlogFileTypeEnum } from '../enums/blog-file-type.enum';
 import { S3StorageAdapter } from '../../../infrastructure/adapters/s3-storage.adapter';
+import { PostPhotosEntity } from '../../../feature/posts/entities/post-photos.entity';
 
 @Injectable()
 export class BlogsQueryRepository {
@@ -34,6 +35,8 @@ export class BlogsQueryRepository {
     @InjectRepository(BlogPhotosEntity)
     private readonly blogPhotosRepo: Repository<BlogPhotosEntity>,
     private readonly s3StorageAdapter: S3StorageAdapter,
+    @InjectRepository(PostPhotosEntity)
+    private readonly postPhotosRepo: Repository<PostPhotosEntity>,
   ) {}
 
   async getBlogs(
@@ -235,12 +238,17 @@ export class BlogsQueryRepository {
       .setParameter('likeNone', LikeStatus.None)
       .getRawMany();
 
+    const postsImages = await this.postPhotosRepo.findBy({
+      postId: In(postsIds),
+    });
+
     const postsView = postsRaw.map((postRaw) => {
       const post: PostQueryType = {
         ...postRaw,
         newestLikes: newestLikesRaw.filter(
           (like) => like.postId === postRaw.id,
         ),
+        photos: postsImages.filter((image) => image.postId === postRaw.id),
       };
       return this.postsDBToPostsView(post);
     });

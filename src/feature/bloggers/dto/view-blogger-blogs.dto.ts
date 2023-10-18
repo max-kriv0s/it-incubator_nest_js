@@ -1,6 +1,8 @@
 import { LikeStatus } from '../../../feature/likes/dto/like-status';
 import { OldPaginator, Paginator, PaginatorType } from '../../../dto';
 import { ViewLikeDetailsDto } from '../../../feature/likes/dto/view-like.dto';
+import { BlogImageView } from '../../../feature/blogs/dto/blog-image-view.dto';
+import { PostImageView } from '../../../feature/posts/dto/post-image-view.dto';
 
 export class ViewBloggerBlogDto {
   readonly id: string;
@@ -9,6 +11,7 @@ export class ViewBloggerBlogDto {
   readonly websiteUrl: string;
   readonly createdAt: string;
   readonly isMembership: boolean;
+  readonly images: BlogImageView;
 }
 
 export class PaginatorBloggerBlogView extends OldPaginator<ViewBloggerBlogDto> {}
@@ -36,6 +39,7 @@ export class ViewBloggerPostDto {
   readonly blogName: string;
   readonly createdAt: string;
   readonly extendedLikesInfo: ExtendedLikesInfoViewDto;
+  readonly images: PostImageView;
 }
 
 export class PaginatorBloggerPostView extends OldPaginator<ViewBloggerPostDto> {}

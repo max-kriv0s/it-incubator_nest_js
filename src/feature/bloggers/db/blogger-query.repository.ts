@@ -10,7 +10,7 @@ import {
   ViewBloggerPostDto,
 } from '../dto/view-blogger-blogs.dto';
 import { BloggerQueryParams } from '../dto/blogger-query-params.dto';
-import { Repository, SelectQueryBuilder } from 'typeorm';
+import { In, Repository, SelectQueryBuilder } from 'typeorm';
 import { LikeStatus } from '../../../feature/likes/dto/like-status';
 import { Post } from '../../../feature/posts/entities/post.entity';
 import { PostLike } from '../../../feature/posts/entities/post-like.entity';
@@ -38,6 +38,9 @@ import {
 import { Comment } from '../../../feature/comments/entities/comment.entity';
 import { CommentLike } from '../../../feature/comments/entities/comment-likes.entity';
 import { CommentQueryRawType } from '../../../feature/comments/dto/view-comment.dto';
+import { BlogsQueryRepository } from 'src/feature/blogs/db/blogs-query.repository';
+import { PostsQueryRepository } from 'src/feature/posts/db/posts-query.repository';
+import { PostPhotosEntity } from 'src/feature/posts/entities/post-photos.entity';
 
 @Injectable()
 export class BloggerQueryRepository {
@@ -52,6 +55,10 @@ export class BloggerQueryRepository {
     private readonly commentsRepo: Repository<Comment>,
     @InjectRepository(CommentLike)
     private readonly commentLikesRepo: Repository<CommentLike>,
+    private readonly blogsQueryRepository: BlogsQueryRepository,
+    @InjectRepository(PostPhotosEntity)
+    private readonly postPhotosRepo: Repository<PostPhotosEntity>,
+    private readonly postsQueryRepository: PostsQueryRepository,
   ) {}
 
   async getBlogs(
@@ -68,6 +75,7 @@ export class BloggerQueryRepository {
       .where('blogs."name" ILIKE :searchNameTerm', {
         searchNameTerm: `%${searchNameTerm}%`,
       })
+      .leftJoinAndSelect('blogs.photos', 'photos')
       .andWhere('blogs.ownerId = :userId', { userId })
       .orderBy(`blogs.${sortBy}`, sortDirection === 'desc' ? 'DESC' : 'ASC')
       .limit(paginator.pageSize)
@@ -79,7 +87,10 @@ export class BloggerQueryRepository {
   }
 
   async getBlogById(id: number): Promise<ViewBloggerBlogDto | null> {
-    const blog = await this.blogsRepository.findOneBy({ id });
+    const blog = await this.blogsRepository.findOne({
+      where: { id },
+      relations: { photos: true },
+    });
     if (!blog) return null;
     return this.blogDBToBlogView(blog);
   }
@@ -92,6 +103,7 @@ export class BloggerQueryRepository {
       websiteUrl: blog.websiteUrl,
       createdAt: blog.createdAt.toISOString(),
       isMembership: blog.isMembership,
+      images: this.blogsQueryRepository.convertblogImageToView(blog.photos),
     };
   }
 
@@ -229,9 +241,12 @@ export class BloggerQueryRepository {
 
     if (!postRaw) return null;
 
+    const postImages = await this.postPhotosRepo.findBy({ postId: id });
+
     const post: PostQueryType = {
       ...postRaw,
       newestLikes: newestLikesRaw.filter((like) => like.postId === postRaw.id),
+      photos: postImages,
     };
     return this.postsDBToPostsView(post);
   }
@@ -252,6 +267,7 @@ export class BloggerQueryRepository {
           login: like.login,
         })),
       },
+      images: this.postsQueryRepository.convertPostImagesToView(post.photos),
       id: post.id.toString(),
       shortDescription: post.shortDescription,
       title: post.title,
@@ -339,12 +355,17 @@ export class BloggerQueryRepository {
       .setParameter('likeNone', LikeStatus.None)
       .getRawMany();
 
+    const postsImages = await this.postPhotosRepo.findBy({
+      postId: In(postsIds),
+    });
+
     const postsView = postsRaw.map((postRaw) => {
       const post: PostQueryType = {
         ...postRaw,
         newestLikes: newestLikesRaw.filter(
           (like) => like.postId === postRaw.id,
         ),
+        photos: postsImages.filter((image) => image.postId === postRaw.id),
       };
       return this.postsDBToPostsView(post);
     });

@@ -9,7 +9,7 @@ import {
 } from '../dto/view-post.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Post } from '../entities/post.entity';
-import { Repository, SelectQueryBuilder } from 'typeorm';
+import { In, Repository, SelectQueryBuilder } from 'typeorm';
 import { LikeStatus } from '../../../feature/likes/dto/like-status';
 import { PostLike } from '../entities/post-like.entity';
 import { QueryParams } from '../../../dto';
@@ -160,9 +160,11 @@ export class PostsQueryRepository {
 
     if (!postRaw) return null;
 
+    const postImages = await this.postImagesRepo.findBy({ postId: id });
     const post: PostQueryType = {
       ...postRaw,
       newestLikes: newestLikesRaw.filter((like) => like.postId === postRaw.id),
+      photos: postImages,
     };
     return this.postsDBToPostsView(post);
   }
@@ -275,12 +277,17 @@ export class PostsQueryRepository {
 
     const postsRaw: PostQueryRawType[] = await query.getRawMany();
 
+    const postsImages = await this.postImagesRepo.findBy({
+      postId: In(postsIds),
+    });
+
     const postsView = postsRaw.map((postRaw) => {
       const post: PostQueryType = {
         ...postRaw,
         newestLikes: newestLikesRaw.filter(
           (like) => like.postId === postRaw.id,
         ),
+        photos: postsImages.filter((image) => image.id === postRaw.id),
       };
       return this.postsDBToPostsView(post);
     });
@@ -292,9 +299,7 @@ export class PostsQueryRepository {
     return this.convertPostImagesToView(postImages);
   }
 
-  private convertPostImagesToView(
-    postImages: PostPhotosEntity[],
-  ): PostImageView {
+  convertPostImagesToView(postImages: PostPhotosEntity[]): PostImageView {
     const view: PostImageView = { main: [] };
 
     for (const image of postImages) {

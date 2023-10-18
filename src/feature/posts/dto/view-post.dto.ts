@@ -1,6 +1,7 @@
 import { OldPaginator, Paginator, PaginatorType } from '../../../dto';
 import { LikeStatus } from '../../likes/dto/like-status';
 import { ViewLikeDetailsDto } from '../../likes/dto/view-like.dto';
+import { PostPhotosEntity } from '../entities/post-photos.entity';
 
 export class ExtendedLikesInfoViewDto {
   readonly likesCount: number;
@@ -44,6 +45,7 @@ export type PostQueryRawType = {
 
 export type PostQueryType = PostQueryRawType & {
   newestLikes: NewestLikesType[];
+  photos: PostPhotosEntity[];
 };
 
 export type NewestLikesType = {

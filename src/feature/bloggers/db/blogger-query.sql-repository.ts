@@ -83,6 +83,7 @@ export class BloggerQuerySqlRepository {
       websiteUrl: blog.websiteUrl,
       createdAt: blog.createdAt.toISOString(),
       isMembership: blog.isMembership,
+      images: {},
     };
   }
 
@@ -175,6 +176,9 @@ export class BloggerQuerySqlRepository {
             dislikesCount: +postRaw.dislikesCount,
             myStatus: postRaw.myStatusLike,
             newestLikes: [],
+          },
+          images: {
+            main: [],
           },
         };
         result.push(post);
