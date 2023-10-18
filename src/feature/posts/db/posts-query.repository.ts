@@ -13,6 +13,10 @@ import { Repository, SelectQueryBuilder } from 'typeorm';
 import { LikeStatus } from '../../../feature/likes/dto/like-status';
 import { PostLike } from '../entities/post-like.entity';
 import { QueryParams } from '../../../dto';
+import { PostImageView } from '../dto/post-image-view.dto';
+import { PostPhotosEntity } from '../entities/post-photos.entity';
+import { PhotoSizeView } from '../../../feature/blogs/dto/blog-image-view.dto';
+import { S3StorageAdapter } from '../../../infrastructure/adapters/s3-storage.adapter';
 
 @Injectable()
 export class PostsQueryRepository {
@@ -20,6 +24,9 @@ export class PostsQueryRepository {
     @InjectRepository(Post) private readonly postsRepo: Repository<Post>,
     @InjectRepository(PostLike)
     private readonly postLikesRepo: Repository<PostLike>,
+    @InjectRepository(PostPhotosEntity)
+    private readonly postImagesRepo: Repository<PostPhotosEntity>,
+    private readonly s3StorageAdapter: S3StorageAdapter,
   ) {}
 
   paramUserId(userId?: number) {
@@ -278,5 +285,27 @@ export class PostsQueryRepository {
       return this.postsDBToPostsView(post);
     });
     return paginator.paginate(totalCount, postsView);
+  }
+
+  async postImagesView(postId: number): Promise<PostImageView> {
+    const postImages = await this.postImagesRepo.findBy({ postId });
+    return this.convertPostImagesToView(postImages);
+  }
+
+  private convertPostImagesToView(
+    postImages: PostPhotosEntity[],
+  ): PostImageView {
+    const view: PostImageView = { main: [] };
+
+    for (const image of postImages) {
+      const imageView: PhotoSizeView = {
+        url: this.s3StorageAdapter.getUrlFile(image.url),
+        width: image.width,
+        height: image.height,
+        fileSize: image.fileSize,
+      };
+      view.main.push(imageView);
+    }
+    return view;
   }
 }

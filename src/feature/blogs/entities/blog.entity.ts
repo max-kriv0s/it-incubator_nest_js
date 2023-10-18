@@ -9,6 +9,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { BlogPhotosEntity } from './blog-photo.entity';
 
 @Entity({ name: 'Blogs' })
 export class Blog {
@@ -50,4 +51,7 @@ export class Blog {
 
   @OneToMany(() => BloggerBannedUser, (bannedUser) => bannedUser.blog)
   bloggerBannedUsers: BloggerBannedUser[];
+
+  @OneToMany(() => BlogPhotosEntity, (blogPhoto) => blogPhoto.blog)
+  photos: BlogPhotosEntity[];
 }

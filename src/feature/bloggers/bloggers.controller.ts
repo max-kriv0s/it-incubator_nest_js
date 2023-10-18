@@ -3,15 +3,21 @@ import {
   Body,
   Controller,
   Delete,
+  FileTypeValidator,
   Get,
   HttpCode,
   HttpStatus,
+  MaxFileSizeValidator,
   NotFoundException,
   Param,
+  ParseFilePipe,
+  ParseFilePipeBuilder,
   Post,
   Put,
   Query,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { AccessJwtAuthGuard } from '../auth/guard/jwt.guard';
 import { UpdateBlogDto } from '../blogs/dto/update-blog.dto';
@@ -43,6 +49,14 @@ import {
 import { IdIntegerValidationPipe } from '../../modules/pipes/id-integer-validation.pipe';
 import { BloggerQueryRepository } from './db/blogger-query.repository';
 import { BloggerQuerySqlRepository } from './db/blogger-query.sql-repository';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { UploadWallpaperForBlogCommand } from '../blogs/use-case/upload-wallpaper- for-blog.usecase';
+import { BlogsQueryRepository } from '../blogs/db/blogs-query.repository';
+import { BlogImageView } from '../blogs/dto/blog-image-view.dto';
+import { ImageInputDto } from '../../modules/dto/image-input.dto';
+import { UploadMainSquareImageForBlogCommand } from '../blogs/use-case/upload-main-square-image-for-blog.usecase';
+import { UploadMainImageForPostCommand } from '../posts/use-case/upload-main-iImage-for-post';
+import { PostsQueryRepository } from '../posts/db/posts-query.repository';
 
 @UseGuards(AccessJwtAuthGuard)
 @Controller('blogger/blogs')
@@ -51,6 +65,8 @@ export class BloggersController {
     private commandBus: CommandBus,
     private readonly bloggerQueryRepository: BloggerQueryRepository,
     private readonly bloggerQuerySqlRepository: BloggerQuerySqlRepository,
+    private readonly blogQueryRepository: BlogsQueryRepository,
+    private readonly postsQueryRepository: PostsQueryRepository,
   ) {}
 
   @HttpCode(HttpStatus.NO_CONTENT)
@@ -196,5 +212,96 @@ export class BloggersController {
       +userId,
       paginator,
     );
+  }
+
+  @Post(':blogId/images/wallpaper')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadBackgroundWallpaperForBlog(
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [new MaxFileSizeValidator({ maxSize: 100 * 1024 })],
+        fileIsRequired: true,
+        exceptionFactory: (error) => {
+          throw new BadRequestException([{ message: error, field: 'file' }]);
+        },
+      }),
+    )
+    wallpaperFile: Express.Multer.File,
+    @CurrentUserId() userId: string,
+    @Param('blogId', IdIntegerValidationPipe) blogId: string,
+  ): Promise<BlogImageView> {
+    const imageInput: ImageInputDto = {
+      originalName: wallpaperFile.originalname,
+      buffer: wallpaperFile.buffer,
+      mimetype: wallpaperFile.mimetype,
+    };
+
+    const result: ResultNotification = await this.commandBus.execute(
+      new UploadWallpaperForBlogCommand(+userId, +blogId, imageInput),
+    );
+
+    result.getResult();
+    return this.blogQueryRepository.blogImageView(+blogId);
+  }
+
+  @Post(':blogId/images/main')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadMainSquareImageForBlog(
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [new MaxFileSizeValidator({ maxSize: 100 * 1024 })],
+        fileIsRequired: true,
+        exceptionFactory: (error) => {
+          throw new BadRequestException([{ message: error, field: 'file' }]);
+        },
+      }),
+    )
+    mainFile: Express.Multer.File,
+    @CurrentUserId() userId: string,
+    @Param('blogId', IdIntegerValidationPipe) blogId: string,
+  ): Promise<BlogImageView> {
+    const imageInput: ImageInputDto = {
+      originalName: mainFile.originalname,
+      buffer: mainFile.buffer,
+      mimetype: mainFile.mimetype,
+    };
+
+    const result: ResultNotification = await this.commandBus.execute(
+      new UploadMainSquareImageForBlogCommand(+userId, +blogId, imageInput),
+    );
+
+    result.getResult();
+    return this.blogQueryRepository.blogImageView(+blogId);
+  }
+
+  @Post(':blogId/posts/:postId/images/main')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadMainImageForPost(
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [new MaxFileSizeValidator({ maxSize: 100 * 1024 })],
+        fileIsRequired: true,
+        exceptionFactory: (error) => {
+          throw new BadRequestException([{ message: error, field: 'file' }]);
+        },
+      }),
+    )
+    mainFile: Express.Multer.File,
+    @CurrentUserId() userId: string,
+    @Param('blogId', IdIntegerValidationPipe) blogId: string,
+    @Param('postId', IdIntegerValidationPipe) postId: string,
+  ): Promise<BlogImageView> {
+    const imageInput: ImageInputDto = {
+      originalName: mainFile.originalname,
+      buffer: mainFile.buffer,
+      mimetype: mainFile.mimetype,
+    };
+
+    const result: ResultNotification = await this.commandBus.execute(
+      new UploadMainImageForPostCommand(+userId, +blogId, +postId, imageInput),
+    );
+
+    result.getResult();
+    return this.postsQueryRepository.postImagesView(+postId);
   }
 }

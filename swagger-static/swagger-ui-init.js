@@ -858,6 +858,74 @@ window.onload = function() {
           }
         }
       },
+      "/blogger/blogs/{blogId}/images/wallpaper": {
+        "post": {
+          "operationId": "BloggersController_uploadBackgroundWallpaperForBlog",
+          "parameters": [
+            {
+              "name": "blogId",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": ""
+            }
+          }
+        }
+      },
+      "/blogger/blogs/{blogId}/images/main": {
+        "post": {
+          "operationId": "BloggersController_uploadMainSquareImageForBlog",
+          "parameters": [
+            {
+              "name": "blogId",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": ""
+            }
+          }
+        }
+      },
+      "/blogger/blogs/{blogId}/posts/{postId}/images/main": {
+        "post": {
+          "operationId": "BloggersController_uploadMainImageForPost",
+          "parameters": [
+            {
+              "name": "blogId",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "postId",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": ""
+            }
+          }
+        }
+      },
       "/blogger/users/{id}/ban": {
         "put": {
           "operationId": "BloggersUsersController_BanUnbanUser",

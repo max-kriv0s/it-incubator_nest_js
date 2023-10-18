@@ -116,6 +116,15 @@ import { PairQuizGameProgressQueryRepository } from './feature/pair-quiz-game/db
 import { PairQuizGameUsersController } from './feature/pair-quiz-game/pair-quiz-game-users.controller';
 import { ScheduleModule } from '@nestjs/schedule';
 import { PairQuizGameService } from './feature/pair-quiz-game/pair-quiz-game.service';
+import { YandexCloudBacketConfig } from './configuration/yandex-cloud-backet.configuration';
+import { S3StorageAdapter } from './infrastructure/adapters/s3-storage.adapter';
+import { UploadWallpaperForBlogUseCase } from './feature/blogs/use-case/upload-wallpaper- for-blog.usecase';
+import { BlogPhotosRepository } from './feature/blogs/db/blog-photos.repository';
+import { BlogPhotosEntity } from './feature/blogs/entities/blog-photo.entity';
+import { UploadMainSquareImageForBlogUseCase } from './feature/blogs/use-case/upload-main-square-image-for-blog.usecase';
+import { PostImagesRepository } from './feature/posts/db/post-images.repository';
+import { UploadMainImageForPostUseCase } from './feature/posts/use-case/upload-main-iImage-for-post';
+import { PostPhotosEntity } from './feature/posts/entities/post-photos.entity';
 
 const apiCallsAdapters = [
   ApiCallsConfig,
@@ -188,6 +197,11 @@ const PairQuizGameAdapters = [
   PairQuizGameService,
 ];
 const QuestionsAdapters = [QuestionsRepository, QuestionsQueryRepository];
+
+const BlogPhotosAdapter = [BlogPhotosRepository];
+
+const PostImageAdapter = [PostImagesRepository];
+
 const useCases = [
   CreateBlogUseCase,
   DeletePostByIdUseCase,
@@ -215,6 +229,9 @@ const useCases = [
   QuestionPublishUnpublishUseCase,
   CreatePairQuizGameUseCase,
   AnswerPairQuizGameUseCase,
+  UploadWallpaperForBlogUseCase,
+  UploadMainSquareImageForBlogUseCase,
+  UploadMainImageForPostUseCase,
 ];
 
 @Module({
@@ -265,6 +282,8 @@ const useCases = [
       Question,
       PairQuizGame,
       PairQuizGameProgress,
+      BlogPhotosEntity,
+      PostPhotosEntity,
     ]),
     ScheduleModule.forRoot(),
   ],
@@ -298,6 +317,8 @@ const useCases = [
     ...usersAdapters,
     ...QuestionsAdapters,
     ...PairQuizGameAdapters,
+    ...BlogPhotosAdapter,
+    ...PostImageAdapter,
     EmailManagerService,
     EmailConfig,
     EmailAdapter,
@@ -310,6 +331,8 @@ const useCases = [
       useClass: OptionalJwtTokenGuard,
     },
     ...useCases,
+    YandexCloudBacketConfig,
+    S3StorageAdapter,
   ],
   exports: [ApiCallsConfig],
 })

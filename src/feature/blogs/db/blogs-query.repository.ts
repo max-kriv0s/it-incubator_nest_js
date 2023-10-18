@@ -19,6 +19,10 @@ import {
 import { Post } from '../../../feature/posts/entities/post.entity';
 import { LikeStatus } from '../../../feature/likes/dto/like-status';
 import { PostLike } from '../../../feature/posts/entities/post-like.entity';
+import { BlogPhotosEntity } from '../entities/blog-photo.entity';
+import { BlogImageView, PhotoSizeView } from '../dto/blog-image-view.dto';
+import { BlogFileTypeEnum } from '../enums/blog-file-type.enum';
+import { S3StorageAdapter } from '../../../infrastructure/adapters/s3-storage.adapter';
 
 @Injectable()
 export class BlogsQueryRepository {
@@ -27,6 +31,9 @@ export class BlogsQueryRepository {
     @InjectRepository(Post) private readonly postsRepo: Repository<Post>,
     @InjectRepository(PostLike)
     private readonly postLikesRepo: Repository<PostLike>,
+    @InjectRepository(BlogPhotosEntity)
+    private readonly blogPhotosRepo: Repository<BlogPhotosEntity>,
+    private readonly s3StorageAdapter: S3StorageAdapter,
   ) {}
 
   async getBlogs(
@@ -261,5 +268,34 @@ export class BlogsQueryRepository {
       shortDescription: post.shortDescription,
       title: post.title,
     };
+  }
+
+  async blogImageView(blogId: number): Promise<BlogImageView> {
+    const blogImages = await this.blogPhotosRepo.findBy({ blogId });
+    return this.convertblogImageToView(blogImages);
+  }
+
+  convertblogImageToView(blogImages: BlogPhotosEntity[]): BlogImageView {
+    const view = {};
+    for (const image of blogImages) {
+      const imageView: PhotoSizeView = {
+        url: this.s3StorageAdapter.getUrlFile(image.url),
+        width: image.width,
+        height: image.height,
+        fileSize: image.fileSize,
+      };
+      if (image.fileType === BlogFileTypeEnum.wallpaper) {
+        view['wallpaper'] = imageView;
+      }
+      if (image.fileType === BlogFileTypeEnum.main) {
+        if (!view.hasOwnProperty('main')) {
+          view['main'] = [];
+        }
+
+        view['main'].push(imageView);
+      }
+    }
+
+    return view;
   }
 }

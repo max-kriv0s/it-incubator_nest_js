@@ -7,6 +7,7 @@ import {
 export enum ResultCodeError {
   NotFound = 4004,
   Forbidden = 4003,
+  BadRequest = 4000,
   Success = 0,
 }
 
@@ -53,6 +54,14 @@ export class ResultNotification<T = null> {
         break;
       case ResultCodeError.NotFound:
         throw new NotFoundException(this.message);
+        break;
+      case ResultCodeError.BadRequest:
+        throw new BadRequestException([
+          {
+            message: this.message,
+            field: this.field,
+          },
+        ]);
         break;
       default:
         throw new BadRequestException();

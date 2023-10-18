@@ -9,6 +9,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { PostLike } from './post-like.entity';
+import { PostPhotosEntity } from './post-photos.entity';
 
 @Entity({ name: 'Posts' })
 export class Post {
@@ -41,4 +42,7 @@ export class Post {
 
   @OneToMany(() => PostLike, (postLike) => postLike.post)
   likes: PostLike[];
+
+  @OneToMany(() => PostPhotosEntity, (postPhoto) => postPhoto.post)
+  photos: PostPhotosEntity[];
 }
