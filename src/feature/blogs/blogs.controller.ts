@@ -1,9 +1,14 @@
 import {
   Controller,
+  Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   NotFoundException,
   Param,
+  Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { QueryParams } from '../../dto';
 import {
@@ -18,10 +23,50 @@ import {
 import { CurrentUserId } from '../auth/decorators/current-user-id.param.decorator';
 import { IdIntegerValidationPipe } from '../../modules/pipes/id-integer-validation.pipe';
 import { BlogsQueryRepository } from './db/blogs-query.repository';
+import { AccessJwtAuthGuard } from '../auth/guard/jwt.guard';
+import { ResultNotification } from '../../modules/notification';
+import { CommandBus } from '@nestjs/cqrs';
+import { SubscribeUserToBlogCommand } from './use-case/subscribe-user-to-blog.usecase';
+import { UnsubscribeUserToBlogCommand } from './use-case/unsubscribe-user-to-blog.usecase';
 
 @Controller('blogs')
 export class BlogsController {
-  constructor(private readonly blogsQueryRepository: BlogsQueryRepository) {}
+  constructor(
+    private readonly blogsQueryRepository: BlogsQueryRepository,
+    private readonly commandBus: CommandBus,
+  ) {}
+
+  @UseGuards(AccessJwtAuthGuard)
+  @Post(':blogId/subscription')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async subscribeUserToBlog(
+    @Param('blogId', IdIntegerValidationPipe) blogId: string,
+    @CurrentUserId() userId: string,
+  ): Promise<void> {
+    const result: ResultNotification = await this.commandBus.execute(
+      new SubscribeUserToBlogCommand(+blogId, +userId),
+    );
+
+    if (result.hasError()) {
+      result.getResult();
+    }
+  }
+
+  @UseGuards(AccessJwtAuthGuard)
+  @Delete(':blogId/subscription')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async unsubscribeUserToBlog(
+    @Param('blogId', IdIntegerValidationPipe) blogId: string,
+    @CurrentUserId() userId: string,
+  ): Promise<void> {
+    const result: ResultNotification = await this.commandBus.execute(
+      new UnsubscribeUserToBlogCommand(+blogId, +userId),
+    );
+
+    if (result.hasError()) {
+      result.getResult();
+    }
+  }
 
   @Get()
   async getBlogs(

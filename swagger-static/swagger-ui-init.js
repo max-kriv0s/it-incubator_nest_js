@@ -389,6 +389,44 @@ window.onload = function() {
           }
         }
       },
+      "/blogs/{blogId}/subscription": {
+        "post": {
+          "operationId": "BlogsController_subscribeUserToBlog",
+          "parameters": [
+            {
+              "name": "blogId",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": ""
+            }
+          }
+        },
+        "delete": {
+          "operationId": "BlogsController_unsubscribeUserToBlog",
+          "parameters": [
+            {
+              "name": "blogId",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": ""
+            }
+          }
+        }
+      },
       "/blogs": {
         "get": {
           "operationId": "BlogsController_getBlogs",
@@ -1175,6 +1213,39 @@ window.onload = function() {
           "parameters": [],
           "responses": {
             "200": {
+              "description": ""
+            }
+          }
+        }
+      },
+      "/integrations/telegram/webhook": {
+        "post": {
+          "operationId": "TelegramUserAccountsController_setWebhook",
+          "parameters": [],
+          "responses": {
+            "204": {
+              "description": ""
+            }
+          }
+        }
+      },
+      "/integrations/telegram/auth-bot-link": {
+        "get": {
+          "operationId": "TelegramUserAccountsController_generateAuthBotLink",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": ""
+            }
+          }
+        }
+      },
+      "/integrations/telegram/update-messages": {
+        "post": {
+          "operationId": "TelegramUserAccountsController_updatingMessagesFromTelegram",
+          "parameters": [],
+          "responses": {
+            "201": {
               "description": ""
             }
           }

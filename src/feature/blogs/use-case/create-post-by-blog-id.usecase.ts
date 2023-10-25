@@ -8,6 +8,8 @@ import { validateOrRejectModel } from '../../../modules/validation';
 import { BlogsRepository } from '../db/blogs.repository';
 import { PostsRepository } from '../../../feature/posts/db/posts.repository';
 import { Post } from '../../../feature/posts/entities/post.entity';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { PostCreatedEvent } from 'src/events/post-created.event';
 
 export class CreatePostByBlogIdCommand {
   constructor(
@@ -24,6 +26,7 @@ export class CreatePostByBlogIdUseCase
   constructor(
     private readonly blogsRepository: BlogsRepository,
     private readonly postsRepository: PostsRepository,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async execute(
@@ -49,6 +52,11 @@ export class CreatePostByBlogIdUseCase
     newPost.shortDescription = command.createPostDto.shortDescription;
     newPost.blogId = command.blogId;
     await this.postsRepository.createPostByBlogId(newPost);
+
+    this.eventEmitter.emit(
+      'post.created',
+      new PostCreatedEvent(newPost.title, blog.id, blog.name),
+    );
 
     creationResult.addData(newPost.id);
     return creationResult;

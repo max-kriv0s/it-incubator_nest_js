@@ -8,9 +8,12 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { TelegramUserAccounts } from '../telegram-user-accounts/entities/telegram-user-accounts.entity';
 
 @Entity({ name: 'Users' })
 export class User {
@@ -76,4 +79,8 @@ export class User {
     this.banDate = isBanned ? new Date() : null;
     this.banReason = isBanned ? banReason : null;
   }
+
+  @OneToOne(() => TelegramUserAccounts)
+  @JoinColumn()
+  telegramAccount: TelegramUserAccounts;
 }

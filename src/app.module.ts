@@ -125,6 +125,19 @@ import { UploadMainSquareImageForBlogUseCase } from './feature/blogs/use-case/up
 import { PostImagesRepository } from './feature/posts/db/post-images.repository';
 import { UploadMainImageForPostUseCase } from './feature/posts/use-case/upload-main-iImage-for-post';
 import { PostPhotosEntity } from './feature/posts/entities/post-photos.entity';
+import { GenerateAuthBotLinkUseCase } from './feature/users/telegram-user-accounts/use-case/generate-auth-bot-link.usecase';
+import { TelegramUserAccountsController } from './feature/users/telegram-user-accounts/telegram-user-accouns.controller';
+import { TelegramUserAccounts } from './feature/users/telegram-user-accounts/entities/telegram-user-accounts.entity';
+import { TelegramUserAccountsRepository } from './feature/users/telegram-user-accounts/db/telegram-user-accounts.repository';
+import { TelegramAdapter } from './adapters/telegram.adapter';
+import { TelegramUserAccountsConfig } from './feature/users/telegram-user-accounts/configuration/telegram-user-accounts.configuration';
+import { updatingMessagesFromTelegramUseCase } from './feature/users/telegram-user-accounts/use-case/updating-messages-from-telegram.usecase';
+import { BlogSubscriber } from './feature/blogs/entities/blog-subscribers.entity';
+import { SubscribeUserToBlogUseCase } from './feature/blogs/use-case/subscribe-user-to-blog.usecase';
+import { BlogSubscriberRepository } from './feature/blogs/db/blog-subscriber.repository';
+import { UnsubscribeUserToBlogUseCase } from './feature/blogs/use-case/unsubscribe-user-to-blog.usecase';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { BlogSubscriberService } from './feature/blogs/blog-subscriber.service';
 
 const apiCallsAdapters = [
   ApiCallsConfig,
@@ -202,6 +215,16 @@ const BlogPhotosAdapter = [BlogPhotosRepository];
 
 const PostImageAdapter = [PostImagesRepository];
 
+const TelegramUserAccountsAdapter = [
+  TelegramUserAccountsRepository,
+  TelegramUserAccountsConfig,
+];
+
+const SubscribesToBlogAdapter = [
+  BlogSubscriberRepository,
+  BlogSubscriberService,
+];
+
 const useCases = [
   CreateBlogUseCase,
   DeletePostByIdUseCase,
@@ -232,6 +255,10 @@ const useCases = [
   UploadWallpaperForBlogUseCase,
   UploadMainSquareImageForBlogUseCase,
   UploadMainImageForPostUseCase,
+  GenerateAuthBotLinkUseCase,
+  updatingMessagesFromTelegramUseCase,
+  SubscribeUserToBlogUseCase,
+  UnsubscribeUserToBlogUseCase,
 ];
 
 @Module({
@@ -284,8 +311,11 @@ const useCases = [
       PairQuizGameProgress,
       BlogPhotosEntity,
       PostPhotosEntity,
+      TelegramUserAccounts,
+      BlogSubscriber,
     ]),
     ScheduleModule.forRoot(),
+    EventEmitterModule.forRoot(),
   ],
   controllers: [
     AppController,
@@ -302,6 +332,7 @@ const useCases = [
     QuestionsController,
     PairQuizGameController,
     PairQuizGameUsersController,
+    TelegramUserAccountsController,
   ],
   providers: [
     AppService,
@@ -319,9 +350,12 @@ const useCases = [
     ...PairQuizGameAdapters,
     ...BlogPhotosAdapter,
     ...PostImageAdapter,
+    ...TelegramUserAccountsAdapter,
+    ...SubscribesToBlogAdapter,
     EmailManagerService,
     EmailConfig,
     EmailAdapter,
+    TelegramAdapter,
     {
       provide: APP_GUARD,
       useClass: ThrottlerBehindProxyGuard,
