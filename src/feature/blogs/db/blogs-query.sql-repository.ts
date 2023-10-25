@@ -14,6 +14,7 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { BlogRawSqlDocument } from '../model/blog-sql.model';
 import { PostWithLikesRawSqlDocument } from '../../../feature/posts/model/post-sql.model';
+import { SubscriptionStatuses } from '../entities/blog-subscribers.entity';
 
 @Injectable()
 export class BlogsQuerySqlRepository {
@@ -68,6 +69,8 @@ export class BlogsQuerySqlRepository {
       createdAt: blog.createdAt.toISOString(),
       isMembership: blog.isMembership,
       images: { main: [], wallpaper: null },
+      currentUserSubscriptionStatus: SubscriptionStatuses.None,
+      subscribersCount: 0,
     };
   }
 

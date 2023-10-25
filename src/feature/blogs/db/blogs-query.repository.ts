@@ -25,6 +25,10 @@ import { BlogFileTypeEnum } from '../enums/blog-file-type.enum';
 import { S3StorageAdapter } from '../../../infrastructure/adapters/s3-storage.adapter';
 import { PostPhotosEntity } from '../../../feature/posts/entities/post-photos.entity';
 import { PostsQueryRepository } from '../../../feature/posts/db/posts-query.repository';
+import {
+  BlogSubscriber,
+  SubscriptionStatuses,
+} from '../entities/blog-subscribers.entity';
 
 @Injectable()
 export class BlogsQueryRepository {
@@ -39,11 +43,14 @@ export class BlogsQueryRepository {
     @InjectRepository(PostPhotosEntity)
     private readonly postPhotosRepo: Repository<PostPhotosEntity>,
     private readonly postsQueryRepository: PostsQueryRepository,
+    @InjectRepository(BlogSubscriber)
+    private readonly blogSubscriberRepo: Repository<BlogSubscriber>,
   ) {}
 
   async getBlogs(
     queryParams: QueryParams,
     paginator: PaginatorBlogSql,
+    userId?: number,
   ): Promise<PaginatorBlogSqlType> {
     const searchNameTerm: string = queryParams.searchNameTerm ?? '';
     const sortBy: string = queryParams.sortBy ?? 'createdAt';
@@ -55,35 +62,54 @@ export class BlogsQueryRepository {
         searchNameTerm: `%${searchNameTerm}%`,
       })
       .leftJoinAndSelect('b.photos', 'photos')
+      .leftJoinAndSelect('b.subscribers', 'subscribers')
       .orderBy(`b.${sortBy}`, sortDirection === 'desc' ? 'DESC' : 'ASC')
       .limit(paginator.pageSize)
       .offset(paginator.skip)
       .getManyAndCount();
 
-    const blogsView = blogs.map((blog) => this.blogDBToBlogView(blog));
+    const blogsView = blogs.map((blog) => this.blogDBToBlogView(blog, userId));
     return paginator.paginate(totalCount, blogsView);
   }
 
-  async getBlogById(id: number): Promise<ViewBlogDto | null> {
+  async getBlogById(id: number, userId?: number): Promise<ViewBlogDto | null> {
     const blog = await this.blogsRepo.findOne({
       where: {
         id,
         isBanned: false,
       },
-      relations: { photos: true },
+      relations: { photos: true, subscribers: true },
     });
     if (!blog) return null;
-    return this.blogDBToBlogView(blog);
-  }
 
-  private blogDBToBlogView(blog: Blog): ViewBlogDto {
+    return this.blogDBToBlogView(blog, userId);
+  }
+  v;
+  private blogDBToBlogView(blog: Blog, userId?: number): ViewBlogDto {
+    let subscribersCount = 0;
+    let currentUserSubscriptionStatus = SubscriptionStatuses.None;
+    if (blog.subscribers) {
+      const subscriber = blog.subscribers.filter(
+        (subscriber) => subscriber.subscriberId === userId,
+      );
+      currentUserSubscriptionStatus = subscriber.length
+        ? subscriber[0].status
+        : SubscriptionStatuses.None;
+
+      subscribersCount = blog.subscribers.filter(
+        (subscriber) => subscriber.status === SubscriptionStatuses.Subscribed,
+      ).length;
+    }
+
     return {
       createdAt: blog.createdAt.toISOString(),
+      currentUserSubscriptionStatus: currentUserSubscriptionStatus,
       description: blog.description,
       id: blog.id.toString(),
       images: this.convertblogImageToView(blog.photos),
       isMembership: blog.isMembership,
       websiteUrl: blog.websiteUrl,
+      subscribersCount: subscribersCount,
       name: blog.name,
     };
   }

@@ -16,7 +16,7 @@ export class updatingMessagesFromTelegramUseCase
   async execute(command: UpdatingMessagesFromTelegramCommand) {
     const text = command.payload.message.text;
     if (text.startsWith('/start')) {
-      const activateCode = text.split('=')[1];
+      const activateCode = text.split(' ')[1];
 
       const telegtamAccount =
         await this.telegramUserAccountsRepository.findByActivateCode(

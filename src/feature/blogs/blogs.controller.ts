@@ -71,12 +71,13 @@ export class BlogsController {
   @Get()
   async getBlogs(
     @Query() queryParams: QueryParams,
+    @CurrentUserId(false) userId: string,
   ): Promise<PaginatorBlogSqlType> {
     const paginator = new PaginatorBlogSql(
       +queryParams.pageNumber,
       +queryParams.pageSize,
     );
-    return this.blogsQueryRepository.getBlogs(queryParams, paginator);
+    return this.blogsQueryRepository.getBlogs(queryParams, paginator, +userId);
   }
 
   @Get(':blogId/posts')
@@ -103,8 +104,9 @@ export class BlogsController {
   @Get(':id')
   async getBlogById(
     @Param('id', IdIntegerValidationPipe) id: string,
+    @CurrentUserId(false) userId: string,
   ): Promise<ViewBlogDto> {
-    const blogView = await this.blogsQueryRepository.getBlogById(+id);
+    const blogView = await this.blogsQueryRepository.getBlogById(+id, +userId);
     if (!blogView) throw new NotFoundException('Blog not found');
     return blogView;
   }

@@ -1,4 +1,5 @@
 import { OldPaginator, Paginator, PaginatorType } from '../../../dto';
+import { SubscriptionStatuses } from '../entities/blog-subscribers.entity';
 import { BlogImageView } from './blog-image-view.dto';
 
 export class ViewBlogDto {
@@ -9,6 +10,8 @@ export class ViewBlogDto {
   readonly createdAt: string;
   readonly isMembership: boolean;
   readonly images: BlogImageView;
+  readonly currentUserSubscriptionStatus: SubscriptionStatuses;
+  readonly subscribersCount: number;
 }
 
 export class PaginatorBlogView extends OldPaginator<ViewBlogDto> {}

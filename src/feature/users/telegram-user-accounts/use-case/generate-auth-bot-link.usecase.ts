@@ -49,7 +49,7 @@ export class GenerateAuthBotLinkUseCase
 
     const urlBotLink = this.telegramUserAccountsConfig.getUrlBotLink();
     return {
-      link: `${urlBotLink}?start=code=${user.telegramAccount.activateCode}`,
+      link: `${urlBotLink}?start=${user.telegramAccount.activateCode}`,
     };
   }
 }

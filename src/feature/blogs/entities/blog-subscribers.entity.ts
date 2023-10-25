@@ -14,7 +14,7 @@ export class BlogSubscriber extends BaseEntityClass {
   @Column()
   blogId: number;
 
-  @ManyToOne(() => Blog)
+  @ManyToOne(() => Blog, (blog) => blog.subscribers)
   blog: Blog;
 
   @Column()
