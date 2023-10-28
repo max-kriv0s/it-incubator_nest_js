@@ -10,6 +10,7 @@ import { PostsRepository } from '../../../feature/posts/db/posts.repository';
 import { Post } from '../../../feature/posts/entities/post.entity';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PostCreatedEvent } from 'src/events/post-created.event';
+import { Logger } from '@nestjs/common';
 
 export class CreatePostByBlogIdCommand {
   constructor(

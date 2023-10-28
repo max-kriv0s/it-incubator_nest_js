@@ -5,6 +5,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Logger,
   Param,
   Put,
   Query,
@@ -29,6 +30,8 @@ import { UsersBlogsQueryRepository } from './db/users-blogs-query.repository';
 @UseGuards(BasicAuthGuard)
 @Controller('sa/blogs')
 export class UsersBlogsController {
+  private readonly logger = new Logger('sa/blogs');
+
   constructor(
     private commandBus: CommandBus,
     private readonly usersBlogsQueryRepository: UsersBlogsQueryRepository,

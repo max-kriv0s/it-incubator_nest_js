@@ -6,6 +6,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Logger,
   MaxFileSizeValidator,
   NotFoundException,
   Param,
@@ -60,6 +61,7 @@ import { PostImageView } from '../posts/dto/post-image-view.dto';
 @UseGuards(AccessJwtAuthGuard)
 @Controller('blogger/blogs')
 export class BloggersController {
+  private readonly logger = new Logger('Blogger');
   constructor(
     private commandBus: CommandBus,
     private readonly bloggerQueryRepository: BloggerQueryRepository,
@@ -67,6 +69,27 @@ export class BloggersController {
     private readonly blogQueryRepository: BlogsQueryRepository,
     private readonly postsQueryRepository: PostsQueryRepository,
   ) {}
+
+  @Post(':blogId/posts')
+  async createPostByBlogId(
+    @Param('blogId', IdIntegerValidationPipe) blogId: string,
+    @Body() createPostDto: CreateBlogPostDto,
+    @CurrentUserId() userId: string,
+  ): Promise<ViewPostDto> {
+    this.logger.log('create post');
+
+    const creationResult: ResultNotification<number> =
+      await this.commandBus.execute(
+        new CreatePostByBlogIdCommand(+blogId, createPostDto, +userId),
+      );
+    const postId = creationResult.getResult();
+    const postView = await this.bloggerQueryRepository.getPostById(
+      postId!,
+      +userId,
+    );
+    if (!postView) throw new NotFoundException('Post not found');
+    return postView;
+  }
 
   @HttpCode(HttpStatus.NO_CONTENT)
   @Put(':id')
@@ -103,7 +126,10 @@ export class BloggersController {
     const blogId = creationResult.getResult();
     if (!blogId) throw new BadRequestException();
 
-    const blogView = await this.bloggerQueryRepository.getBlogById(blogId);
+    const blogView = await this.bloggerQueryRepository.getBlogById(
+      blogId,
+      +userId,
+    );
     if (!blogView) throw new NotFoundException('Blog not found');
     return blogView;
   }
@@ -123,25 +149,6 @@ export class BloggersController {
       +userId,
       paginator,
     );
-  }
-
-  @Post(':blogId/posts')
-  async createPostByBlogId(
-    @Param('blogId', IdIntegerValidationPipe) blogId: string,
-    @Body() createPostDto: CreateBlogPostDto,
-    @CurrentUserId(false) userId: string,
-  ): Promise<ViewPostDto> {
-    const creationResult: ResultNotification<number> =
-      await this.commandBus.execute(
-        new CreatePostByBlogIdCommand(+blogId, createPostDto, +userId),
-      );
-    const postId = creationResult.getResult();
-    const postView = await this.bloggerQueryRepository.getPostById(
-      postId!,
-      +userId,
-    );
-    if (!postView) throw new NotFoundException('Post not found');
-    return postView;
   }
 
   @Get(':blogId/posts')

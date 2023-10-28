@@ -4,6 +4,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Logger,
   Post,
   UseGuards,
 } from '@nestjs/common';
@@ -20,6 +21,7 @@ import { UpdatingMessagesFromTelegramCommand } from './use-case/updating-message
 
 @Controller('integrations/telegram')
 export class TelegramUserAccountsController {
+  private readonly logger = new Logger('telegram');
   constructor(
     private readonly commandBus: CommandBus,
     private readonly telegramAdapter: TelegramAdapter,
@@ -36,6 +38,7 @@ export class TelegramUserAccountsController {
   async generateAuthBotLink(
     @CurrentUserId() userId: string,
   ): Promise<TelegramAuthLinkView> {
+    this.logger.log('generateAuthBotLink');
     return this.commandBus.execute(new GenerateAuthBotLinkCommand(+userId));
   }
 

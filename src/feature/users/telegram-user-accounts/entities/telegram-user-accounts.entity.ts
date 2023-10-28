@@ -3,7 +3,7 @@ import { Column, Entity } from 'typeorm';
 
 @Entity({ name: 'TelegramUserAccounts' })
 export class TelegramUserAccounts extends BaseEntityClass {
-  @Column({ nullable: true })
+  @Column({ type: 'bigint', nullable: true })
   telegramId: number;
 
   @Column()

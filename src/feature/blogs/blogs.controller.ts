@@ -4,6 +4,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Logger,
   NotFoundException,
   Param,
   Post,
@@ -31,6 +32,7 @@ import { UnsubscribeUserToBlogCommand } from './use-case/unsubscribe-user-to-blo
 
 @Controller('blogs')
 export class BlogsController {
+  private readonly logger = new Logger('Blogs');
   constructor(
     private readonly blogsQueryRepository: BlogsQueryRepository,
     private readonly commandBus: CommandBus,

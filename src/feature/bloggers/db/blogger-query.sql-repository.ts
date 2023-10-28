@@ -29,6 +29,7 @@ import {
 } from '../dto/view-blogger-comments.dto';
 import { IPaginator } from '../../../dto';
 import { CommentForPostRawSqlDocument } from '../../../feature/comments/model/comment-sql.model';
+import { SubscriptionStatuses } from '../../../feature/blogs/entities/blog-subscribers.entity';
 
 @Injectable()
 export class BloggerQuerySqlRepository {
@@ -87,6 +88,8 @@ export class BloggerQuerySqlRepository {
         wallpaper: null,
         main: [],
       },
+      currentUserSubscriptionStatus: SubscriptionStatuses.None,
+      subscribersCount: 0,
     };
   }
 

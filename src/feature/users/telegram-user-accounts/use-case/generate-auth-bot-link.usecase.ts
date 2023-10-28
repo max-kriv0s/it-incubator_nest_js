@@ -6,6 +6,7 @@ import add from 'date-fns/add';
 import { TelegramUserAccountsConfig } from '../configuration/telegram-user-accounts.configuration';
 import { TelegramUserAccountsRepository } from '../db/telegram-user-accounts.repository';
 import { TelegramAuthLinkView } from '../dto/telegram-auth-link-view.dto';
+import { Logger } from '@nestjs/common';
 
 export class GenerateAuthBotLinkCommand {
   constructor(public userId: number) {}
@@ -15,6 +16,7 @@ export class GenerateAuthBotLinkCommand {
 export class GenerateAuthBotLinkUseCase
   implements ICommandHandler<GenerateAuthBotLinkCommand>
 {
+  private readonly logger = new Logger('GenerateAuthBotLinkUseCase');
   constructor(
     private readonly telegramUserAccountsConfig: TelegramUserAccountsConfig,
     private readonly usersRepository: UsersRepository,
@@ -48,8 +50,11 @@ export class GenerateAuthBotLinkUseCase
     }
 
     const urlBotLink = this.telegramUserAccountsConfig.getUrlBotLink();
+    const link = `${urlBotLink}?code=${user.telegramAccount.activateCode}`;
+
+    this.logger.log(link);
     return {
-      link: `${urlBotLink}?start=${user.telegramAccount.activateCode}`,
+      link,
     };
   }
 }

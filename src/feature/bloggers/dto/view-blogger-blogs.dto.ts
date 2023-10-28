@@ -3,6 +3,7 @@ import { OldPaginator, Paginator, PaginatorType } from '../../../dto';
 import { ViewLikeDetailsDto } from '../../../feature/likes/dto/view-like.dto';
 import { BlogImageView } from '../../../feature/blogs/dto/blog-image-view.dto';
 import { PostImageView } from '../../../feature/posts/dto/post-image-view.dto';
+import { SubscriptionStatuses } from '../../../feature/blogs/entities/blog-subscribers.entity';
 
 export class ViewBloggerBlogDto {
   readonly id: string;
@@ -12,6 +13,8 @@ export class ViewBloggerBlogDto {
   readonly createdAt: string;
   readonly isMembership: boolean;
   readonly images: BlogImageView;
+  readonly currentUserSubscriptionStatus: SubscriptionStatuses;
+  readonly subscribersCount: number;
 }
 
 export class PaginatorBloggerBlogView extends OldPaginator<ViewBloggerBlogDto> {}

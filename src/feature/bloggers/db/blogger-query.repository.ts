@@ -38,9 +38,10 @@ import {
 import { Comment } from '../../../feature/comments/entities/comment.entity';
 import { CommentLike } from '../../../feature/comments/entities/comment-likes.entity';
 import { CommentQueryRawType } from '../../../feature/comments/dto/view-comment.dto';
-import { BlogsQueryRepository } from 'src/feature/blogs/db/blogs-query.repository';
-import { PostsQueryRepository } from 'src/feature/posts/db/posts-query.repository';
-import { PostPhotosEntity } from 'src/feature/posts/entities/post-photos.entity';
+import { BlogsQueryRepository } from '../../../feature/blogs/db/blogs-query.repository';
+import { PostsQueryRepository } from '../../../feature/posts/db/posts-query.repository';
+import { PostPhotosEntity } from '../../../feature/posts/entities/post-photos.entity';
+import { SubscriptionStatuses } from '../../../feature/blogs/entities/blog-subscribers.entity';
 
 @Injectable()
 export class BloggerQueryRepository {
@@ -86,24 +87,44 @@ export class BloggerQueryRepository {
     return paginator.paginate(totalCount, blogsView);
   }
 
-  async getBlogById(id: number): Promise<ViewBloggerBlogDto | null> {
+  async getBlogById(
+    id: number,
+    userId?: number,
+  ): Promise<ViewBloggerBlogDto | null> {
     const blog = await this.blogsRepository.findOne({
       where: { id },
-      relations: { photos: true },
+      relations: { photos: true, subscribers: true },
     });
     if (!blog) return null;
-    return this.blogDBToBlogView(blog);
+    return this.blogDBToBlogView(blog, userId);
   }
 
-  blogDBToBlogView(blog: Blog): ViewBloggerBlogDto {
+  blogDBToBlogView(blog: Blog, userId?: number): ViewBloggerBlogDto {
+    let subscribersCount = 0;
+    let currentUserSubscriptionStatus = SubscriptionStatuses.None;
+    if (blog.subscribers) {
+      const subscriber = blog.subscribers.filter(
+        (subscriber) => subscriber.subscriberId === userId,
+      );
+      currentUserSubscriptionStatus = subscriber.length
+        ? subscriber[0].status
+        : SubscriptionStatuses.None;
+
+      subscribersCount = blog.subscribers.filter(
+        (subscriber) => subscriber.status === SubscriptionStatuses.Subscribed,
+      ).length;
+    }
+
     return {
       createdAt: blog.createdAt.toISOString(),
+      currentUserSubscriptionStatus: currentUserSubscriptionStatus,
       description: blog.description,
       id: blog.id.toString(),
       images: this.blogsQueryRepository.convertblogImageToView(blog.photos),
       isMembership: blog.isMembership,
-      name: blog.name,
       websiteUrl: blog.websiteUrl,
+      subscribersCount: subscribersCount,
+      name: blog.name,
     };
   }
 
